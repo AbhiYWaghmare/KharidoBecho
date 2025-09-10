@@ -1,11 +1,13 @@
 package com.spring.jwt.service.impl;
 
 import com.spring.jwt.dto.*;
+import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Role;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.entity.UserProfile;
 import com.spring.jwt.exception.BaseException;
 import com.spring.jwt.exception.UserNotFoundExceptions;
+import com.spring.jwt.repository.BuyerRepository;
 import com.spring.jwt.repository.RoleRepository;
 import com.spring.jwt.repository.UserProfileRepository;
 import com.spring.jwt.repository.UserRepository;
@@ -31,6 +33,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.repository.BuyerRepository;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -44,6 +48,8 @@ import com.spring.jwt.mapper.UserMapper;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
+    private final BuyerRepository BuyerRepository;
 
     private final JavaMailSender mailSender;
 
@@ -124,6 +130,10 @@ public class UserServiceImpl implements UserService {
                     createUserProfile(user, userDTO);
                     break;
 
+                case "BUYER":
+                    createBuyer(user);
+                    break;
+
                 default:
                     break;
             }
@@ -146,9 +156,16 @@ public class UserServiceImpl implements UserService {
         userProfileRepository.save(student);
         log.info("Created student profile for user ID: {}", user.getId());
     }
-    
 
-    
+    private void createBuyer(User user) {
+        Buyer buyer = new Buyer();
+        buyer.setUser(user);
+        BuyerRepository.save(buyer);
+        log.info("Created buyer profile for user ID: {}", user.getId());
+    }
+
+
+
 
 
     private void validateAccount(UserDTO userDTO) {
@@ -355,7 +372,16 @@ public class UserServiceImpl implements UserService {
                 userDTO.setStudentClass(userProfile.getStudentClass());
             }
         }
-        
+
+        if (roles.contains("BUYER")) {
+            Buyer buyer = BuyerRepository.findByUserId(userId); // ✅ use the injected repository
+            if (buyer != null) {
+                userDTO.setRole("BUYER");
+            }
+        }
+
+
+
         return userDTO;
     }
 
@@ -376,8 +402,13 @@ public class UserServiceImpl implements UserService {
         if (request.getMobileNumber() != null) {
             user.setMobileNumber(request.getMobileNumber());
         }
-        
+
         User updatedUser = userRepository.save(user);
+
+        // If the user has BUYER role, Buyer will automatically be updated
+        // because Buyer maps to User by shared ID.
+        // No separate save needed for Buyer.
+
         return userMapper.toDTO(updatedUser);
     }
 
@@ -423,9 +454,12 @@ public class UserServiceImpl implements UserService {
                 profileDTO.setUserProfileDTO1(UserProfileDTO1.fromEntity(student));
             }
         }
-        
 
-        
+
+
+
+
+
         return profileDTO;
     }
 }
