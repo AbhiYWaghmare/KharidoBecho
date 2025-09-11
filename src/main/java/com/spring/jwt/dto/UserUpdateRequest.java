@@ -41,6 +41,6 @@ public class UserUpdateRequest {
     @Schema(
             description = "Mobile Number of the customer", example = "9822222212"
     )
-    private Long mobileNumber;
+    private String mobileNumber;
 }
 

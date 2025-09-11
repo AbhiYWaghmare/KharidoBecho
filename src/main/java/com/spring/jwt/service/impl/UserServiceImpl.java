@@ -385,32 +385,66 @@ public class UserServiceImpl implements UserService {
         return userDTO;
     }
 
+//    @Override
+//    public UserDTO updateUser(Long id, UserUpdateRequest request) {
+//        User user = userRepository.findById(id)
+//                .orElseThrow(() -> new UserNotFoundExceptions("User not found with id: " + id));
+//
+//        if (request.getFirstName() != null) {
+//            user.setFirstName(request.getFirstName());
+//        }
+//        if (request.getLastName() != null) {
+//            user.setLastName(request.getLastName());
+//        }
+//        if (request.getAddress() != null) {
+//            user.setAddress(request.getAddress());
+//        }
+//        if (request.getMobileNumber() != null) {
+//            user.setMobileNumber(request.getMobileNumber());
+//        }
+//
+//        User updatedUser = userRepository.save(user);
+//
+//        // If the user has BUYER role, Buyer will automatically be updated
+//        // because Buyer maps to User by shared ID.
+//        // No separate save needed for Buyer.
+//
+//        return userMapper.toDTO(updatedUser);
+//    }
+
+
     @Override
     public UserDTO updateUser(Long id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundExceptions("User not found with id: " + id));
 
-        if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
+        if (request.getFirstName() != null && !request.getFirstName().isBlank()) {
+            user.setFirstName(request.getFirstName().trim());
         }
-        if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
+        if (request.getLastName() != null && !request.getLastName().isBlank()) {
+            user.setLastName(request.getLastName().trim());
         }
-        if (request.getAddress() != null) {
-            user.setAddress(request.getAddress());
+        if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            user.setAddress(request.getAddress().trim());
         }
-        if (request.getMobileNumber() != null) {
-            user.setMobileNumber(request.getMobileNumber());
+
+        if (request.getMobileNumber() != null && !request.getMobileNumber().isBlank()) {
+            try {
+                // Converting String into Long
+                Long mobile = Long.valueOf(request.getMobileNumber());
+                user.setMobileNumber(mobile);
+            } catch (NumberFormatException ex) {
+                throw new IllegalArgumentException("Invalid mobile number format. Must be digits only.");
+            }
         }
 
         User updatedUser = userRepository.save(user);
 
-        // If the user has BUYER role, Buyer will automatically be updated
-        // because Buyer maps to User by shared ID.
-        // No separate save needed for Buyer.
-
         return userMapper.toDTO(updatedUser);
     }
+
+
+
 
     @Override
     public UserProfileDTO getUserProfileById(Long id) {
