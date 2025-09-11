@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Buyer {
 
-    // Primary key is the same as User.user_id (shared PK)
+    // Primary key is the same as User.user_id (share PK)
     @Id
     @Column(name = "user_id")
     private Integer id;
@@ -29,7 +29,7 @@ public class Buyer {
             "lastLogin",
             "loginAttempts",
             "accountLockedUntil",
-            "roles" // hide roles here to keep response minimal; remove if you want them
+            "roles"
     })
     private User user;
 }

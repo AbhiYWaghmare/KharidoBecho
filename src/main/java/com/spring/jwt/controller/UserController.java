@@ -580,7 +580,8 @@ public class UserController {
     }
 
     @GetMapping("/buyers/{userId}")
-    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Integer userId) {
+    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Integer userId)
+    {
         Buyer buyer = buyerRepository.findByUserId(userId);
         if (buyer == null) {
             return ResponseEntity.notFound().build();
