@@ -92,7 +92,7 @@ public class JwtServiceImpl implements JwtService {
 
         log.info("Roles: {}", roles);
 
-        Integer userId = userDetailsCustom.getUserId();
+        Long userId = userDetailsCustom.getUserId();
         String firstName = userDetailsCustom.getFirstName();
         
         log.debug("Generating access token for user: {}, device: {}", 
@@ -256,7 +256,7 @@ public class JwtServiceImpl implements JwtService {
             
             final String username = extractUsername(token);
             
-            if (StringUtils.isEmpty(username)) {
+            if (StringUtils.hasText(username)) {
                 log.debug("Token validation failed: empty username");
                 return false;
             }

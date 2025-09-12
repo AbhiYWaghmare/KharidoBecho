@@ -1,16 +1,10 @@
 package com.spring.jwt.service.impl;
 
 import com.spring.jwt.dto.*;
-import com.spring.jwt.entity.Buyer;
-import com.spring.jwt.entity.Role;
-import com.spring.jwt.entity.User;
-import com.spring.jwt.entity.UserProfile;
+import com.spring.jwt.entity.*;
 import com.spring.jwt.exception.BaseException;
 import com.spring.jwt.exception.UserNotFoundExceptions;
-import com.spring.jwt.repository.BuyerRepository;
-import com.spring.jwt.repository.RoleRepository;
-import com.spring.jwt.repository.UserProfileRepository;
-import com.spring.jwt.repository.UserRepository;
+import com.spring.jwt.repository.*;
 import com.spring.jwt.service.UserService;
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.EmailService;
@@ -50,6 +44,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final BuyerRepository BuyerRepository;
+
+    private final SellerRepository SellerRepository;
 
     private final JavaMailSender mailSender;
 
@@ -134,6 +130,10 @@ public class UserServiceImpl implements UserService {
                     createBuyer(user);
                     break;
 
+                case "SELLER":
+                    createSeller(user);
+                    break;
+
                 default:
                     break;
             }
@@ -151,17 +151,29 @@ public class UserServiceImpl implements UserService {
         student.setStudentcol(userDTO.getStudentcol());
         student.setStudentcol1(userDTO.getStudentcol1());
         student.setStudentClass(userDTO.getStudentClass());
-        student.setUserId(user.getId().intValue());
+        student.setUserId((long) user.getId().intValue());
         
         userProfileRepository.save(student);
         log.info("Created student profile for user ID: {}", user.getId());
     }
+
+
+    //Buyer
 
     private void createBuyer(User user) {
         Buyer buyer = new Buyer();
         buyer.setUser(user);
         BuyerRepository.save(buyer);
         log.info("Created buyer profile for user ID: {}", user.getId());
+    }
+
+    //Seller
+
+    private void createSeller(User user) {
+        Seller seller = new Seller();
+        seller.setUser(user);
+        SellerRepository.save(seller);
+        log.info("Created seller mapping for user ID: {}", user.getId());
     }
 
 
@@ -360,7 +372,7 @@ public class UserServiceImpl implements UserService {
         // Ensure the roles collection is preserved
         userDTO.setRoles(roles);
 
-        Integer userId = user.getId().intValue();
+        Long userId = (long) user.getId().intValue();
         
         if (roles.contains("USER")) {
             UserProfile userProfile = userProfileRepository.findByUserId(userId);
@@ -374,12 +386,20 @@ public class UserServiceImpl implements UserService {
         }
 
         if (roles.contains("BUYER")) {
-            Buyer buyer = BuyerRepository.findByUserId(userId); // ✅ use the injected repository
+            Buyer buyer = BuyerRepository.findByUserId(userId); // use the injected repository
+
             if (buyer != null) {
                 userDTO.setRole("BUYER");
             }
         }
 
+        if (roles.contains("SELLER")) {
+            Seller seller = SellerRepository.findByUser_Id(userId); // use the injected repository
+
+            if (seller != null) {
+                userDTO.setRole("SELLER");
+            }
+        }
 
 
         return userDTO;
@@ -480,7 +500,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
         profileDTO.setRoles(roles);
 
-        Integer userId = user.getId().intValue();
+        Long userId = (long) user.getId().intValue();
         
         if (roles.contains("USER")) {
             UserProfile student = userProfileRepository.findByUserId(userId);

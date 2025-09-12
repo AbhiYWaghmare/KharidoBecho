@@ -21,7 +21,7 @@ public class LRIUtils {
     @PostConstruct
     @Transactional
     public void initRoles() {
-        Set<String> rolesToAdd = Set.of("USER", "ADMIN", "BUYER");
+        Set<String> rolesToAdd = Set.of("USER", "ADMIN", "BUYER", "SELLER");
 
         Set<String> existingRoles = roleRepository.findAll()
                 .stream()

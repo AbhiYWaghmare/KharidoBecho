@@ -14,7 +14,7 @@ public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userProfileId;
+    private Long userProfileId;
     private String name;
     private String lastName;
     private String dateOfBirth;
@@ -23,6 +23,6 @@ public class UserProfile {
     private String studentcol1;
     private String studentClass;
 
-    private Integer userId;
+    private Long userId;
 
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserProfileDTO1 {
-    private Integer studentId;
+    private Long studentId;
     private String name;
     private String lastName;
     private String dateOfBirth;
@@ -17,7 +17,7 @@ public class UserProfileDTO1 {
     private String studentcol;
     private String studentcol1;
     private String studentClass;
-    private Integer userId;
+    private Long userId;
 
     public static UserProfileDTO1 fromEntity(UserProfile userProfile) {
         if (userProfile == null) {

@@ -23,7 +23,7 @@ public class UserDTO {
     @Schema(
             description = "userId of User", example = "10011"
     )
-    private String userId;
+    private Long userId;
 
     @Schema(
             description = "Password to create an account", example = "Pass@1234"
@@ -68,7 +68,7 @@ public class UserDTO {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.mobileNumber = user.getMobileNumber();
-        this.userId = user.getId().toString();
+        this.userId = Long.valueOf(user.getId().toString());
         
         if (user.getRoles() != null) {
             this.roles = user.getRoles().stream()
@@ -89,7 +89,7 @@ public class UserDTO {
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setAddress(user.getAddress());
-        dto.setUserId(user.getId().toString());
+        dto.setUserId(Long.valueOf(user.getId().toString()));
         
         if (user.getRoles() != null) {
             dto.setRoles(user.getRoles().stream()
