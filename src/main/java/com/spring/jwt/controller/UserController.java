@@ -6,9 +6,11 @@ import com.spring.jwt.dto.UserDTO;
 import com.spring.jwt.dto.UserUpdateRequest;
 import com.spring.jwt.dto.UserProfileDTO;
 import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.jwt.JwtService;
 import com.spring.jwt.repository.BuyerRepository;
+import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.repository.UserRepository;
 import com.spring.jwt.service.UserService;
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -76,6 +78,8 @@ public class UserController {
     private final EncryptionUtil encryptionUtil;
     private final JwtService jwtService;
     private final BuyerRepository buyerRepository;
+    private final SellerRepository sellerRepository;
+
 
     @Value("${app.url.password-reset}")
     private String passwordResetUrl;
@@ -574,13 +578,20 @@ public class UserController {
         }
     }
 
+
+    //Buyers Endpoint
+
     @GetMapping("/buyers")
+
     public ResponseEntity<List<Buyer>> getAllBuyers() {
         return ResponseEntity.ok(buyerRepository.findAll());
     }
 
+
+
     @GetMapping("/buyers/{userId}")
-    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Integer userId)
+
+    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Long userId)
     {
         Buyer buyer = buyerRepository.findByUserId(userId);
         if (buyer == null) {
@@ -588,5 +599,28 @@ public class UserController {
         }
         return ResponseEntity.ok(buyer);
     }
+
+
+    //Sellers Endpoint
+
+    @GetMapping("/sellers")
+
+    public ResponseEntity<List<Seller>> getAllSellers() {
+        return ResponseEntity.ok(sellerRepository.findAll());
+    }
+
+
+
+    @GetMapping("/sellers/{userId}")
+
+    public ResponseEntity<Seller> getSellerByUserId(@PathVariable Long userId)
+    {
+        Seller seller = sellerRepository.findByUser_Id(userId);
+        if (seller == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(seller);
+    }
+
 
 }

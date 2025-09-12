@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserProfileRepository extends JpaRepository<UserProfile, Integer> {
-    UserProfile findByUserId(Integer userId);
+public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
+    UserProfile findByUserId(Long userId);
     List<UserProfile> findByStudentClass(String studentClass);
 }

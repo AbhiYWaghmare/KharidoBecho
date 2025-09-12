@@ -9,7 +9,10 @@ import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ResponseDto;
 import org.springframework.data.domain.Page;
 
-public interface UserService {
+public interface
+
+
+UserService {
     BaseResponseDTO registerAccount(UserDTO userDTO);
 
     ResponseDto forgotPass(String email, String resetPasswordLink, String domain) throws UserNotFoundExceptions;

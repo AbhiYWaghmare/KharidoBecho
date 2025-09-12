@@ -15,8 +15,8 @@ public class UserDetailsCustom implements UserDetails {
     private String username;
     private String password;
     private String firstName;
-    private Integer userId;
-    private Integer userProfileId;
+    private Long userId;
+    private Long userProfileId;
 
     private List<GrantedAuthority> authorities;
 
@@ -24,8 +24,8 @@ public class UserDetailsCustom implements UserDetails {
             String username, 
             String password, 
             String firstName, 
-            Integer userId, 
-            Integer userProfileId,
+            Long userId,
+            Long userProfileId,
             List<GrantedAuthority> authorities) {
         this.username = username;
         this.password = password;
@@ -39,7 +39,7 @@ public class UserDetailsCustom implements UserDetails {
             String username, 
             String password, 
             String firstName, 
-            Integer userId, 
+            Long userId,
             List<GrantedAuthority> authorities) {
         this(username, password, firstName, userId, null, authorities);
     }
@@ -63,7 +63,7 @@ public class UserDetailsCustom implements UserDetails {
         return firstName;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 

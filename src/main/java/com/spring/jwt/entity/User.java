@@ -23,7 +23,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1, initialValue = 10000)
     @Column(name = "user_id")
-    private Integer id;
+    private Long id;
 
     @NotBlank(message = "Email cannot be blank")
     @Email
@@ -74,6 +74,13 @@ public class User {
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
     inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id"))
     private Set<Role> roles;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Buyer buyer;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Seller seller;
+
 
 
 }
