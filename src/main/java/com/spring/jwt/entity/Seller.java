@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "sellers")
 @Data
@@ -16,7 +18,7 @@ public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seller_id")
-    private Long sellerId;  // own primary key
+    private Long sellerId;  // separate PK for sellers
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false, unique = true)
@@ -28,7 +30,16 @@ public class Seller {
             "lastLogin",
             "loginAttempts",
             "accountLockedUntil",
-            "roles"
+            "roles",
+            "buyer",
+            "seller",
+            "userProfile"
     })
     private User user;
+
+    // ✅ Soft delete fields
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
 }

@@ -6,10 +6,12 @@ import com.spring.jwt.dto.UserDTO;
 import com.spring.jwt.dto.UserUpdateRequest;
 import com.spring.jwt.dto.UserProfileDTO;
 import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.entity.Role;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.jwt.JwtService;
 import com.spring.jwt.repository.BuyerRepository;
+import com.spring.jwt.repository.RoleRepository;
 import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.repository.UserRepository;
 import com.spring.jwt.service.UserService;
@@ -72,6 +74,7 @@ import java.util.Optional;
 @Slf4j
 @CrossOrigin(origins = "${app.cors.allowed-origins}", maxAge = 3600)
 public class UserController {
+    private final RoleRepository roleRepository;
 
     private final UserService userService;
     private final UserRepository userRepository;
@@ -275,28 +278,25 @@ public class UserController {
     @GetMapping("/getAllUsers")
     public ResponseEntity<ResponseAllUsersDto> getAllUsers(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page number cannot be negative") int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") int size) {
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") int size,
+            @RequestParam(required = false) String role) {
 
-        Page<UserDTO> userPage = userService.getAllUsers(page, size);
+        // Call service method with role filter
+        Page<UserDTO> userPage = userService.getAllUsers(page, size, role);
 
+        // Decrypt sensitive fields
         List<UserDTO> decryptedUsers = userPage.getContent().stream()
-            .map(user -> {
-                try {
-                    if (user.getFirstName() != null) {
-                        user.setFirstName(encryptionUtil.decrypt(user.getFirstName()));
+                .map(user -> {
+                    try {
+                        if (user.getFirstName() != null) user.setFirstName(encryptionUtil.decrypt(user.getFirstName()));
+                        if (user.getLastName() != null) user.setLastName(encryptionUtil.decrypt(user.getLastName()));
+                        if (user.getAddress() != null) user.setAddress(encryptionUtil.decrypt(user.getAddress()));
+                    } catch (Exception e) {
+                        log.error("Error decrypting user data: {}", e.getMessage());
                     }
-                    if (user.getLastName() != null) {
-                        user.setLastName(encryptionUtil.decrypt(user.getLastName()));
-                    }
-                    if (user.getAddress() != null) {
-                        user.setAddress(encryptionUtil.decrypt(user.getAddress()));
-                    }
-                } catch (Exception e) {
-                    log.error("Error decrypting user data: {}", e.getMessage());
-                }
-                return user;
-            })
-            .toList();
+                    return user;
+                })
+                .toList();
 
         ResponseAllUsersDto response = new ResponseAllUsersDto("success", decryptedUsers);
         response.setTotalPages(userPage.getTotalPages());
@@ -308,6 +308,7 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @Operation(
             summary = "Get user by ID",
@@ -591,9 +592,9 @@ public class UserController {
 
     @GetMapping("/buyers/{userId}")
 
-    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Long userId)
+    public ResponseEntity<Buyer> getBuyerByUser_Id(@PathVariable Long userId)
     {
-        Buyer buyer = buyerRepository.findByUserId(userId);
+        Buyer buyer = buyerRepository.findByUser_Id(userId);
         if (buyer == null) {
             return ResponseEntity.notFound().build();
         }
@@ -620,6 +621,46 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(seller);
+    }
+
+
+    @Operation(
+            summary = "Delete user by ID",
+            description = "Soft deletes a user by marking them as deleted",
+            tags = {"User Management"},
+            security = { @SecurityRequirement(name = "bearer-jwt") }
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden - Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteUser(
+            @PathVariable @Min(value = 1, message = "Invalid user ID") Long id) {
+        userService.deleteUser(id);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "User deleted successfully");
+
+        return ResponseEntity.ok(response);
     }
 
 

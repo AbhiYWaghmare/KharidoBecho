@@ -33,8 +33,12 @@ public class UserProfileDTO1 {
         dto.setStudentcol(userProfile.getStudentcol());
         dto.setStudentcol1(userProfile.getStudentcol1());
         dto.setStudentClass(userProfile.getStudentClass());
-        dto.setUserId(userProfile.getUserId());
-        
+
+        // get User’s ID from relation
+        if (userProfile.getUser() != null) {
+            dto.setUserId(userProfile.getUser().getId());
+        }
+
         return dto;
     }
-} 
+}
