@@ -136,32 +136,34 @@ public class AppConfig {
 
         log.debug("Configuring URL-based security rules");
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/v1/users/register").permitAll()
-                .requestMatchers("/api/v1/users/password/**").permitAll()
-                .requestMatchers("/api/v1/exam/**").permitAll()
-                .requestMatchers("/api/v1/**").permitAll()
-                .requestMatchers(jwtConfig.getUrl()).permitAll()
-                .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
-                .requestMatchers(
-                        "/v2/api-docs",
-                        "/v3/api-docs",
-                        "/v*/a*-docs/**",
-                        "/swagger-resources",
-                        "/swagger-resources/**",
-                        "/configuration/ui",
-                        "/configuration/security",
-                        "/swagger-ui/**",
-                        "/webjars/**",
-                        "/swagger-ui.html"
-                ).permitAll()
+                //For testing All API are permitted
+//                .requestMatchers("/api/auth/**").permitAll()
+//                .requestMatchers("/api/v1/users/register").permitAll()
+//                .requestMatchers("/api/v1/users/password/**").permitAll()
+//                .requestMatchers("/api/v1/exam/**").permitAll()
+//                .requestMatchers("/api/v1/**").permitAll()
+//                .requestMatchers(jwtConfig.getUrl()).permitAll()
+//                .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
+//
+//                .requestMatchers(
+//                        "/v2/api-docs",
+//                        "/v3/api-docs",
+//                        "/v*/a*-docs/**",
+//                        "/swagger-resources",
+//                        "/swagger-resources/**",
+//                        "/configuration/ui",
+//                        "/configuration/security",
+//                        "/swagger-ui/**",
+//                        "/webjars/**",
+//                        "/swagger-ui.html"
+//                ).permitAll()
+//
+//                .requestMatchers("/api/public/**").permitAll()
+//                .requestMatchers("/user/**").permitAll()
 
-                .requestMatchers("/api/public/**").permitAll()
-                .requestMatchers("/user/**").permitAll()
 
-
-                .anyRequest().authenticated());
+                .anyRequest().permitAll());
 
         // Create a request matcher for public URLs
         org.springframework.security.web.util.matcher.RequestMatcher publicUrls =
@@ -184,14 +186,18 @@ public class AppConfig {
             );
 
         log.debug("Configuring security filters");
-        JwtUsernamePasswordAuthenticationFilter jwtUsernamePasswordAuthenticationFilter = new JwtUsernamePasswordAuthenticationFilter(authenticationManager(http), jwtConfig, jwtService, userRepository, activeSessionService);
-        JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(jwtConfig, jwtService, userDetailsService(), publicUrls, activeSessionService);
-        JwtRefreshTokenFilter jwtRefreshTokenFilter = new JwtRefreshTokenFilter(authenticationManager(http), jwtConfig, jwtService, userDetailsService(), activeSessionService);
 
-        http.addFilterBefore(jwtTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtRefreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
+        //For testing filter is comment out
+//        JwtUsernamePasswordAuthenticationFilter jwtUsernamePasswordAuthenticationFilter = new JwtUsernamePasswordAuthenticationFilter(authenticationManager(http), jwtConfig, jwtService, userRepository, activeSessionService);
+//        JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(jwtConfig, jwtService, userDetailsService(), publicUrls, activeSessionService);
+//        JwtRefreshTokenFilter jwtRefreshTokenFilter = new JwtRefreshTokenFilter(authenticationManager(http), jwtConfig, jwtService, userDetailsService(), activeSessionService);
+//
+//        http.addFilterBefore(jwtTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(jwtUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(jwtRefreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
+
+
+                http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(xssFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(sqlInjectionFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class);

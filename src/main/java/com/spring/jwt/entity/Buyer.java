@@ -1,11 +1,12 @@
 package com.spring.jwt.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "buyers")
@@ -17,7 +18,7 @@ public class Buyer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "buyer_id")
-    private Long buyerId;  // separate PK
+    private Long buyerId;  // separate PK for buyers
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false, unique = true)
@@ -29,7 +30,16 @@ public class Buyer {
             "lastLogin",
             "loginAttempts",
             "accountLockedUntil",
-            "roles"
+            "roles",
+            "buyer",
+            "seller",
+            "userProfile"
     })
     private User user;
+
+    // Soft delete fields
+    private boolean deleted = false;
+
+    private LocalDateTime deletedAt;
+
 }
