@@ -112,7 +112,7 @@ public class AppConfig {
             .ignoringRequestMatchers(
                 "/api/**",
                 "/user/**",
-
+//                "/laptops/**",
                 jwtConfig.getUrl(),
                 jwtConfig.getRefreshUrl()
             )
@@ -159,6 +159,8 @@ public class AppConfig {
 
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/user/**").permitAll()
+//                .requestMatchers("/api/laptops/**").permitAll()   // ✅ ADD THIS LINE
+
 
 
                 .anyRequest().authenticated());
