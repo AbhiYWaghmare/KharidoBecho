@@ -27,7 +27,6 @@ public interface UserService {
 
     ResponseDto processPasswordUpdate(ResetPassword resetRequest);
 
-    // ✅ Only one version of getAllUsers should exist!
     Page<UserDTO> getAllUsers(int pageNo, int pageSize, String role);
 
     UserDTO getUserById(Long id);

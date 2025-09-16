@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,9 +113,9 @@ public class UserServiceImpl implements UserService {
         profile.setLastName(userDTO.getLastName());
         profile.setDateOfBirth(userDTO.getDateOfBirth());
         profile.setAddress(userDTO.getAddress());
-        profile.setStudentcol(userDTO.getStudentcol());
-        profile.setStudentcol1(userDTO.getStudentcol1());
-        profile.setStudentClass(userDTO.getStudentClass());
+//        profile.setStudentcol(userDTO.getStudentcol());
+//        profile.setStudentcol1(userDTO.getStudentcol1());
+//        profile.setStudentClass(userDTO.getStudentClass());
         profile.setUser(user);
         userProfileRepository.save(profile);
         log.info("Created profile for user ID: {}", user.getId());
@@ -258,9 +259,9 @@ public class UserServiceImpl implements UserService {
             if (profile != null) {
                 userDTO.setRole("USER");
                 userDTO.setDateOfBirth(profile.getDateOfBirth());
-                userDTO.setStudentcol(profile.getStudentcol());
-                userDTO.setStudentcol1(profile.getStudentcol1());
-                userDTO.setStudentClass(profile.getStudentClass());
+//                userDTO.setStudentcol(profile.getStudentcol());
+//                userDTO.setStudentcol1(profile.getStudentcol1());
+//                userDTO.setStudentClass(profile.getStudentClass());
             }
         }
         if (roles.contains("BUYER")) {
@@ -316,32 +317,84 @@ public class UserServiceImpl implements UserService {
         return profileDTO;
     }
 
+
+
     @Override
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundExceptions("User not found with id: " + id));
 
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
+
+        System.err.println("Local time " + now);
+
+        // Soft delete User
+
         user.setDeleted(true);
-        user.setDeletedAt(LocalDateTime.now());
+        user.setDeletedAt(now);
         userRepository.save(user);
-    }
 
-    private void deleteBuyer(User user) {
-        Buyer buyer = buyerRepository.findByUser_Id(user.getId()); // ✅ correct
+
+        // Soft delete Buyer if exists
+
+        Buyer buyer = buyerRepository.findByUser_Id(user.getId());
         if (buyer != null) {
-            buyerRepository.delete(buyer);
-            log.info("Deleted buyer profile for user ID: {}", user.getId());
+            buyer.setDeleted(true);
+            buyer.setDeletedAt(now);
+            buyerRepository.save(buyer);
         }
+
+        // Soft delete Seller if exists
+
+        Seller seller = sellerRepository.findByUser_Id(user.getId());
+        if (seller != null) {
+            seller.setDeleted(true);
+            seller.setDeletedAt(now);
+            sellerRepository.save(seller);
+        }
+        log.info("Soft deleted user and related buyer/seller with ID: {}", id);
+
     }
 
-    private void deleteSeller(User user) {
-        Seller seller = sellerRepository.findByUser_Id(user.getId()); // ✅ correct
-        if (seller != null) {
-            sellerRepository.delete(seller);
-            log.info("Deleted seller profile for user ID: {}", user.getId());
-        }
-    }
+
+
+
+
+/// ////////////////////////////////////////////////////
+
+    // Use this in Future if We want hard Delete
+
+////////////////////////////////////////////////////////
+
+//    @Override
+//    @Transactional
+//    public void deleteUser(Long id) {
+//        User user = userRepository.findById(id)
+//                .orElseThrow(() -> new UserNotFoundExceptions("User not found with id: " + id));
+//
+//        user.setDeleted(true);
+//        user.setDeletedAt(LocalDateTime.now());
+//        userRepository.save(user);
+//    }
+
+
+
+//    private void deleteBuyer(User user) {
+//        Buyer buyer = buyerRepository.findByUser_Id(user.getId());
+//        if (buyer != null) {
+//            buyerRepository.delete(buyer);
+//            log.info("Deleted buyer profile for user ID: {}", user.getId());
+//        }
+//    }
+//
+//    private void deleteSeller(User user) {
+//        Seller seller = sellerRepository.findByUser_Id(user.getId());
+//        if (seller != null) {
+//            sellerRepository.delete(seller);
+//            log.info("Deleted seller profile for user ID: {}", user.getId());
+//        }
+//    }
 
 
 }
