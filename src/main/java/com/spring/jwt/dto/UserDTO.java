@@ -55,11 +55,17 @@ public class UserDTO {
     )
     private Set<String> roles;
 
-    private String name;
+
     private String dateOfBirth;
-    private String studentcol;
-    private String studentcol1;
-    private String studentClass;
+
+
+//      private String name;
+//    private String studentcol;
+//    private String studentcol1;
+//    private String studentClass;
+
+
+
     private String role; // Single role field for backward compatibility
 
     public UserDTO(User user) {

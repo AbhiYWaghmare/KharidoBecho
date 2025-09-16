@@ -37,7 +37,7 @@ public class Seller {
     })
     private User user;
 
-    // ✅ Soft delete fields
+    //  Soft delete fields
     private boolean deleted = false;
 
     private LocalDateTime deletedAt;
