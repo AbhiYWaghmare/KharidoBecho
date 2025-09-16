@@ -30,7 +30,7 @@ public class UserProfile {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false, unique = true)
     private User user;   // <-- must match "mappedBy = 'user'" in User.java
 
-    // ✅ Soft delete fields
+    // Soft delete fields
     private boolean deleted = false;
 
     private LocalDateTime deletedAt;
