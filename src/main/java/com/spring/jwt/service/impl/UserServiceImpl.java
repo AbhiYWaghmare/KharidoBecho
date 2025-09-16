@@ -347,6 +347,7 @@ public class UserServiceImpl implements UserService {
 
         // Soft delete Seller if exists
 
+
         Seller seller = sellerRepository.findByUser_Id(user.getId());
         if (seller != null) {
             seller.setDeleted(true);
