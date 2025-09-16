@@ -76,18 +76,19 @@ public class UserController {
     @Value("${app.url.password-reset}")
     private String passwordResetUrl;
 
-    // -----------------------
-    // Register
-    // -----------------------
+    // =================================
+    // Register User According to Role
+    // ==================================
+
     @PostMapping("/register")
     public ResponseEntity<BaseResponseDTO> registerUser(@Valid @RequestBody UserDTO userDTO) {
         BaseResponseDTO response = userService.registerAccount(userDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // -----------------------
-    // Password reset endpoints (unchanged)
-    // -----------------------
+    // ======================================
+    // Password reset endpoints
+    // ======================================
     @PostMapping("/password/forgot")
     public ResponseEntity<ResponseDto> requestPasswordReset(
             @RequestParam @Email(message = "Invalid email format") @NotBlank(message = "Email is required") String email,
@@ -119,9 +120,10 @@ public class UserController {
 
     // =======================
     // Users - Paginated list
-    // GET /api/v1/users?page=0&size=10&role=BUYER
+    // GET /api/v1/users/getAllUsers?page=0&size=10&role=BUYER
     // =======================
-    @GetMapping
+
+    @GetMapping("/getAllUsers")
     public ResponseEntity<ResponseAllUsersDto> getAllUsers(
             @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page number cannot be negative") int page,
             @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") int size,
@@ -189,7 +191,7 @@ public class UserController {
 
 
     // =======================
-    // Update user
+    // Update user By ID
     // =======================
     @PatchMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(
@@ -240,7 +242,7 @@ public class UserController {
     // Buyers - paginated list
     // GET /api/v1/users/buyers?page=0&size=10
     // =======================
-    @GetMapping("/buyers")
+    @GetMapping("/getAllBuyers")
     public ResponseEntity<ResponseAllUsersDto> getAllBuyers(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size) {
@@ -249,7 +251,7 @@ public class UserController {
         return ResponseEntity.ok(buildPagedResponse(userPage));
     }
 
-    @GetMapping("/buyers/{userId}")
+    @GetMapping("/buyer/{userId}")
     public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Long userId) {
         Buyer buyer = buyerRepository.findByUser_Id(userId);
         if (buyer == null) return ResponseEntity.notFound().build();
@@ -262,7 +264,7 @@ public class UserController {
     // Sellers - paginated list
     // GET /api/v1/users/sellers?page=0&size=10
     // =======================
-    @GetMapping("/sellers")
+    @GetMapping("/getAllSellers")
     public ResponseEntity<ResponseAllUsersDto> getAllSellers(
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "10") @Min(1) int size) {
@@ -271,7 +273,7 @@ public class UserController {
         return ResponseEntity.ok(buildPagedResponse(userPage));
     }
 
-    @GetMapping("/sellers/{userId}")
+    @GetMapping("/seller/{userId}")
     public ResponseEntity<Seller> getSellerByUserId(@PathVariable Long userId) {
         Seller seller = sellerRepository.findByUser_Id(userId);
         if (seller == null) return ResponseEntity.notFound().build();
@@ -282,7 +284,6 @@ public class UserController {
     // Delete (soft) user
     // DELETE /api/v1/users/{id}
     // =======================
-
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable @Min(1) Long id) {
