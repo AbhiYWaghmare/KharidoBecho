@@ -3,11 +3,13 @@ package com.spring.jwt.laptop.controller;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.exceptionHandling.ResourceNotFoundException;
+import com.spring.jwt.laptop.model.Status;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LaptopController {
 
-   private LaptopRepository laptopRepository;
-   private LaptopService laptopService;
+   private final LaptopRepository laptopRepository;
+   private final LaptopService laptopService;
 
 
 
@@ -90,12 +92,46 @@ public class LaptopController {
        return ResponseEntity.ok(laptopService.getById(id));
     }
 
+
     @DeleteMapping("/delete/{laptopId}")
-    public String deleteLaptop(Long laptopId, String type){
+    public String deleteLaptop(@PathVariable Long laptopId, @RequestParam String type){
         laptopService.deleteById(laptopId,type);
 
         return "Laptop " +laptopId + " deleted ("+type+")";
     }
 
+    //Get laptops by dealer id and status
+    @GetMapping("/dealer/{dealerId}")
+    public ResponseEntity<Page<Laptop>> getLaptopsByDealerIdAnsStatus(
+            @PathVariable Long dealerId,
+            @RequestParam Status status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "laptop_id") String sortBy){
+
+        Page<Laptop> laptops = laptopService.getByDealerIdAndStatus(dealerId,status,page,size,sortBy);
+        return ResponseEntity.ok((laptops));
+    }
+
+
+    //Get all laptops by status only
+    @GetMapping("/status/{status}")
+    public ResponseEntity<Page<Laptop>> getLaptopByStatus(
+            @PathVariable Status status,
+            @RequestParam (defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "laptop_id") String sortBy) {
+
+        Page<Laptop> laptops = laptopService.getByStatus(status,page,size,sortBy);
+        return  ResponseEntity.ok(laptops);
+    }
+
+
+    //Get only count of laptop
+//    @GetMapping("/dealerId/{dealerId}/count")
+//    public long getLaptopCount(@PathVariable Long dealerId,
+//                               @RequestParam (required = false) String status){
+//        return laptopService.getLaptopCount(dealerId,status);
+//    }
 
 }

@@ -5,12 +5,22 @@ import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.exceptionHandling.ResourceNotFoundException;
 import com.spring.jwt.laptop.model.Status;
 import com.spring.jwt.laptop.repository.LaptopRepository;
+import com.spring.jwt.laptop.service.LaptopService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class LaptopServiceImpl {
+@Service
+@RequiredArgsConstructor
+public class LaptopServiceImpl implements LaptopService {
 
-    private LaptopRepository laptopRepository;
+    private final LaptopRepository laptopRepository;
 
     public Laptop create(LaptopRequestDTO requestDTO) {
         Laptop laptop = new Laptop();
@@ -55,8 +65,8 @@ public class LaptopServiceImpl {
         return laptopRepository.findAll();
     }
 
-
-    public void deleteLaptop(Long id, String type) {
+    @Override
+    public void deleteById(Long id, String type) {
         Laptop laptop = laptopRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Laptop with ID " +id + " not found"));
 
@@ -69,4 +79,23 @@ public class LaptopServiceImpl {
             throw new IllegalArgumentException("Invalid delete type: must be 'soft' or 'hard'");
         }
     }
+
+    @Override
+    public Page<Laptop> getByDealerIdAndStatus(Long dealerId, Status status, int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page,size, Sort.by(sortBy).ascending());
+        return laptopRepository.findBySellerIdAndStatus(dealerId,status,pageable);
+    }
+
+    @Override
+    public Page<Laptop> getByStatus(Status status, int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page,size,Sort.by(sortBy).ascending());
+        return laptopRepository.findByStatus(status, pageable);
+    }
+
+//    @Override
+//    public long getLaptopCount(Long dealerId, String status) {
+//        return laptopRepository.countByDealerIdAndStatus(dealerId,status);
+//    }
+
+
 }

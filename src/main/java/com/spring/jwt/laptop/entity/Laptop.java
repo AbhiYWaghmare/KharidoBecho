@@ -33,7 +33,7 @@ public class Laptop {
     private double price;
 
     @Enumerated(EnumType.STRING)
-    private Status Status;
+    private Status status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
