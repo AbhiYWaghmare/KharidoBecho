@@ -286,5 +286,19 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(LaptopAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
+                                                                      WebRequest request) {
+        ErrorResponseDto error = new ErrorResponseDto();
+        error.setApiPath(request.getDescription(false).replace("uri=", "")); // Extracts the URI
+        error.setErrorCode(HttpStatus.CONFLICT);
+        error.setErrorMessage(ex.getMessage());
+        error.setErrorTime(LocalDateTime.now());
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+
+
 
 }
