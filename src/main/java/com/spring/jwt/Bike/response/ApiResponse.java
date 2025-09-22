@@ -17,7 +17,7 @@ public class ApiResponse {
 
     private LocalDateTime timestamp;
 
-    // Constructor without data
+    // Constructor
     public ApiResponse(String status, String message) {
         this.status = status;
         this.message = message;

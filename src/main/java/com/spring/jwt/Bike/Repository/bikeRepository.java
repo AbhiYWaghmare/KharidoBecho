@@ -9,12 +9,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface bikeRepository extends JpaRepository<Bike ,Long> {
-    // 1. Find bikes by sellerId and status
+    //  Find bikes by sellerId and status
     Page<Bike> findBySellerIdAndStatus(Long sellerId, bikeStatus status, Pageable pageable);
 
-    // 2. Find all bikes by status
+    // Find all bikes by status
     Page<Bike> findByStatus(bikeStatus status, Pageable pageable);
 
-    // 3. Count bikes by sellerId and status
+    //  Count bikes by sellerId and status
     Long countBySellerIdAndStatus(Long sellerId, bikeStatus status);
+
+
 }
