@@ -116,6 +116,9 @@ public class AppConfig {
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
                     "api/v1/mobiles/**",
+                    "/cars/**",
+                    "api/v1/auth/**",
+
 
                 jwtConfig.getUrl(),
                 jwtConfig.getRefreshUrl()
@@ -152,6 +155,8 @@ public class AppConfig {
                 .requestMatchers("/api/v1/users/password/**").permitAll()
                 .requestMatchers("/api/v1/exam/**").permitAll()
                 .requestMatchers("/api/v1/**").permitAll()
+                .requestMatchers("/cars/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -200,6 +205,8 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/webjars/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui.html"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/user/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/cars/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getUrl()),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl())
             );

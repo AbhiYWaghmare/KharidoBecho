@@ -4,7 +4,10 @@ public enum Status {
     PENDING("Pending"),
     ACTIVE("Active"),
     SOLD("Sold"),
+    DELETED("Deleted"),
     DEACTIVATE("Deactivate");
+
+
 
 
     private final String status;
@@ -26,4 +29,5 @@ public enum Status {
         throw new IllegalArgumentException("Invalid status: " + status);
     }
 }
+
 

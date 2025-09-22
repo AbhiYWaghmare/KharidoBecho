@@ -1,0 +1,5 @@
+package com.spring.jwt.car.exception;
+
+public class StatusNotFoundException extends RuntimeException {
+    public StatusNotFoundException(String message) { super(message); }
+}
