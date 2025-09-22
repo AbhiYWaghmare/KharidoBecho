@@ -49,7 +49,7 @@ public class bikeServiceImpl implements bikeService {
         return bikerepository.findAll() // Fetch all bikes from DB
                 .stream()
                 .map(this::convertToDto) // Convert each Bike entity to bikeDto
-                .toList(); // Java 16+
+                .toList();
     }
 
 

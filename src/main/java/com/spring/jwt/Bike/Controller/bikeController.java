@@ -38,21 +38,21 @@ public class bikeController {
     }
 
     /** UPDATE Bike */
-    @PatchMapping("/patch/{id}")
+    @PatchMapping(value = "/patch/{id}",consumes = "application/json", produces = "application/json")
     public ResponseEntity<ApiResponse> updateBike(@PathVariable Long id, @RequestBody bikeDto bikedto) {
         bikeService.updateBike(id, bikedto);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike updated successfully"));
     }
 
     /** SOFT DELETE Bike */
-    @PatchMapping("/patch/{id}/soft-delete")
+    @PatchMapping(value = "/patch/{id}/soft-delete",consumes = "application/json", produces = "application/json")
     public ResponseEntity<ApiResponse> softDeleteBike(@PathVariable Long id) {
         bikeService.softDeletebike(id);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike soft deleted successfully"));
     }
 
     /** HARD DELETE Bike */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping(value = "/delete/{id}")
     public ResponseEntity<ApiResponse> hardDeleteBike(@PathVariable Long id) {
         bikeService.hardDeleteBike(id);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike permanently deleted"));
