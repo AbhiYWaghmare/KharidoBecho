@@ -1,6 +1,9 @@
 package com.spring.jwt.exception;
 
 
+import com.spring.jwt.exception.mobile.BuyerNotFoundException;
+import com.spring.jwt.exception.mobile.MobileNotFoundException;
+import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ErrorResponseDto;
 import jakarta.validation.ConstraintViolationException;
@@ -275,7 +278,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-    // In your GlobalExceptionHandler.java
+
     @ExceptionHandler(NotesNotCreatedException.class)
     public ResponseEntity<Map<String, Object>> handleNotesNotCreatedException(NotesNotCreatedException ex) {
         Map<String, Object> body = new HashMap<>();
@@ -285,6 +288,46 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
+
+    //Mobile Exception Handler
+    @ExceptionHandler(MobileNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleMobileNotFound(MobileNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Mobile Not Found");
+        body.put("message", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(SellerNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSellerNotFound(
+            SellerNotFoundException ex, WebRequest webRequest) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Seller Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", webRequest.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BuyerNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBuyerNotFound(
+            BuyerNotFoundException ex, WebRequest webRequest) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Buyer Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", webRequest.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
 
 
 }
