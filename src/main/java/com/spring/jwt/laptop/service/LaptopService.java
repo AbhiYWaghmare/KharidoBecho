@@ -32,6 +32,5 @@ public interface LaptopService {
 
     Long countBySellerIdAndStatus(Long sellerId, Status status);
 
-    Laptop getByMainLaptopId(Long mainLaptopId);
 
 }

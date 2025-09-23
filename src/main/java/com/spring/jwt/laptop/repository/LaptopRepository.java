@@ -13,7 +13,6 @@ import java.util.Optional;
 public interface LaptopRepository extends JpaRepository<Laptop,Long> {
     boolean existsBySerialNumber(String serialNumber);
 
-    Laptop findByMainLaptopId(Long mainLaptopId);
 
     Page<Laptop> findBySeller_IdAndStatus(Long sellerId, Status status, Pageable pageable);
 

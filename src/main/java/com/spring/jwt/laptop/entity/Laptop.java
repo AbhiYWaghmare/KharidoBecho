@@ -25,9 +25,6 @@ public class Laptop {
     @Column(name = "laptop_id")
     private Long laptopId;
 
-    @Column(unique = true, nullable = false)
-    private String mainLaptopId;
-
     @NotBlank
     @Column(name = "serial_Number", nullable = false, unique = true)
     private String serialNumber;
@@ -96,7 +93,6 @@ public class Laptop {
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
     private Seller seller;
-
 
     private boolean deleted = false;
 

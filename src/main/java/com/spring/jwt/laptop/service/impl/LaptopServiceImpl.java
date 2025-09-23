@@ -5,6 +5,7 @@ import com.spring.jwt.exception.LaptopAlreadyExistsException;
 import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.entity.Laptop;
+import com.spring.jwt.laptop.exceptions.LaptopNotFoundException;
 import com.spring.jwt.laptop.model.Status;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.repository.SellerRepository;
@@ -189,10 +190,6 @@ public class LaptopServiceImpl implements LaptopService {
     @Override
     public Long countBySellerIdAndStatus(Long sellerId, Status status) {
         return laptopRepository.countBySellerIdAndStatus(sellerId,status);
-    }
-
-    public Laptop getByMainLaptopId(Long mainLaptopId){
-        return laptopRepository.findByMainLaptopId(mainLaptopId);
     }
 
 
