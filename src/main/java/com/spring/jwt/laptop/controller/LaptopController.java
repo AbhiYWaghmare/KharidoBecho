@@ -1,6 +1,7 @@
 package com.spring.jwt.laptop.controller;
 
 import com.spring.jwt.exception.LaptopAlreadyExistsException;
+import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Laptop;
@@ -144,10 +145,5 @@ public class LaptopController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/getByMainLaptopId")
-    public ResponseEntity<Laptop> getByMainLaptopId(Long mainLaptopId){
-        Laptop laptop = laptopService.getByMainLaptopId(mainLaptopId);
-        return ResponseEntity.ok(laptop);
-    }
 
 }

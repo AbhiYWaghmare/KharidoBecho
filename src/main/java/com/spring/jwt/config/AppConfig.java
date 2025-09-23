@@ -145,6 +145,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/exam/**").permitAll()
                 .requestMatchers("/api/v1/**").permitAll()
                 .requestMatchers("/api/laptops/**").permitAll()
+                .requestMatchers("/api/photo/**").permitAll()
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -180,6 +181,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
