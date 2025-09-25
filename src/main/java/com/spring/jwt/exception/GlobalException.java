@@ -2,6 +2,7 @@ package com.spring.jwt.exception;
 
 
 import com.spring.jwt.exception.mobile.BuyerNotFoundException;
+import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -291,39 +292,57 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
     //Mobile Exception Handler
     @ExceptionHandler(MobileNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleMobileNotFound(MobileNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleMobileNotFound(
+            MobileNotFoundException ex, WebRequest request) {
+
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
         body.put("error", "Mobile Not Found");
         body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MobileImageException.class)
+    public ResponseEntity<Map<String, Object>> handleMobileImageException(
+            MobileImageException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Mobile Image Upload Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(SellerNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleSellerNotFound(
-            SellerNotFoundException ex, WebRequest webRequest) {
+            SellerNotFoundException ex, WebRequest request) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
         body.put("error", "Seller Not Found");
         body.put("message", ex.getMessage());
-        body.put("path", webRequest.getDescription(false));
+        body.put("path", request.getDescription(false));
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(BuyerNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleBuyerNotFound(
-            BuyerNotFoundException ex, WebRequest webRequest) {
+            BuyerNotFoundException ex, WebRequest request) {
 
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.NOT_FOUND.value());
         body.put("error", "Buyer Not Found");
         body.put("message", ex.getMessage());
-        body.put("path", webRequest.getDescription(false));
+        body.put("path", request.getDescription(false));
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
