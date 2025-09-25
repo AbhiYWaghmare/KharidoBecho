@@ -1,18 +1,20 @@
 package com.spring.jwt.laptop.service.impl;
 
 import com.cloudinary.Cloudinary;
-import com.spring.jwt.exception.ResourceNotFoundException;
+import com.spring.jwt.exception.CloudinaryDeleteException;
+import com.spring.jwt.exception.PhotoNotFoundException;
 import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.spring.jwt.laptop.repository.LaptopPhotoRepository;
-import org.springframework.util.ObjectUtils;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -51,7 +53,7 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
 
             return Map.of(
                     "photoId", savedPhoto.getPhotoId(),
-                    "laptopId", savedPhoto.getLaptopId(),
+//                    "laptopId", savedPhoto.getLaptopId(),
                     "type", savedPhoto.getType(),
                     "photo_link", savedPhoto.getPhoto_link(),
                     "publicId", savedPhoto.getPublicId()
@@ -63,51 +65,28 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
     }
 
     @Override
-    public Map deleteFile(int photoId) throws IOException {
+    public Map deleteFile(int laptopId, int photoId) {
+
         LaptopPhotos laptopPhotos = laptopPhotoRepository.findById(photoId)
-                .orElseThrow(() -> new ResourceNotFoundException("Photo not found with id " +photoId));
+                .orElseThrow(() -> new PhotoNotFoundException("Photo not found"));
 
         try {
-            Map result = cloudinary.uploader()
-                    .destroy(laptopPhotos.getPublicId(), Collections.emptyMap());
-
-            if("ok".equals(result.get("result"))){
-                laptopPhotoRepository.delete(laptopPhotos);
+           Map result =  cloudinary.uploader().destroy(laptopPhotos.getPublicId(), ObjectUtils.emptyMap());
+            if (!"ok".equals(result.get("result"))) {
+                throw new CloudinaryDeleteException("Failed to delete from Cloudinary: " + result);
             }
-            return result;
-        }catch(IOException e){
-            throw new RuntimeException("Failed to delete photo " +e.getMessage());
+
+            laptopPhotoRepository.delete(laptopPhotos);
+
+            Map<String, String> resp = new HashMap<>();
+            resp.put("message", "Photo deleted successfully");
+            return resp;
+
+        }catch (IOException e) {
+           throw new RuntimeException("Error deleting photo: " + e.getMessage());
         }
+
     }
 
-//    public Map deleteFile(String publicId) throws IOException {
-//        return cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-//    }
 
-
-//    @Override
-//    public LaptopPhotos savePhoto(LaptopPhotos laptopPhotos) {
-//        return laptopPhotoRepository.save(laptopPhotos);
-//    }
-//
-//    @Override
-//    public List<LaptopPhotos> getPhotosByLaptopId(int laptopId) {
-//        List<LaptopPhotos> photos = laptopPhotoRepository.findByLaptopId(laptopId);
-//        if(photos.isEmpty()){
-//            throw new ResourceNotFoundException("Photo Not found for laptop id " +laptopId);
-//        }
-//        return photos;
-//    }
-//
-//    @Override
-//    public List<LaptopPhotos> getAllPhotos() {
-//        return laptopPhotoRepository.findAll();
-//    }
-//
-//    @Override
-//    public void deletePhotoById(int laptopId) {
-//        LaptopPhotos existing = laptopPhotoRepository.findById(laptopId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Photo not found with laptopId " + laptopId));
-//        laptopPhotoRepository.delete(existing);
-//    }
 }

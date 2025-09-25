@@ -10,16 +10,9 @@ import java.util.Map;
 
 @Service
 public interface LaptopPhotoService {
-//    LaptopPhotos savePhoto(LaptopPhotos laptopPhotos);
-//
-//    List<LaptopPhotos> getPhotosByLaptopId(int laptopId);
-//
-//    List<LaptopPhotos> getAllPhotos();
-//
-//    void deletePhotoById(int laptopId);
 
     Map uploadFile(MultipartFile file, int laptopId, String type);
 
 
-    Map deleteFile(int photoId) throws IOException;
+    Map deleteFile(int laptopId, int photoId);
 }
