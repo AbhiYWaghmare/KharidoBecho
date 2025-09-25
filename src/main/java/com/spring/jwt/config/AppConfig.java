@@ -112,6 +112,8 @@ public class AppConfig {
             .ignoringRequestMatchers(
                 "/api/**",
                 "api/v1/user/**",
+                    "api/v1/auth/**",
+
 
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
@@ -144,6 +146,7 @@ public class AppConfig {
                 //For testing All API are permitted
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
 
                 .requestMatchers("/api/v1/buyers/**").permitAll()
                 .requestMatchers("/api/v1/sellers/**").permitAll()
@@ -185,6 +188,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/public/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
