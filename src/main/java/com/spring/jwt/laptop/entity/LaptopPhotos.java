@@ -15,10 +15,10 @@ public class LaptopPhotos {
     @Id
     @Column(name = "laptop_photo_id" ,nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int photoId;
+    private Integer photoId;
 
     @Column(name = "laptop_id",nullable = false)
-    private int laptopId;
+    private Integer laptopId;
 
     @Column(name = "photoLink",nullable = false)
     private String photo_link;
@@ -28,4 +28,8 @@ public class LaptopPhotos {
 
     @Column(name = "public_id",nullable = false)
     private String publicId;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "laptop_id",nullable = false)
+//    private Laptop laptop;
 }

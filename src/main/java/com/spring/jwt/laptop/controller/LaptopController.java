@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ public class LaptopController {
 
     private final LaptopRepository laptopRepository;
     private final LaptopService laptopService;
+    LaptopResponseDTO resp = new LaptopResponseDTO();
 
 
 
@@ -43,9 +45,8 @@ public class LaptopController {
 
         Laptop laptop = laptopService.create(requestDTO);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getLaptopId()));
-
+       return ResponseEntity.status(HttpStatus.CREATED)
+               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getLaptopId(),"CREATED",200, LocalDateTime.now(),"NULL", resp.getApiPath()));
     }
 
     //====================================================//
@@ -58,8 +59,7 @@ public class LaptopController {
             @RequestBody LaptopRequestDTO requestDTO) {
 
             Laptop laptop = laptopService.update(laptopId, requestDTO);
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated Successfully"));
-
+            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getLaptopId(),"UPDATED",200, LocalDateTime.now(),"NULL", resp.getApiPath()));
     }
 
     //====================================================//
