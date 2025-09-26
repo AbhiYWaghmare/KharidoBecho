@@ -22,26 +22,8 @@ public class MobileImage {
     @Column(name = "image_url", nullable = false, length = 1000)
     private String imageUrl;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @Column(name = "public_id", nullable = false)
+    private String publicId;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

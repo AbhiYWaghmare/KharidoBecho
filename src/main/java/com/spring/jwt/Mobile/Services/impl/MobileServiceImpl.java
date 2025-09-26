@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -98,13 +99,22 @@ public class MobileServiceImpl implements MobileService {
         List<String> urls = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
-                String imageUrl = cloudinaryService.uploadFile(file, "mobiles");
+                // Get full upload result
+                Map<String, Object> uploadResult = cloudinaryService.uploadFileWithResult(file, "mobiles");
+
+                String imageUrl = (String) uploadResult.get("secure_url");
+                String publicId = (String) uploadResult.get("public_id");
+
+                // Save both in DB
                 MobileImage image = MobileImage.builder()
                         .imageUrl(imageUrl)
+                        .publicId(publicId)
                         .mobile(mobile)
                         .build();
+
                 mobileImageRepository.save(image);
                 urls.add(imageUrl);
+
             } catch (IOException e) {
                 throw new MobileImageException("Failed to upload image: " + file.getOriginalFilename(), e);
             }
@@ -113,9 +123,26 @@ public class MobileServiceImpl implements MobileService {
     }
 
     @Override
+    @Transactional
     public void deleteImage(Long imageId) {
-        mobileImageRepository.deleteById(imageId);
+        MobileImage image = mobileImageRepository.findById(imageId)
+                .orElseThrow(() -> new MobileImageException("Image not found with ID: " + imageId));
+
+        try {
+            //  first image will delete from cloudnairy then DB
+            boolean deleted = cloudinaryService.deleteByPublicId(image.getPublicId());
+            if (!deleted) {
+                throw new MobileImageException("Failed to delete image from Cloudinary: " + image.getPublicId());
+            }
+
+            //  Then delete from DB
+            mobileImageRepository.delete(image);
+
+        } catch (IOException e) {
+            throw new MobileImageException("Error deleting image from Cloudinary: " + image.getPublicId(), e);
+        }
     }
+
 
     public MobileImage uploadMobileImage(Long mobileId, MultipartFile file) {
         Mobile mobile = mobileRepository.findById(mobileId)
