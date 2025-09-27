@@ -80,10 +80,20 @@ public class MobileController {
         return ResponseEntity.ok(urls);
     }
 
-    //To delete images By Image ID
-    @DeleteMapping("/images/delete/{imageId}")
-    public ResponseEntity<BaseResponseDTO> deleteImage(@PathVariable Long imageId) {
-        mobileService.deleteImage(imageId);
-        return ResponseEntity.noContent().build();
+
+
+        //To delete images By Image ID
+        @DeleteMapping("/images/delete/{imageId}")
+        public ResponseEntity<BaseResponseDTO> deleteImage(@PathVariable Long imageId) {
+            mobileService.deleteImage(imageId);
+
+            BaseResponseDTO response = BaseResponseDTO.builder()
+                    .code(String.valueOf(HttpStatus.OK.value()))
+                    .message("Image deleted successfully")
+                    .build();
+
+            return ResponseEntity.ok(response);
+        }
     }
-}
+
+

@@ -126,7 +126,7 @@ public class MobileServiceImpl implements MobileService {
     @Transactional
     public void deleteImage(Long imageId) {
         MobileImage image = mobileImageRepository.findById(imageId)
-                .orElseThrow(() -> new MobileImageException("Image not found with ID: " + imageId));
+                .orElseThrow(() -> new MobileImageException("Mobile image not found with ID: " + imageId));
 
         try {
             //  first image will delete from cloudnairy then DB

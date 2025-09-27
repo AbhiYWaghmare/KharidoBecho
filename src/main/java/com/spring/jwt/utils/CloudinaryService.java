@@ -34,7 +34,7 @@ public class CloudinaryService {
     }
 
     /**
-     * New: Uploads file and returns the full response Map so we can store public_id + URL.
+     *  Uploads file and returns the full response Map so we can store public_id + URL.
      */
     public Map<String, Object> uploadFileWithResult(MultipartFile file, String folder) throws IOException {
         return cloudinary.uploader().upload(file.getBytes(),
@@ -42,7 +42,7 @@ public class CloudinaryService {
     }
 
     /**
-     * New: Deletes file from Cloudinary using its public_id.
+     *  Deletes file from Cloudinary using its public_id.
      * Returns true if successfully deleted or already not found.
      */
     public boolean deleteByPublicId(String publicId) throws IOException {
