@@ -11,8 +11,9 @@ import java.util.Map;
 @Service
 public interface LaptopPhotoService {
 
-    Map uploadFile(MultipartFile file, int laptopId, String type);
+    LaptopPhotos uploadSingleFile(MultipartFile file, Long laptopId, String type) throws IOException;
 
+    List<LaptopPhotos> uploadFile(MultipartFile[] files, Long laptopId, String type) throws IOException;
 
     Map deleteFile(int laptopId, int photoId);
 }

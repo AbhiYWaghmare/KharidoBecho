@@ -1,6 +1,7 @@
 package com.spring.jwt.laptop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.laptop.model.Status;
@@ -12,6 +13,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "laptops")
@@ -23,7 +27,7 @@ public class Laptop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "laptop_id")
-    private Long laptopId;
+    private Long id;
 
     @NotBlank
     @Column(name = "serial_Number", nullable = false, unique = true)
@@ -93,6 +97,9 @@ public class Laptop {
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
     private Seller seller;
+
+    @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LaptopPhotos> laptopPhotos = new ArrayList<>();
 
     private boolean deleted = false;
 

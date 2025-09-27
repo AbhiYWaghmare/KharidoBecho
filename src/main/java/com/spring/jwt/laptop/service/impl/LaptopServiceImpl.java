@@ -51,11 +51,11 @@ public class LaptopServiceImpl implements LaptopService {
             throw new IllegalArgumentException("SellerId is required");
         }
 
-        if (laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())) {
-            throw new LaptopAlreadyExistsException(
-                    "Laptop with serial number " + requestDTO.getSerialNumber() + " already exists"
-            );
-        }
+//        if (laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())) {
+//            throw new LaptopAlreadyExistsException(
+//                    "Laptop with serial number " + requestDTO.getSerialNumber() + " already exists"
+//            );
+//        }
 
         Laptop laptop = new Laptop();
         laptop.setSerialNumber(requestDTO.getSerialNumber());
@@ -67,6 +67,7 @@ public class LaptopServiceImpl implements LaptopService {
         laptop.setProcessor(requestDTO.getProcessor());
         laptop.setStatus(requestDTO.getStatus());
         laptop.setBattery(requestDTO.getBattery());
+        laptop.setBatteryLife(requestDTO.getBatteryLife());
         laptop.setColour(requestDTO.getColour());
         laptop.setGraphicBrand(requestDTO.getGraphicBrand());
         laptop.setGraphicsCard(requestDTO.getGraphicsCard());

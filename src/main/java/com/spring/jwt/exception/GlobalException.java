@@ -315,6 +315,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         error.setStatusCode(HttpStatus.NOT_FOUND.value());
         error.setTimeStamp(LocalDateTime.now());
         error.setException(ex.toString());
+        error.setApiPath(error.getApiPath());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
