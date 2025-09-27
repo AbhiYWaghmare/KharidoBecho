@@ -5,7 +5,7 @@ import com.spring.jwt.exception.CloudinaryDeleteException;
 import com.spring.jwt.exception.PhotoNotFoundException;
 import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.entity.LaptopPhotos;
-import com.spring.jwt.laptop.exceptions.LaptopNotFoundException;
+import com.spring.jwt.exception.LaptopNotFoundException;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import lombok.AllArgsConstructor;

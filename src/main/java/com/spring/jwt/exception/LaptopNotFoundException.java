@@ -1,4 +1,4 @@
-package com.spring.jwt.laptop.exceptions;
+package com.spring.jwt.exception;
 
 public class LaptopNotFoundException extends RuntimeException{
     public LaptopNotFoundException(String message){

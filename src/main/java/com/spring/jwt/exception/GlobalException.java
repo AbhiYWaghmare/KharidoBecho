@@ -330,5 +330,17 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
 
+    public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
 
 }

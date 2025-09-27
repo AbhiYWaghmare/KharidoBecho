@@ -14,6 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
+//********************************************************//
+
+    //Author : Sudhir Lokade
+    //Laptop Photo Controller
+    //Date : 24/09/2025
+
+//*******************************************************//
+
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/photo")
