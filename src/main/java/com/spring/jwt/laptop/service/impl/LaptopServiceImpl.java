@@ -176,7 +176,7 @@ public class LaptopServiceImpl implements LaptopService {
     @Override
     public Page<Laptop> getByDealerIdAndStatus(Long sellerId, Status status, int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page,size, Sort.by(sortBy).ascending());
-        return laptopRepository.findBySeller_IdAndStatus(sellerId,status,pageable);
+        return laptopRepository.findBySellerAndStatus(sellerId,status,pageable);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class LaptopServiceImpl implements LaptopService {
 
     @Override
     public Long countBySellerIdAndStatus(Long sellerId, Status status) {
-        return laptopRepository.countBySellerIdAndStatus(sellerId,status);
+        return laptopRepository.countBySellerAndStatus(sellerId,status);
     }
 
 
