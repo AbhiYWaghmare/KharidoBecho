@@ -1,6 +1,6 @@
 package com.spring.jwt.entity;
 
-
+import com.spring.jwt.car.entity.CloudinaryImage;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 @Setter
@@ -19,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "car")
 public class Car {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "car_id", nullable = false)
@@ -64,6 +65,7 @@ public class Car {
     private String carInsuranceType;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "carStatus")
     private Status carStatus;
 
     @Column(name = "pending_approval", nullable = false)
@@ -76,13 +78,13 @@ public class Car {
     private String color;
 
     @Column(name = "description", length = 5000)
-    @Size(max = 5000, message = "Description cannot exceed 5000 characters")
+    @Size(max = 5000)
     private String description;
 
     @Column(name = "fuel_type", length = 45)
     private String fuelType;
 
-    @Column(name = "km_driven", length = 50)
+    @Column(name = "km_driven")
     private int kmDriven;
 
     @Column(name = "model", length = 45)
@@ -94,7 +96,7 @@ public class Car {
     @Column(name = "power_window_feature")
     private Boolean powerWindowFeature;
 
-    @Column(name = "price", length = 45)
+    @Column(name = "price")
     private int price;
 
     @Column(name = "rear_parking_camera_feature")
@@ -109,7 +111,6 @@ public class Car {
     @Column(name = "transmission", length = 45)
     private String transmission;
 
-
     @Column(name = "year")
     private int year;
 
@@ -121,14 +122,9 @@ public class Car {
 
     private long carPhotoId;
 
-    @Column(name = "main_car_id", nullable = false)
-    private String mainCarId;
-
     @Column(name = "carType", nullable = false)
     private String carType;
 
-//    @OneToMany(mappedBy = "carCar")
-//    private Set<PendingBooking> pendingBookings = new LinkedHashSet<>();
-
-
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<CloudinaryImage> images = new HashSet<>();
 }

@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 @Data
 public class CarDto {
-    private Integer id;                 // --- NEW/Important: Primary key of car
-    private String carName;             // --- maps to Car.title
+    private Integer id;
+    private String carName;
     private String brand;
     private String model;
     private String variant;
@@ -20,13 +20,12 @@ public class CarDto {
     private Integer year;
     private LocalDate date;
     private String description;
-    private Integer dealerId;          // seller ID (maps to dealer)
-    private Integer buyerId;            // --- NEW: buyer ID (optional, maps to ownerSerial)
-    private String mainCarId;           // --- NEW: unique identifier for car
+    private Integer dealerId;
+    private Integer buyerId;
     private String carType;
-    private Status carStatus;           // --- NEW: ACTIVE / DELETED / INACTIVE etc.
+    private Status carStatus;
 
     public Integer getCarId() {
-       return id;
+        return id;
     }
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class BaseException extends RuntimeException{
+public class     BaseException extends RuntimeException{
 
     private String code;
 

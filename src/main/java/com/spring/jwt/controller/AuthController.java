@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
+@RequiredArgsConstructor   
 @Slf4j
 public class AuthController {
 
