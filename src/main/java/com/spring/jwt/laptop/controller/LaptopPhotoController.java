@@ -1,6 +1,7 @@
 package com.spring.jwt.laptop.controller;
 
 import com.cloudinary.Cloudinary;
+import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,13 +29,17 @@ public class LaptopPhotoController {
     //  Post /api/photo/upload                            //
     //====================================================//
     @PostMapping("/upload")
-    public ResponseEntity<Map> uploadPhoto(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("laptopId") int laptopId,
+    public ResponseEntity<List<LaptopPhotos>> uploadPhotos(
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam("laptopId") Long laptopId,
             @RequestParam("type") String type) throws IOException {
-        Map data = this.laptopPhotoService.uploadFile(file,laptopId,type);
-        return new ResponseEntity<>(data, HttpStatus.OK);
 
+        if (files == null || files.length == 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<LaptopPhotos> photos = laptopPhotoService.uploadFile(files, laptopId, type);
+        return ResponseEntity.ok(photos);
     }
 
     //====================================================//

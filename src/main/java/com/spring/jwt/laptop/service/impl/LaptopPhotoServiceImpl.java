@@ -3,19 +3,20 @@ package com.spring.jwt.laptop.service.impl;
 import com.cloudinary.Cloudinary;
 import com.spring.jwt.exception.CloudinaryDeleteException;
 import com.spring.jwt.exception.PhotoNotFoundException;
+import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.entity.LaptopPhotos;
+import com.spring.jwt.laptop.exceptions.LaptopNotFoundException;
+import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.spring.jwt.laptop.repository.LaptopPhotoRepository;
 import com.cloudinary.utils.ObjectUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -23,46 +24,45 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
 
     public LaptopPhotoRepository laptopPhotoRepository;
     public Cloudinary cloudinary;
+    public LaptopRepository laptopRepository;
 
     @Override
-    public Map uploadFile(MultipartFile file, int laptopId, String type) {
-        if (file == null || file.isEmpty()) {
-            throw new RuntimeException("File is empty!");
-        }
+    @Transactional
+    public LaptopPhotos uploadSingleFile(MultipartFile file, Long laptopId, String type) throws IOException {
+        Laptop laptop = laptopRepository.findById(laptopId)
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop not found"));
 
-        try {
-            Map uploadResult = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    Map.of("resource_type", "auto")
-            );
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap("resource_type", "image", "folder", "laptop_photos"));
 
-            String secureUrl = (String) uploadResult.get("secure_url");
-            String publicId = (String) uploadResult.get("public_id");
+        LaptopPhotos photo = new LaptopPhotos();
+        photo.setPhoto_link(uploadResult.get("secure_url").toString());
+        photo.setPublicId(uploadResult.get("public_id").toString());
+        photo.setType(type);
+        photo.setLaptop(laptop);
 
-            if (secureUrl == null || publicId == null) {
-                throw new RuntimeException("Cloudinary returned invalid data");
-            }
+        laptop.getLaptopPhotos().add(photo);
+        laptopRepository.save(laptop);
 
-            LaptopPhotos laptopPhoto = new LaptopPhotos();
-            laptopPhoto.setLaptopId(laptopId);
-            laptopPhoto.setType(type);
-            laptopPhoto.setPhoto_link(secureUrl);
-            laptopPhoto.setPublicId(publicId);
-
-            LaptopPhotos savedPhoto = laptopPhotoRepository.save(laptopPhoto);
-
-            return Map.of(
-                    "photoId", savedPhoto.getPhotoId(),
-//                    "laptopId", savedPhoto.getLaptopId(),
-                    "type", savedPhoto.getType(),
-                    "photo_link", savedPhoto.getPhoto_link(),
-                    "publicId", savedPhoto.getPublicId()
-            );
-
-        } catch (IOException e) {
-            throw new RuntimeException("Image uploading failed: " + e.getMessage());
-        }
+        return photo;
     }
+
+    @Override
+    @Transactional
+    public List<LaptopPhotos> uploadFile(MultipartFile[] files, Long laptopId, String type) throws IOException {
+        List<LaptopPhotos> photos = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                LaptopPhotos photo = uploadSingleFile(file, laptopId, type);
+                photos.add(photo);
+            }
+        }
+
+        return photos;
+    }
+
+
 
     @Override
     public Map deleteFile(int laptopId, int photoId) {

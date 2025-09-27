@@ -24,8 +24,6 @@ public class LaptopRequestDTO {
     @NotNull(message= "Price is required")
     @Positive(message = "Price must be positive")
     private Double price;
-    @NotBlank(message = "Main Id is required")
-    private Long mainLaptopId;
 
     private Long warrantyInYear;
     private String processor;
@@ -43,6 +41,7 @@ public class LaptopRequestDTO {
     private String manufacturer;
     private Integer usbPorts;
     private Status status;
+
     @NotNull(message= "Seller id is required")
     private Long sellerId;
 }

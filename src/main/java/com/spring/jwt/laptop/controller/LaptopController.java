@@ -40,13 +40,15 @@ public class LaptopController {
     @PostMapping("/create")
     public ResponseEntity<LaptopResponseDTO> create(@Valid @RequestBody LaptopRequestDTO requestDTO){
         if (laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())) {
-            throw new LaptopAlreadyExistsException("Laptop already exists");
+            throw new LaptopAlreadyExistsException(
+                    "Laptop with serial number " + requestDTO.getSerialNumber() + " already exists"
+            );
         }
 
         Laptop laptop = laptopService.create(requestDTO);
 
        return ResponseEntity.status(HttpStatus.CREATED)
-               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getLaptopId(),"CREATED",200, LocalDateTime.now(),"NULL", resp.getApiPath()));
+               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", resp.getApiPath(), resp.getImageUrl()));
     }
 
     //====================================================//
@@ -59,7 +61,7 @@ public class LaptopController {
             @RequestBody LaptopRequestDTO requestDTO) {
 
             Laptop laptop = laptopService.update(laptopId, requestDTO);
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getLaptopId(),"UPDATED",200, LocalDateTime.now(),"NULL", resp.getApiPath()));
+            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", resp.getApiPath(), resp.getImageUrl()));
     }
 
     //====================================================//

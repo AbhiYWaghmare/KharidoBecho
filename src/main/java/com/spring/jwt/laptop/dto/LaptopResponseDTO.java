@@ -16,6 +16,7 @@ public class LaptopResponseDTO {
     private Integer statusCode;
     private LocalDateTime timeStamp;
     private String exception;
-    private  String apiPath;
+    private String apiPath;
+    private String imageUrl;
 
 }
