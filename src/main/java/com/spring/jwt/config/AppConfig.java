@@ -112,7 +112,16 @@ public class AppConfig {
             .ignoringRequestMatchers(
                 "/api/**",
                 "api/v1/user/**",
+
                 "/api/laptops/**",
+
+                    "api/v1/auth/**",
+
+
+                    "api/v1/buyers/**",
+                    "api/v1/sellers/**",
+                    "api/v1/mobiles/**",
+
 
                 jwtConfig.getUrl(),
                 jwtConfig.getRefreshUrl()
@@ -141,6 +150,12 @@ public class AppConfig {
                 //For testing All API are permitted
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+
+                .requestMatchers("/api/v1/buyers/**").permitAll()
+                .requestMatchers("/api/v1/sellers/**").permitAll()
+                .requestMatchers("/api/v1/mobiles/**").permitAll()
+
                 .requestMatchers("/api/v1/users/password/**").permitAll()
                 .requestMatchers("/api/v1/exam/**").permitAll()
                 .requestMatchers("/api/v1/**").permitAll()
@@ -179,6 +194,12 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/public/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
+
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
