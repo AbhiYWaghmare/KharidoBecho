@@ -82,7 +82,7 @@ public class MobileController {
 
     //To delete images By Image ID
     @DeleteMapping("/images/delete/{imageId}")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long imageId) {
+    public ResponseEntity<BaseResponseDTO> deleteImage(@PathVariable Long imageId) {
         mobileService.deleteImage(imageId);
         return ResponseEntity.noContent().build();
     }
