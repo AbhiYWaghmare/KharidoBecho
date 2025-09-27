@@ -18,6 +18,7 @@ import java.util.Map;
 
     //Author : Abhishek Waghmare
     //Mobile Controller
+    //Date : 22/09/2025
 
 //*******************************************************//
 
@@ -74,14 +75,14 @@ public class MobileController {
 
     //To upload images of particular mobile by ID
     @PostMapping("/{id}/upload/images")
-    public ResponseEntity<List<String>> uploadImages(@PathVariable Long id, @RequestParam("files") List<MultipartFile> files) throws Exception {
+    public ResponseEntity<List<String>> uploadImages(@PathVariable Long id, @RequestParam("files") List<MultipartFile> files)  {
         List<String> urls = mobileService.addImages(id, files);
         return ResponseEntity.ok(urls);
     }
 
     //To delete images By Image ID
     @DeleteMapping("/images/delete/{imageId}")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long imageId) {
+    public ResponseEntity<BaseResponseDTO> deleteImage(@PathVariable Long imageId) {
         mobileService.deleteImage(imageId);
         return ResponseEntity.noContent().build();
     }
