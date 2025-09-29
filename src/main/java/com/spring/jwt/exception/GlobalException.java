@@ -1,12 +1,17 @@
 package com.spring.jwt.exception;
 
 
+
+import com.spring.jwt.laptop.dto.LaptopResponseDTO;
+
 import com.spring.jwt.exception.mobile.BuyerNotFoundException;
 import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
+
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ErrorResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -288,6 +293,62 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         body.put("error", "Notes Not Created");
         body.put("message", ex.getMessage());
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(LaptopAlreadyExistsException.class)
+    public ResponseEntity<LaptopResponseDTO> handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
+                                                                      WebRequest request) {
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri=", ""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("ALREADY EXISTS");
+        error.setStatusCode(HttpStatus.CONFLICT.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PhotoNotFoundException.class)
+    public ResponseEntity<LaptopResponseDTO> handlePhotoNotFoundException(
+            PhotoNotFoundException ex, WebRequest request) {
+
+        LaptopResponseDTO error = new LaptopResponseDTO();
+
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+        error.setApiPath(error.getApiPath());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(CloudinaryDeleteException.class)
+    public ResponseEntity<Map<String, Object>> handleCloudinaryDelete(CloudinaryDeleteException ex, HttpServletRequest request) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("apiPath", "uri=" + request.getRequestURI());
+        error.put("errorCode", "CLOUDINARY_ERROR");
+        error.put("errorMessage", ex.getMessage());
+        error.put("errorTime", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
+    }
+
+    public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     //Mobile Exception Handler
