@@ -1,6 +1,7 @@
 package com.spring.jwt.car.service;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.spring.jwt.car.entity.CloudinaryImage;
 import com.spring.jwt.car.repository.CarRepository;
@@ -26,6 +27,33 @@ public class CloudinaryImageServiceImpl implements CloudinaryImageService {
     @Autowired
     private CarRepository carRepository;
 
+//    public Map<String,Object> upload(Mul)
+
+
+    public Map<String, Object> upload(MultipartFile file) {
+        try {
+            // Create a Transformation object to specify the size and quality
+            Transformation transformation = new Transformation()
+                    // Use 'q_auto:low' for a very aggressive compression that prioritizes a small file size
+                    .quality("auto:low")
+                    // Use 'f_auto' to automatically choose the best format (like WebP) for the requesting browser
+                    .fetchFormat("auto")
+                    // Optional: resize the image to a smaller size, if needed. For example, limit the width to 800 pixels.
+                    // This is often necessary for large source images to stay under a specific file size.
+                    .width(800).crop("scale");
+
+            // Build the options map with the aggressive transformation
+            Map<String, Object> uploadOptions = ObjectUtils.asMap(
+                    "transformation", transformation
+            );
+
+            // Upload the image with the specified transformation
+            return cloudinary.uploader().upload(file.getBytes(), uploadOptions);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Image upload failed", e);
+        }
+    }
     @Override
     public Map<String, Object> upload(MultipartFile file, int carId) {
         try {
