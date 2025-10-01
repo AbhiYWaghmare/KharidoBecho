@@ -312,6 +312,7 @@ public class MobileServiceImpl implements MobileService {
 //        return urls;
 //    }
 
+
     @Override
     @Transactional
     public void deleteImage(Long imageId) {
