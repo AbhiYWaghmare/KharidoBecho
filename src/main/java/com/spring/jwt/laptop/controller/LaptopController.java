@@ -1,7 +1,6 @@
 package com.spring.jwt.laptop.controller;
 
-import com.spring.jwt.exception.LaptopAlreadyExistsException;
-import com.spring.jwt.exception.ResourceNotFoundException;
+import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Laptop;
@@ -35,10 +34,9 @@ import java.util.Map;
 @RequestMapping("/api/laptops")
 @RequiredArgsConstructor
 public class LaptopController {
-
     private final LaptopRepository laptopRepository;
     private final LaptopService laptopService;
-    LaptopResponseDTO resp = new LaptopResponseDTO();
+    LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO();
 
 
 
@@ -47,17 +45,17 @@ public class LaptopController {
     //  Post /api/laptops/create                          //
     //====================================================//
     @PostMapping("/create")
-    public ResponseEntity<LaptopResponseDTO> create(@Valid @RequestBody LaptopRequestDTO requestDTO){
-        if (laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())) {
+    public ResponseEntity<LaptopResponseDTO> create(@Valid @RequestBody LaptopRequestDTO laptopRequestDTO){
+        if (laptopRepository.existsBySerialNumber(laptopRequestDTO.getSerialNumber())) {
             throw new LaptopAlreadyExistsException(
-                    "Laptop with serial number " + requestDTO.getSerialNumber() + " already exists"
+                    "Laptop with serial number " + laptopRequestDTO.getSerialNumber() + " already exists"
             );
         }
 
-        Laptop laptop = laptopService.create(requestDTO);
+        Laptop laptop = laptopService.create(laptopRequestDTO);
 
        return ResponseEntity.status(HttpStatus.CREATED)
-               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", resp.getApiPath(), resp.getImageUrl()));
+               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", laptopResponseDTO.getApiPath(), laptopResponseDTO.getImageUrl()));
     }
 
     //====================================================//
@@ -70,7 +68,7 @@ public class LaptopController {
             @RequestBody LaptopRequestDTO requestDTO) {
 
             Laptop laptop = laptopService.update(laptopId, requestDTO);
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", resp.getApiPath(), resp.getImageUrl()));
+            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", laptopResponseDTO.getApiPath(), laptopResponseDTO.getImageUrl()));
     }
 
     //====================================================//
@@ -158,3 +156,4 @@ public class LaptopController {
 
 
 }
+
