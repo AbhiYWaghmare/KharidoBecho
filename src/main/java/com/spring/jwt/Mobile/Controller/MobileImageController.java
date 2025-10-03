@@ -1,6 +1,7 @@
 package com.spring.jwt.Mobile.Controller;
 
 import com.spring.jwt.Mobile.Services.MobileService;
+import com.spring.jwt.Mobile.dto.ImageUploadResponseDTO;
 import com.spring.jwt.utils.BaseResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,9 +29,16 @@ public class MobileImageController {
 
     //To upload images of particular mobile by ID
     @PostMapping("/{id}/upload")
-    public ResponseEntity<List<String>> uploadImages(@PathVariable Long id, @RequestParam("files") List<MultipartFile> files) {
+    public ResponseEntity<ImageUploadResponseDTO> uploadImages(@PathVariable Long id, @RequestParam("files") List<MultipartFile> files) {
         List<String> urls = mobileService.addImages(id, files);
-        return ResponseEntity.ok(urls);
+
+        ImageUploadResponseDTO response = ImageUploadResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.OK.value()))
+                .message("Image uploaded sucessfully")
+                .images(urls)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
 
