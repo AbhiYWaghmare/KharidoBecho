@@ -1,6 +1,7 @@
 package com.spring.jwt.Mobile.Controller;
 
 import com.spring.jwt.Mobile.Services.MobileService;
+import com.spring.jwt.Mobile.dto.MobileCreateResponseDTO;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -31,15 +32,16 @@ public class MobileController {
 
     //To Add mobile for sell
     @PostMapping("/add")
-    public ResponseEntity<BaseResponseDTO> createMobile(@RequestBody MobileRequestDTO request) {
-        mobileService.createMobile(request);
+    public ResponseEntity<MobileCreateResponseDTO> createMobile(@RequestBody MobileRequestDTO request) {
+       MobileResponseDTO savedMobile = mobileService.createMobile(request);
 
-        BaseResponseDTO response = BaseResponseDTO.builder()
-                .code("200")
+        MobileCreateResponseDTO response = MobileCreateResponseDTO.builder()
+                .code("201")
                 .message("Mobile Added Successfully !!")
+                .mobileId(savedMobile.getMobileId())
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
