@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class LRIUtils {
+public class  LRIUtils {
 
     private final RoleRepository roleRepository;
 

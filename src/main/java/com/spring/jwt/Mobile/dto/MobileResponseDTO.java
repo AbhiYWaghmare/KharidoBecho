@@ -7,7 +7,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
-public class MobileResponseDTO {
+public class
+
+
+MobileResponseDTO {
     private Long mobileId;
     private String title;
     private String description;

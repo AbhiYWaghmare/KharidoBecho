@@ -18,7 +18,7 @@ public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seller_id")
-    private Long sellerId;  // separate PK for sellers
+    private Long sellerId; // separate PK for sellers
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false, unique = true)

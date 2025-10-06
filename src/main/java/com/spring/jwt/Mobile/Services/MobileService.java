@@ -13,6 +13,6 @@ public interface MobileService {
     MobileResponseDTO getMobile(Long id);
     MobileResponseDTO updateMobile(Long id, MobileRequestDTO request);
     void softDeleteMobile(Long id);
-    List<String> addImages(Long mobileId, List<MultipartFile> files) throws Exception;
+    List<String> addImages(Long mobileId, List<MultipartFile> files) ;
     void deleteImage(Long imageId);
 }
