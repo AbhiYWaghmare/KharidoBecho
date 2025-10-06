@@ -56,7 +56,7 @@ public class LaptopController {
 
        return ResponseEntity.status(HttpStatus.CREATED)
                .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", laptopResponseDTO.getApiPath(), laptopResponseDTO.getImageUrl()));
-    }
+    }  
 
     //====================================================//
     //  Update Laptop                                     //
@@ -153,7 +153,5 @@ public class LaptopController {
         response.put("count", count);
         return ResponseEntity.ok(response);
     }
-
-
 }
 
