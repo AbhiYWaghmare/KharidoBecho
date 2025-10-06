@@ -131,7 +131,7 @@ public class LaptopController {
             @RequestParam Status status,
             @RequestParam (defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "laptopId") String sortBy) {
+            @RequestParam(defaultValue = "id") String sortBy) {
 
         Page<Laptop> laptops = laptopService.getByStatus(status,page,size,sortBy);
         return  ResponseEntity.ok(laptops);

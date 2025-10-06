@@ -75,7 +75,7 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
                 }
 
                 // Upload to Cloudinary and get full result (secure_url + public_id)
-                Map<String, Object> uploadResult = cloudinaryService.uploadFileWithResult(toUpload, "mobiles");
+                Map<String, Object> uploadResult = cloudinaryService.uploadFileWithResult(toUpload, "laptop_photo");
                 String imageUrl = Objects.toString(uploadResult.get("secure_url"), null);
                 String publicId = Objects.toString(uploadResult.get("public_id"), null);
 
@@ -219,7 +219,7 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
     @Transactional
     public void deleteImage(Long imageId) {
         LaptopPhotos laptopPhotos = laptopPhotoRepository.findById(imageId)
-                .orElseThrow(() -> new LaptopImageException("Mobile image not found with ID: " + imageId));
+                .orElseThrow(() -> new LaptopImageException("Laptop image not found with ID: " + imageId));
 
         try {
             //  first image will delete from cloudnairy then DB
@@ -237,7 +237,7 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
     }
 
 
-    public LaptopPhotos uploadMobileImage(Long laptopId, MultipartFile file) {
+    public LaptopPhotos uploadLaptopImage(Long laptopId, MultipartFile file) {
         Laptop laptop = laptopPhotoRepository.findById(laptopId)
                 .orElseThrow(() -> new LaptopNotFoundException(laptopId)).getLaptop();
 
