@@ -1,6 +1,7 @@
 package com.spring.jwt.Mobile.Controller;
 
 import com.spring.jwt.Mobile.Services.MobileService;
+import com.spring.jwt.Mobile.dto.MobileCreateResponseDTO;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -31,15 +32,16 @@ public class MobileController {
 
     //To Add mobile for sell
     @PostMapping("/add")
-    public ResponseEntity<BaseResponseDTO> createMobile(@RequestBody MobileRequestDTO request) {
-        mobileService.createMobile(request);
+    public ResponseEntity<MobileCreateResponseDTO> createMobile(@RequestBody MobileRequestDTO request) {
+       MobileResponseDTO savedMobile = mobileService.createMobile(request);
 
-        BaseResponseDTO response = BaseResponseDTO.builder()
-                .code("200")
+        MobileCreateResponseDTO response = MobileCreateResponseDTO.builder()
+                .code("201")
                 .message("Mobile Added Successfully !!")
+                .mobileId(savedMobile.getMobileId())
                 .build();
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
@@ -73,17 +75,7 @@ public class MobileController {
         return ResponseEntity.ok(Map.of("status","success","message","Mobile soft-deleted"));
     }
 
-    //To upload images of particular mobile by ID
-    @PostMapping("/{id}/upload/images")
-    public ResponseEntity<List<String>> uploadImages(@PathVariable Long id, @RequestParam("files") List<MultipartFile> files)  {
-        List<String> urls = mobileService.addImages(id, files);
-        return ResponseEntity.ok(urls);
+
     }
 
-    //To delete images By Image ID
-    @DeleteMapping("/images/delete/{imageId}")
-    public ResponseEntity<BaseResponseDTO> deleteImage(@PathVariable Long imageId) {
-        mobileService.deleteImage(imageId);
-        return ResponseEntity.noContent().build();
-    }
-}
+
