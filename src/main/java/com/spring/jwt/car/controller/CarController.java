@@ -19,13 +19,19 @@ public class CarController {
         this.carService = carService;
     }
 
+    // ✅ POST -> Standard Response
     @PostMapping("/newcar")
+    // response entity used to sendback http status + body
     public ResponseEntity<ApiResponse<Integer>> createCar(@RequestBody CarDto dto) {
         CarDto created = carService.createCar(dto);
+        //call carservice for actually perform delete it returns CarDto layer
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse<>("SUCCESS", "Car created successfully", created.getCarId()));
     }
 
+    // ✅ PATCH -> Standard Response
+    //only update selected filelds (in this i can send only selected fileds)
+    //in this if we use put we have to send entire car json every time(update entire entity with new one )
     @PatchMapping("/updatecar")
     public ResponseEntity<ApiResponse<Integer>> updateCar(@RequestParam Integer carId,
                                                           @RequestBody CarDto dto) {
@@ -33,12 +39,14 @@ public class CarController {
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Car updated successfully", updated.getCarId()));
     }
 
+    // ✅ GET -> Raw JSON Response
     @GetMapping("/getById")
-    public ResponseEntity<ApiResponse<CarDto>> getCarById(@RequestParam Integer carId) {
+    public ResponseEntity<CarDto> getCarById(@RequestParam Integer carId) {
         CarDto car = carService.getCarById(carId);
-        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Car retrieved successfully", car));
+        return ResponseEntity.ok(car);
     }
 
+    // ✅ DELETE -> Standard Response
     @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Integer>> deleteCar(@RequestParam Integer carId,
                                                           @RequestParam String type) {
@@ -46,28 +54,33 @@ public class CarController {
         return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Car deleted successfully (" + type + ")", deletedCar.getCarId()));
     }
 
+    // ✅ GET -> Raw JSON Response
     @GetMapping("/getcarbyseller")
-    public ResponseEntity<ApiResponse<Page<CarDto>>> getCarsBySellerAndStatus(
+    public ResponseEntity<Page<CarDto>> getCarsBySellerAndStatus(
             @RequestParam Integer sellerId,
-            @RequestParam Status status,
+            @RequestParam(name = "car_status") Status status,  // match request param name
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<CarDto> cars = carService.getCarsBySellerAndStatus(sellerId, status, page, size);
-        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Cars retrieved successfully", cars));
+
+        Page<CarDto> cars = carService.getCarsBySellerAndStatus(sellerId,status, page, size);
+        return ResponseEntity.ok(cars);
     }
 
-    @GetMapping("/GetCarbyStatus")
-    public ResponseEntity<ApiResponse<Page<CarDto>>> getCarsByStatus(@RequestParam Status status,
-                                                                     @RequestParam(defaultValue = "0") int page,
-                                                                     @RequestParam(defaultValue = "10") int size) {
+
+    // ✅ GET -> Raw JSON Response
+    @GetMapping("/getByStatus")
+    public ResponseEntity<Page<CarDto>> getCarsByStatus(@RequestParam Status status,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size) {
         Page<CarDto> cars = carService.getCarsByStatus(status, page, size);
-        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Cars retrieved successfully", cars));
+        return ResponseEntity.ok(cars);
     }
 
+    //  Raw JSON Response
     @GetMapping("/CarCount")
-    public ResponseEntity<ApiResponse<Long>> countCarsBySellerAndStatus(@RequestParam Integer sellerId,
-                                                                        @RequestParam Status status) {
+    public ResponseEntity<Long> countCarsBySellerAndStatus(@RequestParam Integer sellerId,
+                                                           @RequestParam Status status) {
         Long count = carService.countCarsBySellerAndStatus(sellerId, status);
-        return ResponseEntity.ok(new ApiResponse<>("SUCCESS", "Car count fetched successfully", count));
+        return ResponseEntity.ok(count);
     }
 }

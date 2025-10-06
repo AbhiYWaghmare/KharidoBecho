@@ -1,9 +1,12 @@
 package com.spring.jwt.car.service;
 
 import com.spring.jwt.car.dto.CarDto;
+import com.spring.jwt.car.exception.CarNotFoundException;
+import com.spring.jwt.car.exception.InvalidRequestException;
 import com.spring.jwt.car.repository.CarRepository;
 import com.spring.jwt.entity.Car;
 import com.spring.jwt.entity.Status;
+import com.sun.jdi.request.InvalidRequestStateException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +41,7 @@ public class CarServiceImpl implements CarService {
         dto.setYear(car.getYear());
         dto.setDate(car.getDate());
         dto.setDescription(car.getDescription());
-        dto.setDealerId(car.getDealerId());
+//        dto.setDealerId(car.getDealerId());
         dto.setBuyerId(car.getOwnerSerial());
         dto.setCarType(car.getCarType());
         dto.setCarStatus(car.getCarStatus());
@@ -59,7 +62,7 @@ public class CarServiceImpl implements CarService {
         car.setYear(dto.getYear() != null ? dto.getYear() : 0);
         car.setDate(dto.getDate());
         car.setDescription(dto.getDescription());
-        car.setDealerId(dto.getDealerId() != null ? dto.getDealerId() : 0);
+//        car.setDealerId(dto.getDealerId() != null ? dto.getDealerId() : 0);
         car.setOwnerSerial(dto.getBuyerId() != null ? dto.getBuyerId() : 0);
         car.setCarType(dto.getCarType());
         car.setCarStatus(dto.getCarStatus() != null ? dto.getCarStatus() : Status.ACTIVE);
@@ -69,14 +72,35 @@ public class CarServiceImpl implements CarService {
     // ------------------- Car CRUD methods -------------------
     @Override
     public CarDto createCar(CarDto dto) {
-        Car saved = carRepository.save(toEntity(dto));
-        return toDto(saved);
+        if(dto==null){
+            throw new InvalidRequestException("Request body cannot be null");
+        }
+        if(dto.getCarName()==null || dto.getCarName().isBlank()){
+            throw new InvalidRequestException("car name is required");
+        }
+        if(dto.getBrand()==null || dto.getBrand().isBlank()){
+            throw new InvalidRequestException("brand is required");
+        }
+        try{
+            Car saved = carRepository.save(toEntity(dto));
+            return toDto(saved);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Failedto create car" + e.getMessage());
+        }
     }
 
     @Override
     public CarDto patchUpdateCar(Integer carId, CarDto partialDto) {
+        if (carId == null) {
+            throw new InvalidRequestException("Car ID cannot be null");
+        }
+
+        if (partialDto == null) {
+            throw new InvalidRequestException("Request body cannot be null");
+        }
+
         Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new EntityNotFoundException("Car not found for id: " + carId));
+                .orElseThrow(() -> new CarNotFoundException("Car not found for id: " + carId));
 
         if (partialDto.getCarName() != null) car.setTitle(partialDto.getCarName());
         if (partialDto.getBrand() != null) car.setBrand(partialDto.getBrand());
@@ -90,13 +114,14 @@ public class CarServiceImpl implements CarService {
         if (partialDto.getYear() != null) car.setYear(partialDto.getYear());
         if (partialDto.getDate() != null) car.setDate(partialDto.getDate());
         if (partialDto.getDescription() != null) car.setDescription(partialDto.getDescription());
-        if (partialDto.getDealerId() != null) car.setDealerId(partialDto.getDealerId());
+//        if (partialDto.getDealerId() != null) car.setDealerId(partialDto.getDealerId());
         if (partialDto.getBuyerId() != null) car.setOwnerSerial(partialDto.getBuyerId());
         if (partialDto.getCarType() != null) car.setCarType(partialDto.getCarType());
         if (partialDto.getCarStatus() != null) car.setCarStatus(partialDto.getCarStatus());
 
         return toDto(carRepository.save(car));
     }
+
 
     @Override
     public CarDto getCarById(Integer carId) {
@@ -108,19 +133,21 @@ public class CarServiceImpl implements CarService {
     @Override
     public CarDto deleteCar(Integer carId, String type) {
         Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new EntityNotFoundException("Car not found for id: " + carId));
+                .orElseThrow(() -> new CarNotFoundException("Car not found for id: " + carId));
 
         if ("soft".equalsIgnoreCase(type)) {
             car.setCarStatus(Status.DELETED);
             carRepository.save(car);
+            return toDto(car); // return updated car
         } else if ("hard".equalsIgnoreCase(type)) {
+            CarDto deletedDto = toDto(car); // capture info before deleting
             carRepository.delete(car);
+            return deletedDto; // return deleted car info
         } else {
-            throw new IllegalArgumentException("Invalid delete type: " + type);
+            throw new InvalidRequestException("Invalid delete type: " + type);
         }
-
-        return null;
     }
+
 
     @Override
     public Page<CarDto> getCarsBySellerAndStatus(Integer sellerId, Status status, int page, int size) {

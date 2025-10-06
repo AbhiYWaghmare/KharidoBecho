@@ -18,10 +18,7 @@ public class CloudinaryImage {
     private String publicId;
     private String url;
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id")  // foreign key column in cloudinary_images table
+    @JoinColumn(name = "car_id")  // Foreign key in cloudinary_images table
     private Car car;
-
 }

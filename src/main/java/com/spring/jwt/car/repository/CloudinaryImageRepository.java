@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface CloudinaryImageRepository extends JpaRepository<CloudinaryImage, Long> {
     Optional<CloudinaryImage> findByPublicId(String publicId);
-    void deleteByPublicId(String publicId);
     List<CloudinaryImage> findByCarId(Long carId);
+    void deleteByCarId(Long carId);
 }

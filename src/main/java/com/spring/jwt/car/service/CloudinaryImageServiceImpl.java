@@ -1,3 +1,4 @@
+
 package com.spring.jwt.car.service;
 
 import com.cloudinary.Cloudinary;
@@ -67,12 +68,12 @@ public class CloudinaryImageServiceImpl implements CloudinaryImageService {
             Car car = carRepository.findById(carId).
                     orElseThrow(() -> new RuntimeException("car not found with id " + carId));
 
-            // ✅ Save to DB
+
             if (publicId != null && secureUrl != null) {
                 CloudinaryImage image = new CloudinaryImage();
                 image.setPublicId(publicId);
                 image.setUrl(secureUrl);
-                image.setCar(car);  // ✅ link image to car
+                image.setCar(car);
                 imageRepository.save(image);
             }
 
@@ -99,7 +100,7 @@ public class CloudinaryImageServiceImpl implements CloudinaryImageService {
         }
     }
 
-    // ✅ NEW: Get all images from DB
+
     public List<CloudinaryImage> getAllImages() {
         return imageRepository.findAll();
     }
@@ -114,5 +115,3 @@ public class CloudinaryImageServiceImpl implements CloudinaryImageService {
         return imageRepository.findByCarId(carId);
     }
 }
-
-

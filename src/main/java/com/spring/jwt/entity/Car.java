@@ -117,8 +117,8 @@ public class Car {
     @Column(name = "date")
     private LocalDate date;
 
-    @Column(name = "dealer_id")
-    private int dealerId;
+//    @Column(name = "dealer_id")
+//    private int dealerId;
 
     private long carPhotoId;
 
