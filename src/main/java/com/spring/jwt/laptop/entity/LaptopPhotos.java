@@ -1,7 +1,10 @@
 package com.spring.jwt.laptop.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,25 +12,25 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "laptopPhoto")
+@Table(name = "laptop_Photo")
+@Builder
 public class LaptopPhotos {
 
     @Id
-    @Column(name = "laptop_photo_id" ,nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer photoId;
+    @Column(name = "photo_id")
+    private Long photoId;
 
-    @Column(name = "photoLink",nullable = false)
+    @Column(name = "photo_url", nullable = false, length = 1000)
     private String photo_link;
 
-    @Column(name = "photo_type",nullable = false)
-    private String type;
-
-    @Column(name = "public_id",nullable = false)
+    @Column(name = "public_id", nullable = false)
     private String publicId;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "laptop_id")
+    @JoinColumn(name = "laptop_id", nullable = false)
+    @JsonIgnore
     private Laptop laptop;
 }
 

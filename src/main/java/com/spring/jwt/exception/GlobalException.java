@@ -2,6 +2,9 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
+import com.spring.jwt.exception.laptop.LaptopImageException;
+import com.spring.jwt.exception.laptop.LaptopNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 
 import com.spring.jwt.exception.mobile.BuyerNotFoundException;
@@ -296,6 +299,8 @@ public class GlobalException extends ResponseEntityExceptionHandler {
     }
 
 
+    //Laptop Exception Handler
+
     @ExceptionHandler(LaptopAlreadyExistsException.class)
     public ResponseEntity<LaptopResponseDTO> handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
                                                                       WebRequest request) {
@@ -349,6 +354,20 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         error.setException(ex.toString());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(LaptopImageException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopImageException(
+            LaptopImageException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Laptop Image Upload Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     //Mobile Exception Handler
