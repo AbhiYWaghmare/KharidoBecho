@@ -45,14 +45,14 @@ public class bikeController {
     }
 
     /** SOFT DELETE Bike */
-    @PatchMapping(value = "/patch/{id}/soft-delete",consumes = "application/json", produces = "application/json")
+    @PatchMapping(value = "/patch/{id}/soft-delete", produces = "application/json")
     public ResponseEntity<ApiResponse> softDeleteBike(@PathVariable Long id) {
         bikeService.softDeletebike(id);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike soft deleted successfully"));
     }
 
     /** HARD DELETE Bike */
-    @DeleteMapping(value = "/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse> hardDeleteBike(@PathVariable Long id) {
         bikeService.hardDeleteBike(id);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike permanently deleted"));
@@ -66,35 +66,36 @@ public class bikeController {
     }
 
     /** GET Bikes by Seller & Status with Pagination */
-    @GetMapping("/seller/{sellerId}")
+    @GetMapping("/seller/{sellerId}/status/{status}/page/{page}/size/{size}")
     public ResponseEntity<Page<bikeDto>> getBikesBySellerAndStatus(
             @PathVariable Long sellerId,
-            @RequestParam bikeStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PathVariable bikeStatus status,
+            @PathVariable int page,
+            @PathVariable int size
     ) {
         Page<bikeDto> bikes = bikeService.getBikesBySellerAndStatus(sellerId, status, page, size);
         return ResponseEntity.ok(bikes);
     }
 
     /** GET Bikes by Status with Pagination */
-    @GetMapping("/status/{status}")
+    @GetMapping("/status/{status}/page/{page}/size/{size}")
     public ResponseEntity<Page<bikeDto>> getBikesByStatus(
             @PathVariable bikeStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PathVariable int page,
+            @PathVariable int size
     ) {
         Page<bikeDto> bikes = bikeService.getBikesByStatus(status, page, size);
         return ResponseEntity.ok(bikes);
     }
 
     /** COUNT Bikes by Seller & Status */
-    @GetMapping("/seller/{sellerId}/count")
+    @GetMapping("/seller/{sellerId}/status/{status}/count")
     public ResponseEntity<Long> countBikesBySellerAndStatus(
             @PathVariable Long sellerId,
-            @RequestParam bikeStatus status
+            @PathVariable bikeStatus status
     ) {
         Long count = bikeService.countBikesBySellerAndStatus(sellerId, status);
         return ResponseEntity.ok(count);
     }
+
 }

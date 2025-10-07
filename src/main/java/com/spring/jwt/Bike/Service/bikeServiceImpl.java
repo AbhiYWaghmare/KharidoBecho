@@ -16,7 +16,7 @@ import java.util.List;
 public class bikeServiceImpl implements bikeService {
 
     private final bikeRepository bikerepository;
-    private final ModelMapper modelMapper; // Corrected
+    private final ModelMapper modelMapper;
 
     public bikeServiceImpl(bikeRepository bikerepository, ModelMapper modelMapper) {
         this.bikerepository = bikerepository;
@@ -57,9 +57,9 @@ public class bikeServiceImpl implements bikeService {
      * GET Bike by ID
      */
     @Override
-    public bikeDto getBikeById(Long id) {
-        Bike bike = bikerepository.findById(id)
-                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + id));
+    public bikeDto getBikeById(Long bike_id) {
+        Bike bike = bikerepository.findById(bike_id)
+                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + bike_id));
         return convertToDto(bike);
     }
 
@@ -67,9 +67,9 @@ public class bikeServiceImpl implements bikeService {
      * UPDATE Bike by ID
      */
     @Override
-    public bikeDto updateBike(Long id, bikeDto bikedto) {
-        Bike existingBike = bikerepository.findById(id)
-                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + id));
+    public bikeDto updateBike(Long bike_id, bikeDto bikedto) {
+        Bike existingBike = bikerepository.findById(bike_id)
+                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + bike_id));
 
         // Map updated values from DTO to existing entity
         modelMapper.map(bikedto, existingBike);
@@ -80,12 +80,12 @@ public class bikeServiceImpl implements bikeService {
 
     /**
      * SOFT DELETE Bike
-     * Instead of deleting the record, we update its status to DELETED
+     * Instead of deleting the record,  update its status to DELETED
      */
     @Override
-    public bikeDto softDeletebike(Long id) {
-        Bike bike = bikerepository.findById(id)
-                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + id));
+    public bikeDto softDeletebike(Long bike_id) {
+        Bike bike = bikerepository.findById(bike_id)
+                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + bike_id));
 
         bike.setStatus(bikeStatus.DELETED);
 
@@ -99,11 +99,11 @@ public class bikeServiceImpl implements bikeService {
      * Permanently remove record from the database
      */
     @Override
-    public void hardDeleteBike(Long id) {
-        if (!bikerepository.existsById(id)) {
-            throw new bikeNotFoundException("Bike not found with id: " + id);
+    public void hardDeleteBike(Long bike_id) {
+        if (!bikerepository.existsById(bike_id)) {
+            throw new bikeNotFoundException("Bike not found with id: " + bike_id);
         }
-        bikerepository.deleteById(id);
+        bikerepository.deleteById(bike_id);
     }
 
 

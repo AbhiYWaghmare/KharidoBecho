@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 public class bikeDto {
 
-    private Long id; // For response or update operations
+    private Long bike_id; // For response or update operations
 
     @NotNull(message = "Price must not be null")
     private Long prize;

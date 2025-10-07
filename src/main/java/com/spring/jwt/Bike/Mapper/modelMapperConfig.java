@@ -1,4 +1,4 @@
-package com.spring.jwt.Bike.Mapper;  // ✅ Matches the actual folder name
+package com.spring.jwt.Bike.Mapper;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
