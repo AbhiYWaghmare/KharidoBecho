@@ -1,8 +1,12 @@
 package com.spring.jwt.Bike.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bikes")
@@ -14,7 +18,8 @@ public class Bike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Primary key
+
+    private Long bike_id;  // Primary key
 
     @NotNull(message = "Prize must not be null")
     private Long prize;  // Price of the bike
@@ -48,6 +53,10 @@ public class Bike {
     @Column(name = "seller_id")
 
     private Long sellerId;
+
+    @OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<BikeImage> images = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Bike status must not be null")

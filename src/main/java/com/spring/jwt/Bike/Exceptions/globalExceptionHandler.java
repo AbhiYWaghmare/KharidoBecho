@@ -40,4 +40,45 @@ public class globalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
+    @ExceptionHandler(BikeImageNotFound.class)
+    public ResponseEntity<Map<String, Object>> handleBikeImageNotFound(
+            BikeImageNotFound ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_IMAGE_NOT_FOUND");
+        errorResponse.put("errorMessage", "Bike Image Issue");
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(
+            RuntimeException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_IMAGE_OPERATION_FAILED");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> ResourceNotFoundException(
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = Map.of(
+                "apiPath", request.getRequestURI(),
+                "errorCode", "RESOURCE_NOT_FOUND",
+                "errorMessage", ex.getMessage(),
+                "errorTime", LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
 }
