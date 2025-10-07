@@ -2,12 +2,8 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
-
-import com.spring.jwt.exception.mobile.BuyerNotFoundException;
-import com.spring.jwt.exception.mobile.MobileImageException;
-import com.spring.jwt.exception.mobile.MobileNotFoundException;
-import com.spring.jwt.exception.mobile.SellerNotFoundException;
 
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ErrorResponseDto;
@@ -407,6 +403,22 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+
+    @ExceptionHandler(MobileValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleMobileValidationException(
+            MobileValidationException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Error");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
 
 
 

@@ -11,6 +11,7 @@ import com.spring.jwt.Mobile.entity.MobileImage;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
+import com.spring.jwt.exception.mobile.MobileValidationException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.utils.CloudinaryService;
@@ -45,20 +46,65 @@ public class MobileServiceImpl implements MobileService {
     private final CloudinaryService cloudinaryService;
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
+//    @Override
+//    @Transactional
+//    public MobileResponseDTO createMobile(MobileRequestDTO req) {
+//        Seller seller = sellerRepository.findById(req.getSellerId())
+//                .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
+//
+//        Mobile m = new Mobile();
+//        MobileMapper.updateFromRequest(m, req);
+//        m.setSeller(seller);
+//        m.setDeleted(false);
+//        m.setStatus(Mobile.Status.ACTIVE);
+//        m = mobileRepository.save(m);
+//        return MobileMapper.toDTO(m);
+//    }
+
     @Override
     @Transactional
     public MobileResponseDTO createMobile(MobileRequestDTO req) {
+
+        //Validate condition enum case-insensitive(You cannot add NEW, USED, REFURBISHED this thing in small letter)
+        try {
+            req.setCondition(req.getCondition().toUpperCase()); // normalize lowercase
+            Mobile.Condition.valueOf(req.getCondition());
+        } catch (IllegalArgumentException e) {
+            throw new MobileValidationException("Invalid condition. Allowed: NEW, USED, REFURBISHED");
+        }
+
+        // Validate yearOfPurchase is not in the future
+        int currentYear = java.time.Year.now().getValue();
+        if (req.getYearOfPurchase() > currentYear) {
+            throw new MobileValidationException("Year of purchase cannot be in the future");
+        }
+
+        //Validate description word count (max 100 words user can enter)
+        int maxWords = 100;
+        int wordCount = req.getDescription().trim().split("\\s+").length;
+        if (wordCount > maxWords) {
+            throw new MobileValidationException("Description cannot exceed " + maxWords + " words");
+        }
+
+        // Validate seller existence
         Seller seller = sellerRepository.findById(req.getSellerId())
                 .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
 
+        //Create and save mobile
         Mobile m = new Mobile();
         MobileMapper.updateFromRequest(m, req);
         m.setSeller(seller);
         m.setDeleted(false);
         m.setStatus(Mobile.Status.ACTIVE);
         m = mobileRepository.save(m);
+
         return MobileMapper.toDTO(m);
     }
+
+
+
+
+
 
     @Override
     public Page<MobileResponseDTO> listMobiles(int page, int size, Long sellerId) {
