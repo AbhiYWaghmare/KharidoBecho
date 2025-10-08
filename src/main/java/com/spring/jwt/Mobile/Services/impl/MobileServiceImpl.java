@@ -77,8 +77,8 @@ public class MobileServiceImpl implements MobileService {
             if (req.getDescription() == null || req.getDescription().isBlank()) {
                 throw new MobileValidationException("Description is required.");
             }
-            if (req.getDescription().length() > 1000) {
-                throw new MobileValidationException("Description cannot exceed 1000 characters.");
+            if (req.getDescription().length() > 4000) {
+                throw new MobileValidationException("Description cannot exceed 4000 characters.");
             }
         }
 
