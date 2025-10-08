@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 
 public interface CarService {
     CarDto createCar(CarDto dto);
-    CarDto patchUpdateCar(Integer carId, CarDto partialDto);
-    CarDto getCarById(Integer carId);
-    CarDto deleteCar(Integer carId, String type);
-    Page<CarDto> getCarsBySellerAndStatus(Integer sellerId, Status status, int page, int size);
+    CarDto patchUpdateCar(Long carId, CarDto partialDto);
+    CarDto getCarById(Long carId);
+    CarDto deleteCar(Long carId, String type);
+    Page<CarDto> getCarsBySellerAndStatus(Long sellerId, Status status, int page, int size);
     Page<CarDto> getCarsByStatus(Status status, int page, int size);
-    long countCarsBySellerAndStatus(Integer sellerId, Status status);
+    long countCarsBySellerAndStatus(Long sellerId, Status status);
 }

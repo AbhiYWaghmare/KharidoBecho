@@ -18,20 +18,24 @@ public class CarMapper {
 
     @PostConstruct
     public void setup() {
-        // map entity.title -> dto.carName
+        // 1️⃣ Map Car → CarDto
         mapper.addMappings(new PropertyMap<Car, CarDto>() {
             @Override
             protected void configure() {
                 map().setCarName(source.getTitle());
+                map().setCarId(source.getCarId()); // ✅ Long → Long
+//                map().setCarId(source.getCarId());
+                // sellerId handled in service if needed
             }
         });
 
-        // map dto.carName -> entity.title
+        // 2️⃣ Map CarDto → Car
         mapper.addMappings(new PropertyMap<CarDto, Car>() {
             @Override
             protected void configure() {
                 map().setTitle(source.getCarName());
-                // dealerId will be mapped by name automatically
+                map().setCarId(source.getCarId()); // ✅ Long → Long
+                // sellerId handled manually
             }
         });
     }

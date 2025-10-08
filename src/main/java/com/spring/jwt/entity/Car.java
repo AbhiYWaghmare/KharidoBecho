@@ -1,6 +1,6 @@
 package com.spring.jwt.entity;
 
-import com.spring.jwt.car.entity.CloudinaryImage;
+import com.spring.jwt.car.entity.CarPhotos;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,10 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "car_id", nullable = false)
-    private int id;
+    private Long carId;
+
+    @Column(name = "car_name")
+    private String carName;
 
     @Column(name = "airbag")
     private Boolean airbag;
@@ -56,10 +59,10 @@ public class Car {
     private String brand;
 
     @Column(name = "car_insurance")
-    private Boolean carInsurance;
+    private String carInsurance;
 
     @Column(name = "car_insurance_date")
-    private String carInsuranceDate;
+    private LocalDate carInsuranceDate;
 
     @Column(name = "carInsuranceType")
     private String carInsuranceType;
@@ -102,7 +105,7 @@ public class Car {
     @Column(name = "rear_parking_camera_feature")
     private Boolean rearParkingCameraFeature;
 
-    @Column(name = "registration", length = 45)
+    @Column(name = "registration", length = 45, unique = true)
     private String registration;
 
     @Column(name = "title", length = 250)
@@ -117,14 +120,15 @@ public class Car {
     @Column(name = "date")
     private LocalDate date;
 
-//    @Column(name = "dealer_id")
-//    private int dealerId;
-
-    private long carPhotoId;
-
     @Column(name = "carType", nullable = false)
     private String carType;
 
+    // Seller relationship
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
+
+    // Car photos relationship
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<CloudinaryImage> images = new HashSet<>();
+    private Set<CarPhotos> images = new HashSet<>();
 }

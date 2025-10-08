@@ -19,14 +19,14 @@ public class CloudinaryConfig {
 //
 //    @Value("${cloudinary.api_secret}")
 //    private String apiSecret;
-
-    @Bean
-    public Cloudinary cloudinary() {
-        Map config = new HashMap();
-        config.put("cloud_name","dxr6zaozd");
-        config.put("api_key","873471871927925");
-        config.put("api_secret","PoW04EKwHVfIVW2WA-8Q3_qDahk");
-
-        return new Cloudinary(config);
-    }
+//
+//    @Bean
+//    public Cloudinary cloudinary() {
+//        Map config = new HashMap();
+//        config.put("cloud_name","dxr6zaozd");
+//        config.put("api_key","873471871927925");
+//        config.put("api_secret","PoW04EKwHVfIVW2WA-8Q3_qDahk");
+//
+//        return new Cloudinary(config);
+//    }
 }

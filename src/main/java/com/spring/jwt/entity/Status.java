@@ -5,7 +5,8 @@ public enum Status {
     ACTIVE("ACTIVE"),
     SOLD("Sold"),
     DELETED("Deleted"),
-    DEACTIVATE("Deactivate");
+    DEACTIVATE("Deactivate"),
+    AVAILABLE("Available");
 
 
 
