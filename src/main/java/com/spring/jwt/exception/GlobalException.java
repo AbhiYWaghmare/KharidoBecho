@@ -3,6 +3,7 @@ package com.spring.jwt.exception;
 
 
 import com.spring.jwt.exception.mobile.*;
+import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 
 import com.spring.jwt.utils.BaseResponseDTO;

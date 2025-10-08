@@ -32,7 +32,9 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.Year;
 import java.util.*;
 import java.util.List;
 
@@ -46,62 +48,128 @@ public class MobileServiceImpl implements MobileService {
     private final CloudinaryService cloudinaryService;
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
-//    @Override
-//    @Transactional
-//    public MobileResponseDTO createMobile(MobileRequestDTO req) {
-//        Seller seller = sellerRepository.findById(req.getSellerId())
-//                .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
-//
-//        Mobile m = new Mobile();
-//        MobileMapper.updateFromRequest(m, req);
-//        m.setSeller(seller);
-//        m.setDeleted(false);
-//        m.setStatus(Mobile.Status.ACTIVE);
-//        m = mobileRepository.save(m);
-//        return MobileMapper.toDTO(m);
-//    }
+
+// This method is for Create mobile service
+    private void validateCreateRequest(MobileRequestDTO req) {
+        validateCommonFields(req, true); // true = creation mode (all fields required)
+    }
+
+    // This method is for Update mobile service
+    private void validateUpdateRequest(MobileRequestDTO req) {
+        validateCommonFields(req, false); // false = update mode (but still must remain valid)
+    }
+
+    //============We create this method because we have to validate this common fileds
+    // in both cenarios for Adding Also & for Updating Also so we create common method and implement
+    // this in there separte method that we passing in createmobile and updatemobile time method ==========//
+
+    private void validateCommonFields(MobileRequestDTO req, boolean isCreate) {
+
+        // Title
+        if (isCreate || req.getTitle() != null) {
+            if (req.getTitle() == null || req.getTitle().isBlank()) {
+                throw new MobileValidationException("Title is required and cannot be blank.");
+            }
+        }
+
+        //Description
+        if (isCreate || req.getDescription() != null) {
+            if (req.getDescription() == null || req.getDescription().isBlank()) {
+                throw new MobileValidationException("Description is required.");
+            }
+            if (req.getDescription().length() > 1000) {
+                throw new MobileValidationException("Description cannot exceed 1000 characters.");
+            }
+        }
+
+        //Price
+        if (isCreate || req.getPrice() != null) {
+            if (req.getPrice() == null) {
+                throw new MobileValidationException("Price is required.");
+            }
+            if (req.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new MobileValidationException("Price must be greater than zero.");
+            }
+            if (req.getPrice().compareTo(new BigDecimal("10000000")) > 0) {
+                throw new MobileValidationException("Price cannot exceed 1 crore.");
+            }
+        }
+
+        //Condition
+        if (isCreate || req.getCondition() != null) {
+            if (req.getCondition() == null || req.getCondition().isBlank()) {
+                throw new MobileValidationException("Condition is required.");
+            }
+
+            try {
+                Mobile.Condition.valueOf(req.getCondition().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new MobileValidationException("Invalid condition. Allowed: NEW, USED, REFURBISHED.");
+            }
+        }
+
+        //Year of Purchase
+        if (isCreate || req.getYearOfPurchase() != null) {
+            if (req.getYearOfPurchase() == null) {
+                throw new MobileValidationException("Year of purchase is required.");
+            }
+            int currentYear = Year.now().getValue();
+            if (req.getYearOfPurchase() > currentYear) {
+                throw new MobileValidationException("Year of purchase cannot be in the future.");
+            }
+            if (req.getYearOfPurchase() < 2000) {
+                throw new MobileValidationException("Year of purchase must be after 2000.");
+            }
+        }
+
+        //Brand
+        if (isCreate || req.getBrand() != null) {
+            if (req.getBrand() == null || req.getBrand().isBlank()) {
+                throw new MobileValidationException("Brand is required.");
+            }
+        }
+
+        // Model
+        if (isCreate || req.getModel() != null) {
+            if (req.getModel() == null || req.getModel().isBlank()) {
+                throw new MobileValidationException("Model is required.");
+            }
+        }
+
+        //  Color
+        if (isCreate || req.getColor() != null) {
+            if (req.getColor() == null || req.getColor().isBlank()) {
+                throw new MobileValidationException("Color is required.");
+            }
+        }
+
+        //Seller
+        if (isCreate || req.getSellerId() != null) {
+            if (req.getSellerId() == null) {
+                throw new MobileValidationException("SellerId is required.");
+            }
+        }
+    }
+
+
 
     @Override
     @Transactional
     public MobileResponseDTO createMobile(MobileRequestDTO req) {
 
-        //Validate condition enum case-insensitive(You cannot add NEW, USED, REFURBISHED this thing in small letter)
-        try {
-            req.setCondition(req.getCondition().toUpperCase()); // normalize lowercase
-            Mobile.Condition.valueOf(req.getCondition());
-        } catch (IllegalArgumentException e) {
-            throw new MobileValidationException("Invalid condition. Allowed: NEW, USED, REFURBISHED");
-        }
+        validateCreateRequest(req);
 
-        // Validate yearOfPurchase is not in the future
-        int currentYear = java.time.Year.now().getValue();
-        if (req.getYearOfPurchase() > currentYear) {
-            throw new MobileValidationException("Year of purchase cannot be in the future");
-        }
-
-        //Validate description word count (max 100 words user can enter)
-        int maxWords = 100;
-        int wordCount = req.getDescription().trim().split("\\s+").length;
-        if (wordCount > maxWords) {
-            throw new MobileValidationException("Description cannot exceed " + maxWords + " words");
-        }
-
-        // Validate seller existence
         Seller seller = sellerRepository.findById(req.getSellerId())
                 .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
 
-        //Create and save mobile
         Mobile m = new Mobile();
         MobileMapper.updateFromRequest(m, req);
         m.setSeller(seller);
         m.setDeleted(false);
         m.setStatus(Mobile.Status.ACTIVE);
         m = mobileRepository.save(m);
-
         return MobileMapper.toDTO(m);
     }
-
-
 
 
 
@@ -121,9 +189,15 @@ public class MobileServiceImpl implements MobileService {
         return MobileMapper.toDTO(m);
     }
 
+
+
+
     @Override
     @Transactional
     public MobileResponseDTO updateMobile(Long id, MobileRequestDTO req) {
+
+        validateUpdateRequest(req);
+
         Mobile m = mobileRepository.findById(id)
                 .orElseThrow(() -> new MobileNotFoundException(id));
         MobileMapper.updateFromRequest(m, req);

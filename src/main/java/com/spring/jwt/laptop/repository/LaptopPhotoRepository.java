@@ -5,6 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface LaptopPhotoRepository extends JpaRepository<LaptopPhotos,Integer> {
-    List<LaptopPhotos> findByLaptopId(int laptopId);
+public interface LaptopPhotoRepository extends JpaRepository<LaptopPhotos,Long> {
 }

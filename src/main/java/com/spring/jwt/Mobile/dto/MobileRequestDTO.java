@@ -15,7 +15,7 @@ public class MobileRequestDTO {
 
     //Description
     @NotBlank(message = "Description is required")
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
+    @Size(max = 4000, message = "Description must not exceed 4000 characters")
     private String description;
 
     //Price
@@ -47,8 +47,8 @@ public class MobileRequestDTO {
 
     //Year of Purchase
     @NotNull(message = "Year of purchase is required")
-    @Max(value = 2030, message = "Year cannot be in the future") // you can also dynamically set to current year
-    @Min(value = 2000, message = "Year must be realistic") // optional lower bound
+    @Max(value = 2030, message = "Year cannot be in the future")
+    @Min(value = 2000, message = "Year must be realistic")
     private Integer yearOfPurchase;
 
     // Seller ID
