@@ -1,8 +1,10 @@
 package com.spring.jwt.laptop.service.impl;
 
 import com.spring.jwt.entity.Seller;
-import com.spring.jwt.exception.LaptopAlreadyExistsException;
+import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.exception.ResourceNotFoundException;
+import com.spring.jwt.exception.laptop.LaptopNotFoundException;
+import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.model.Status;
@@ -31,24 +33,24 @@ public class LaptopServiceImpl implements LaptopService {
     private final SellerRepository sellerRepository;
 
     public Laptop create(LaptopRequestDTO requestDTO) {
-        if (requestDTO.getSerialNumber() == null || requestDTO.getSerialNumber().isBlank()) {
-            throw new IllegalArgumentException("Serial number is required");
-        }
-        if (requestDTO.getDealer() == null || requestDTO.getDealer().isBlank()) {
-            throw new IllegalArgumentException("Dealer is required");
-        }
-        if (requestDTO.getModel() == null || requestDTO.getModel().isBlank()) {
-            throw new IllegalArgumentException("Model is required");
-        }
-        if (requestDTO.getBrand() == null || requestDTO.getBrand().isBlank()) {
-            throw new IllegalArgumentException("Brand is required");
-        }
-        if (requestDTO.getPrice() == null || requestDTO.getPrice() < 0) {
-            throw new IllegalArgumentException("Price must be positive");
-        }
-        if (requestDTO.getSellerId() == null) {
-            throw new IllegalArgumentException("SellerId is required");
-        }
+//        if (requestDTO.getSerialNumber() == null || requestDTO.getSerialNumber().isBlank()) {
+//            throw new IllegalArgumentException("Serial number is required");
+//        }
+//        if (requestDTO.getDealer() == null || requestDTO.getDealer().isBlank()) {
+//            throw new IllegalArgumentException("Dealer is required");
+//        }
+//        if (requestDTO.getModel() == null || requestDTO.getModel().isBlank()) {
+//            throw new IllegalArgumentException("Model is required");
+//        }
+//        if (requestDTO.getBrand() == null || requestDTO.getBrand().isBlank()) {
+//            throw new IllegalArgumentException("Brand is required");
+//        }
+//        if (requestDTO.getPrice() == null || requestDTO.getPrice() < 0) {
+//            throw new IllegalArgumentException("Price must be positive");
+//        }
+//        if (requestDTO.getSellerId() == null) {
+//            throw new IllegalArgumentException("SellerId is required");
+//        }
 
 //        if (laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())) {
 //            throw new LaptopAlreadyExistsException(
@@ -80,7 +82,7 @@ public class LaptopServiceImpl implements LaptopService {
         laptop.setWeight(requestDTO.getWeight());
 
         Seller seller = sellerRepository.findById(requestDTO.getSellerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Seller not found with id: " + requestDTO.getSellerId()));
+                .orElseThrow(() -> new SellerNotFoundException(requestDTO.getSellerId()));
         laptop.setSeller(seller);
 
         return laptopRepository.save(laptop);
@@ -89,7 +91,7 @@ public class LaptopServiceImpl implements LaptopService {
     @Transactional
     public Laptop update(Long laptopId, LaptopRequestDTO dto) {
         Laptop laptop = laptopRepository.findById(laptopId)
-                .orElseThrow(() -> new ResourceNotFoundException("Laptop not found with ID " + laptopId));
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop not found with ID " + laptopId));
 
         // Only update fields if they are not null
         if (dto.getSerialNumber() != null && !dto.getSerialNumber().equals(laptop.getSerialNumber())) {
@@ -129,7 +131,7 @@ public class LaptopServiceImpl implements LaptopService {
 
         if (dto.getSellerId() != null) {
             Seller seller = sellerRepository.findById(dto.getSellerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Seller not found with ID: " + dto.getSellerId()));
+                    .orElseThrow(() -> new SellerNotFoundException(dto.getSellerId()));
             laptop.setSeller(seller);
         }
 
@@ -139,7 +141,7 @@ public class LaptopServiceImpl implements LaptopService {
 
     public Laptop getById(Long laptopId) {
         return laptopRepository.findById(laptopId)
-                .orElseThrow(() -> new ResourceNotFoundException("Laptop with ID " + laptopId + " not found"));
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop with ID " + laptopId + " not found"));
     }
 
     public List<Laptop> getAllLaptops() {
@@ -151,7 +153,7 @@ public class LaptopServiceImpl implements LaptopService {
     @Override
     public void deleteLaptopById(Long laptopId) {
         Laptop laptop = laptopRepository.findById(laptopId)
-                .orElseThrow(() -> new ResourceNotFoundException("Laptop not found with id: " + laptopId));
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop not found with id: " + laptopId));
 
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
         log.debug("Processing delete for Laptop with ID {} at {}", laptopId, now);
