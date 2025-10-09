@@ -4,6 +4,7 @@ import com.spring.jwt.Bike.Entity.bikeStatus;
 import com.spring.jwt.Bike.Service.bikeService;
 import com.spring.jwt.Bike.dto.bikeDto;
 import com.spring.jwt.Bike.response.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class bikeController {
 
     /** CREATE Bike */
     @PostMapping(value = "/post", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<ApiResponse> createBike(@RequestBody bikeDto bikedto) {
+    public ResponseEntity<ApiResponse> createBike( @RequestBody bikeDto bikedto) {
         bikeService.createBike(bikedto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse("SUCCESS", "Bike created successfully"));
@@ -39,7 +40,7 @@ public class bikeController {
 
     /** UPDATE Bike */
     @PatchMapping(value = "/patch/{id}",consumes = "application/json", produces = "application/json")
-    public ResponseEntity<ApiResponse> updateBike(@PathVariable Long id, @RequestBody bikeDto bikedto) {
+    public ResponseEntity<ApiResponse> updateBike(@PathVariable Long id,@Valid @RequestBody bikeDto bikedto) {
         bikeService.updateBike(id, bikedto);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike updated successfully"));
     }

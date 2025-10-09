@@ -1,7 +1,9 @@
 package com.spring.jwt.Bike.Exceptions;
 
+import jakarta.mail.Message;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +28,20 @@ public class globalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+    @ExceptionHandler(StatusNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBikeStatusNotFound(
+            StatusNotFoundException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_STATUS_NOT_FOUND");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(
@@ -61,7 +77,7 @@ public class globalExceptionHandler {
 
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("apiPath", "uri=" + request.getRequestURI());
-        errorResponse.put("errorCode", "BIKE_IMAGE_OPERATION_FAILED");
+        errorResponse.put("errorCode", "BIKE_OPERATION_FAILED");
         errorResponse.put("errorMessage", ex.getMessage());
         errorResponse.put("errorTime", LocalDateTime.now());
 
@@ -81,4 +97,21 @@ public class globalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+
+    @ExceptionHandler(InvalidBikeData.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidBikeData(
+            InvalidBikeData ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", request.getRequestURI());
+        errorResponse.put("errorCode", "INVALID_BIKE_DATA");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", java.time.LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+
+
 }
