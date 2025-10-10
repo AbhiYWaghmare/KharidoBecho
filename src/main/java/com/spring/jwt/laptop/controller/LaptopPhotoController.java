@@ -47,6 +47,7 @@ public class LaptopPhotoController {
 
     //To upload images of particular laptop by ID
     @PostMapping("/upload")
+
     public ResponseEntity<LaptopResponseDTO> uploadImages(@RequestParam Long laptopId, @RequestParam("files") List<MultipartFile> files, HttpServletRequest httpServletRequest) {
         List<String> photos = laptopPhotoService.uploadPhoto(laptopId, files);
         String imageUrl = String.join(", ", photos);
