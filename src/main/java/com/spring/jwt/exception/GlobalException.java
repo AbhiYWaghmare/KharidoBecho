@@ -2,9 +2,8 @@ package com.spring.jwt.exception;
 
 
 
-import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
-import com.spring.jwt.exception.laptop.LaptopImageException;
-import com.spring.jwt.exception.laptop.LaptopNotFoundException;
+import com.spring.jwt.exception.laptop.*;
+import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 
 import com.spring.jwt.exception.mobile.BuyerNotFoundException;
@@ -343,6 +342,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
 
+    @ExceptionHandler(LaptopNotFoundException.class)
     public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
         LaptopResponseDTO error = new LaptopResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
@@ -369,6 +369,34 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    public ResponseEntity<LaptopResponseDTO> handleValidationException(ValidationException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(BlankFieldsException.class)
+    public ResponseEntity<LaptopResponseDTO> handleBlankFieldsException(BlankFieldsException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
 
     //Mobile Exception Handler
     @ExceptionHandler(MobileNotFoundException.class)

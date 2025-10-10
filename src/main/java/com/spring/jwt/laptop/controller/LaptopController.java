@@ -67,6 +67,7 @@ public class LaptopController {
             @RequestParam Long laptopId,
             @RequestBody LaptopRequestDTO requestDTO) {
 
+
             Laptop laptop = laptopService.update(laptopId, requestDTO);
             return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", laptopResponseDTO.getApiPath(), laptopResponseDTO.getImageUrl()));
     }
@@ -115,9 +116,9 @@ public class LaptopController {
             @RequestParam Status status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "laptopId") String sortBy){
+            @RequestParam(defaultValue = "id") String sortBy){
 
-        Page<Laptop> laptops = laptopService.getByDealerIdAndStatus(sellerId,status,page,size,sortBy);
+        Page<Laptop> laptops = laptopService.getBySellerIdAndStatus(sellerId,status,page,size,sortBy);
         return ResponseEntity.ok((laptops));
     }
 
