@@ -28,6 +28,8 @@ public class CarDto {
     private Integer year;
     private LocalDate date;
     private String description;
+    private Integer dealerId;
+    private Integer buyerId;
     private String carType;
     @NotNull(message = "Car status is required")
     private Status carStatus;

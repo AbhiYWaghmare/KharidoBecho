@@ -217,7 +217,10 @@
 package com.spring.jwt.car.service;
 
 import com.spring.jwt.car.dto.CarDto;
-import com.spring.jwt.car.exception.*;
+import com.spring.jwt.car.exception.CarAlreadyExists;
+import com.spring.jwt.car.exception.CarNotFoundException;
+import com.spring.jwt.car.exception.InvalidRequestException;
+import com.spring.jwt.car.exception.SellerNotFoundException;
 import com.spring.jwt.car.repository.CarRepository;
 import com.spring.jwt.entity.Car;
 import com.spring.jwt.entity.Seller;
@@ -259,7 +262,7 @@ public class CarServiceImpl implements CarService {
         dto.setYear(car.getYear());
         dto.setDate(car.getDate());
         dto.setDescription(car.getDescription());
-//        dto.setBuyerId(car.getOwnerSerial());
+        dto.setBuyerId(car.getOwnerSerial());
         dto.setCarType(car.getCarType());
         dto.setCarStatus(car.getCarStatus());
         dto.setRegistration(car.getRegistration());
@@ -300,7 +303,7 @@ public class CarServiceImpl implements CarService {
         car.setYear(dto.getYear() != null ? dto.getYear() : 0);
         car.setDate(dto.getDate() != null ? dto.getDate() : LocalDate.now());
         car.setDescription(dto.getDescription());
-//        car.setOwnerSerial(dto.getBuyerId() != null ? dto.getBuyerId() : 0);
+        car.setOwnerSerial(dto.getBuyerId() != null ? dto.getBuyerId() : 0);
         car.setCarType(dto.getCarType());
         car.setCarStatus(dto.getCarStatus() != null ? dto.getCarStatus() : Status.ACTIVE);
         car.setRegistration(dto.getRegistration());
@@ -368,7 +371,7 @@ public class CarServiceImpl implements CarService {
         if (partialDto.getYear() != null) car.setYear(partialDto.getYear());
         if (partialDto.getDate() != null) car.setDate(partialDto.getDate());
         if (partialDto.getDescription() != null) car.setDescription(partialDto.getDescription());
-//        if (partialDto.getBuyerId() != null) car.setOwnerSerial(partialDto.getBuyerId());
+        if (partialDto.getBuyerId() != null) car.setOwnerSerial(partialDto.getBuyerId());
         if (partialDto.getCarType() != null) car.setCarType(partialDto.getCarType());
 
         return toDto(carRepository.save(car));
