@@ -26,6 +26,7 @@ public class CarDto {
     @Min(value = 1886, message = "Year must be no earlier than 1886")
     @Max(value = 2026, message = "Year cannot be in the future")
     private Integer year;
+//    private Integer delerId;
     private LocalDate date;
     private String description;
     private String carType;
