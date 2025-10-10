@@ -81,7 +81,7 @@ public class Laptop {
     @Column(name = "graphics_brand")
     private String graphicBrand;
 
-    @Column(name = "weight")
+     @Column(name = "weight")
     private String weight;
 
     @Column(name = "manufacturer")
