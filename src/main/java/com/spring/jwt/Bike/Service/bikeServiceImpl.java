@@ -7,6 +7,7 @@ import com.spring.jwt.Bike.Exceptions.StatusNotFoundException;
 import com.spring.jwt.Bike.Exceptions.bikeNotFoundException;
 import com.spring.jwt.Bike.Repository.bikeRepository;
 import com.spring.jwt.Bike.dto.bikeDto;
+import com.spring.jwt.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.modelmapper.Conditions;
@@ -26,6 +27,7 @@ public class bikeServiceImpl implements bikeService {
     public bikeServiceImpl(bikeRepository bikerepository, ModelMapper modelMapper) {
         this.bikerepository = bikerepository;
         this.modelMapper = modelMapper;
+
     }
 
     private Bike convertToEntity(bikeDto bikedto) {
@@ -72,42 +74,17 @@ public class bikeServiceImpl implements bikeService {
      * UPDATE Bike by ID
      */
     @Override
-    @Transactional
     public bikeDto updateBike(Long bike_id, bikeDto bikedto) {
-        // Fetch existing bike or throw 404
         Bike existingBike = bikerepository.findById(bike_id)
                 .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + bike_id));
 
-        // Check string fields for blank values
-        if ((bikedto.getBrand() != null && bikedto.getBrand().isBlank()) ||
-                (bikedto.getModel() != null && bikedto.getModel().isBlank()) ||
-                (bikedto.getFuelType() != null && bikedto.getFuelType().isBlank()) ||
-                (bikedto.getVariant() != null && bikedto.getVariant().isBlank()) ||
-                (bikedto.getColor() != null && bikedto.getColor().isBlank()) ||
-                (bikedto.getRegistrationNumber() != null && bikedto.getRegistrationNumber().isBlank()) ||
-                (bikedto.getDescription() != null && bikedto.getDescription().isBlank())) {
-            throw new InvalidBikeData("String fields cannot be blank");
-        }
+        //Make sure the DTO’s ID doesn’t override the entity ID
+        bikedto.setBike_id(null);
+        // Map updated values from DTO to existing entity
+        modelMapper.map(bikedto, existingBike);
 
-        // Update only valid fields
-        if (bikedto.getPrize() == null) {
-            throw new InvalidBikeData("Prize cannot be empty or null");
-        }
-
-        if (bikedto.getBrand() != null) existingBike.setBrand(bikedto.getBrand().trim());
-        if (bikedto.getModel() != null) existingBike.setModel(bikedto.getModel().trim());
-        if (bikedto.getVariant() != null) existingBike.setVariant(bikedto.getVariant().trim());
-        if (bikedto.getManufactureYear() != null) existingBike.setManufactureYear(bikedto.getManufactureYear());
-        if (bikedto.getEngineCC() != null) existingBike.setEngineCC(bikedto.getEngineCC());
-        if (bikedto.getKilometersDriven() != null) existingBike.setKilometersDriven(bikedto.getKilometersDriven());
-        if (bikedto.getFuelType() != null) existingBike.setFuelType(bikedto.getFuelType().trim());
-        if (bikedto.getColor() != null) existingBike.setColor(bikedto.getColor().trim());
-        if (bikedto.getRegistrationNumber() != null) existingBike.setRegistrationNumber(bikedto.getRegistrationNumber().trim());
-        if (bikedto.getDescription() != null) existingBike.setDescription(bikedto.getDescription().trim());
-        if (bikedto.getSellerId() != null && bikedto.getSellerId() > 0) existingBike.setSellerId(bikedto.getSellerId());
-        if (bikedto.getStatus() != null) existingBike.setStatus(bikedto.getStatus());
-
-        return convertToDto(bikerepository.save(existingBike));
+        Bike updatedBike = bikerepository.save(existingBike);
+        return convertToDto(updatedBike);
     }
 
 

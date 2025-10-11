@@ -40,7 +40,7 @@ public class bikeController {
 
     /** UPDATE Bike */
     @PatchMapping(value = "/patch/{id}",consumes = "application/json", produces = "application/json")
-    public ResponseEntity<ApiResponse> updateBike(@PathVariable Long id,@Valid @RequestBody bikeDto bikedto) {
+    public ResponseEntity<ApiResponse> updateBike(@PathVariable Long id, @RequestBody bikeDto bikedto) {
         bikeService.updateBike(id, bikedto);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike updated successfully"));
     }
