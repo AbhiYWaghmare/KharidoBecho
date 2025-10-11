@@ -242,43 +242,43 @@ public class UserController {
     // Buyers - paginated list
     // GET /api/v1/users/buyers?page=0&size=10
     // =======================
-    @GetMapping("/getAllBuyers")
-    public ResponseEntity<ResponseAllUsersDto> getAllBuyers(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) int size) {
-
-        Page<UserDTO> userPage = userService.getAllUsers(page, size, "BUYER");
-        return ResponseEntity.ok(buildPagedResponse(userPage));
-    }
-
-    @GetMapping("/buyer/{userId}")
-    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Long userId) {
-        Buyer buyer = buyerRepository.findByUser_Id(userId);
-        if (buyer == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(buyer);
-    }
-
-
-
-    // =======================
-    // Sellers - paginated list
-    // GET /api/v1/users/sellers?page=0&size=10
-    // =======================
-    @GetMapping("/getAllSellers")
-    public ResponseEntity<ResponseAllUsersDto> getAllSellers(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "10") @Min(1) int size) {
-
-        Page<UserDTO> userPage = userService.getAllUsers(page, size, "SELLER");
-        return ResponseEntity.ok(buildPagedResponse(userPage));
-    }
-
-    @GetMapping("/seller/{userId}")
-    public ResponseEntity<Seller> getSellerByUserId(@PathVariable Long userId) {
-        Seller seller = sellerRepository.findByUser_Id(userId);
-        if (seller == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(seller);
-    }
+//    @GetMapping("/getAllBuyers")
+//    public ResponseEntity<ResponseAllUsersDto> getAllBuyers(
+//            @RequestParam(defaultValue = "0") @Min(0) int page,
+//            @RequestParam(defaultValue = "10") @Min(1) int size) {
+//
+//        Page<UserDTO> userPage = userService.getAllUsers(page, size, "BUYER");
+//        return ResponseEntity.ok(buildPagedResponse(userPage));
+//    }
+//
+//    @GetMapping("/buyer/{userId}")
+//    public ResponseEntity<Buyer> getBuyerByUserId(@PathVariable Long userId) {
+//        Buyer buyer = buyerRepository.findByUser_Id(userId);
+//        if (buyer == null) return ResponseEntity.notFound().build();
+//        return ResponseEntity.ok(buyer);
+//    }
+//
+//
+//
+//    // =======================
+//    // Sellers - paginated list
+//    // GET /api/v1/users/sellers?page=0&size=10
+//    // =======================
+//    @GetMapping("/getAllSellers")
+//    public ResponseEntity<ResponseAllUsersDto> getAllSellers(
+//            @RequestParam(defaultValue = "0") @Min(0) int page,
+//            @RequestParam(defaultValue = "10") @Min(1) int size) {
+//
+//        Page<UserDTO> userPage = userService.getAllUsers(page, size, "SELLER");
+//        return ResponseEntity.ok(buildPagedResponse(userPage));
+//    }
+//
+//    @GetMapping("/seller/{userId}")
+//    public ResponseEntity<Seller> getSellerByUserId(@PathVariable Long userId) {
+//        Seller seller = sellerRepository.findByUser_Id(userId);
+//        if (seller == null) return ResponseEntity.notFound().build();
+//        return ResponseEntity.ok(seller);
+//    }
 
     // =======================
     // Delete (soft) user
