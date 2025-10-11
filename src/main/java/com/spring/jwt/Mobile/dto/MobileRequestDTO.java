@@ -1,62 +1,66 @@
 package com.spring.jwt.Mobile.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.utils.validation.MaxWords;
 import jakarta.validation.constraints.*;
+import com.spring.jwt.utils.validation.MinWords;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.Year;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class MobileRequestDTO {
 
-    //Title
+    //  TITLE
     @NotBlank(message = "Title is required")
+    @Size(max = 150, message = "Title cannot exceed 150 characters")
     private String title;
 
-    //Description
+    // DESCRIPTION
     @NotBlank(message = "Description is required")
-    @Size(max = 4000, message = "Description must not exceed 4000 characters")
+//    @Size(min = 20, max = 1000, message = "Description must be between 20 and 1000 characters")
+    @MaxWords(value = 70, message = "Description cannot exceed 70 words")
+    @MinWords(value = 5, message = "Description must have at least 5 words")
     private String description;
 
-    //Price
+    // PRICE
     @NotNull(message = "Price is required")
-    @DecimalMin(value = "0.01", inclusive = true, message = "Price must be greater than zero")
+    @DecimalMin(value = "1", inclusive = true, message = "Price must be greater than zero")
     @DecimalMax(value = "10000000", inclusive = true, message = "Price cannot exceed 1 crore")
+    @Digits(integer = 8, fraction = 2, message = "Price must have up to 2 decimal places")
     private BigDecimal price;
 
-    //Negotiable
-//    @NotNull(message = "Negotiable field is required")
+    // NEGOTIABLE
+    @NotNull(message = "Negotiable must be specified")
     private Boolean negotiable;
 
-    //Condition
+    // CONDITION
     @NotBlank(message = "Condition is required")
-    @Pattern(regexp = "NEW|USED|REFURBISHED", message = "Condition must be NEW, USED or REFURBISHED")
+    @Pattern(regexp = "NEW|USED|REFURBISHED", message = "Condition must be NEW, USED, or REFURBISHED")
     private String condition;
 
-    //Brand
+    // BRAND
     @NotBlank(message = "Brand is required")
     private String brand;
 
-    // Model
+    //  MODEL
     @NotBlank(message = "Model is required")
     private String model;
 
-    //Color
-    @NotBlank(message = "Color is required")
+    // COLOR
+    @Pattern(
+            regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^[A-Za-z ]{2,30}$",
+            message = "Color must be a valid hex code or alphabetic name (2–30 characters)"
+    )
     private String color;
 
-    //Year of Purchase
+    // YEAR
     @NotNull(message = "Year of purchase is required")
-    @Max(value = 2030, message = "Year cannot be in the future")
-    @Min(value = 2000, message = "Year must be realistic")
+    @Min(value = 2000, message = "Year must be realistic (after 2000)")
     private Integer yearOfPurchase;
 
-    // Seller ID
+    // SELLER
     @NotNull(message = "SellerId is required")
     private Long sellerId;
-
-    // validate that year is not greater than current year
-    public boolean isYearValid() {
-        return yearOfPurchase == null || yearOfPurchase <= Year.now().getValue();
-    }
 }
