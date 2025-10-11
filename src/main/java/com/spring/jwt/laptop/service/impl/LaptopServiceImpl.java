@@ -36,6 +36,13 @@ public class LaptopServiceImpl implements LaptopService {
 
     public Laptop create(LaptopRequestDTO requestDTO) {
 
+        Seller seller = sellerRepository.findById(requestDTO.getSellerId())
+                .orElseThrow(() -> new SellerNotFoundException(requestDTO.getSellerId()));
+
+        if(laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())){
+            throw new LaptopAlreadyExistsException("Laptop already exists with serial number " + requestDTO.getSerialNumber());
+        }
+
         Laptop laptop = new Laptop();
         laptop.setSerialNumber(requestDTO.getSerialNumber());
         laptop.setDealer(requestDTO.getDealer());
@@ -58,9 +65,6 @@ public class LaptopServiceImpl implements LaptopService {
         laptop.setStorage(requestDTO.getStorage());
         laptop.setUsbPorts(requestDTO.getUsbPorts());
         laptop.setWeight(requestDTO.getWeight());
-
-        Seller seller = sellerRepository.findById(requestDTO.getSellerId())
-                .orElseThrow(() -> new SellerNotFoundException(requestDTO.getSellerId()));
         laptop.setSeller(seller);
 
         return laptopRepository.save(laptop);

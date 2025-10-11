@@ -19,10 +19,12 @@ public class LaptopRequestDTO {
     @Size(max = 30, message = "Serial number cannot exceed 30 characters")
     private String serialNumber;
 
-    @NotBlank(message= "Dealer is required")
+    @NotBlank(message = "Dealer is required")
     @Size(max = 50, message = "Dealer cannot exceed 50 characters")
-    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
-            message = "Dealer must contain letters only and cannot have digits or special characters")
+    @Pattern(
+            regexp = "^\\s*(?=.*\\p{L})[\\p{L}\\s\\-\\.]+\\s*$",
+            message = "Dealer must contain letters only and cannot have digits or special characters"
+    )
     private String dealer;
 
     @NotBlank(message= "Model is required")
@@ -32,7 +34,7 @@ public class LaptopRequestDTO {
     private String model;
 
     @NotBlank(message= "Brand is required")
-    @Size(max = 50, message = "Dealer cannot exceed 50 characters")
+    @Size(max = 50, message = "Brand cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
             message = "Brand must contain letters only and cannot have digits or special characters")
     private String brand;
@@ -71,26 +73,30 @@ public class LaptopRequestDTO {
     private String colour;
 
     @NotBlank(message= "RAM is required")
-    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
+    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "RAM must contain letters and digits only and cannot have special characters")
     private String ram;
 
     @NotBlank(message= "Storage is required")
-    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
-            message = "Storage must contain letters and digits only and cannot have special characters")
+    @Size(max = 30, message = "Storage cannot exceed 30 characters")
+    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
+            message = "Storage must contain at least one letter and no special characters")
     private String storage;
 
     @NotBlank(message= "Battery is required")
     private String battery;
 
     @NotBlank(message= "Battery Life is required")
-    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
-            message = "Battery life must contain letters and digits only and cannot have special characters")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
+            message = "Battery life must contain letters and digits only and cannot have special characters"
+    )
     private String batteryLife;
 
     @NotBlank(message= "Graphics card is required")
-    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
-            message = "Graphics card must contain letters and digits only and cannot have special characters")
+    @Size(max = 30, message = "Graphics card cannot exceed 30 characters")
+    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
+            message = "Graphics card must contain at least one letter and no special characters")
     private String graphicsCard;
 
     @NotBlank(message= "Graphics brand is required")
@@ -99,8 +105,11 @@ public class LaptopRequestDTO {
             message = "Graphics brand must contain letters only and cannot have digits or special characters")
     private String graphicBrand;
 
-    @NotBlank(message= "Weight is required")
-    @Positive(message = "Weight must be greater than zero")
+    @NotBlank(message = "Weight is required")
+    @Pattern(
+            regexp = "^(?!0+(\\.0+)?$)([1-9]\\d*(\\.\\d+)?|0?\\.\\d*[1-9]\\d*)\\s?kg$",
+            message = "Weight must be a greater than zero"
+    )
     private String weight;
 
     @NotBlank(message= "Manufacturer is required")
