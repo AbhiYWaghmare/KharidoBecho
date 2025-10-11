@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import com.spring.jwt.utils.ByteArrayMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.IIOImage;
@@ -33,6 +34,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.time.Year;
 import java.util.*;
@@ -56,6 +58,15 @@ public class MobileServiceImpl implements MobileService {
 
     // This method is for Update mobile service
     private void validateUpdateRequest(MobileRequestDTO req) {
+
+        if (req.getTitle() == null && req.getDescription() == null &&
+                req.getPrice() == null && req.getNegotiable() == null &&
+                req.getCondition() == null && req.getBrand() == null &&
+                req.getModel() == null && req.getColor() == null &&
+                req.getYearOfPurchase() == null && req.getSellerId() == null) {
+            throw new MobileValidationException("Update request body cannot be empty.");
+        }
+
         validateCommonFields(req, false); // false = update mode (but still must remain valid)
     }
 
@@ -65,54 +76,18 @@ public class MobileServiceImpl implements MobileService {
 
     private void validateCommonFields(MobileRequestDTO req, boolean isCreate) {
 
-        // Title
-        if (isCreate || req.getTitle() != null) {
-            if (req.getTitle() == null || req.getTitle().isBlank()) {
-                throw new MobileValidationException("Title is required and cannot be blank.");
+        //  Seller Check
+        if (isCreate || req.getSellerId() != null) {
+            Seller seller = sellerRepository.findById(req.getSellerId())
+                    .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
+
+            if (Boolean.TRUE.equals(seller.isDeleted())) {
+                throw new MobileValidationException("Seller is deleted or inactive.");
             }
         }
 
-        //Description
-        if (isCreate || req.getDescription() != null) {
-            if (req.getDescription() == null || req.getDescription().isBlank()) {
-                throw new MobileValidationException("Description is required.");
-            }
-            if (req.getDescription().length() > 4000) {
-                throw new MobileValidationException("Description cannot exceed 4000 characters.");
-            }
-        }
-
-        //Price
-        if (isCreate || req.getPrice() != null) {
-            if (req.getPrice() == null) {
-                throw new MobileValidationException("Price is required.");
-            }
-            if (req.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new MobileValidationException("Price must be greater than zero.");
-            }
-            if (req.getPrice().compareTo(new BigDecimal("10000000")) > 0) {
-                throw new MobileValidationException("Price cannot exceed 1 crore.");
-            }
-        }
-
-        //Condition
-        if (isCreate || req.getCondition() != null) {
-            if (req.getCondition() == null || req.getCondition().isBlank()) {
-                throw new MobileValidationException("Condition is required.");
-            }
-
-            try {
-                Mobile.Condition.valueOf(req.getCondition().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new MobileValidationException("Invalid condition. Allowed: NEW, USED, REFURBISHED.");
-            }
-        }
-
-        //Year of Purchase
-        if (isCreate || req.getYearOfPurchase() != null) {
-            if (req.getYearOfPurchase() == null) {
-                throw new MobileValidationException("Year of purchase is required.");
-            }
+        //  Year Check
+        if (req.getYearOfPurchase() != null) {
             int currentYear = Year.now().getValue();
             if (req.getYearOfPurchase() > currentYear) {
                 throw new MobileValidationException("Year of purchase cannot be in the future.");
@@ -122,34 +97,45 @@ public class MobileServiceImpl implements MobileService {
             }
         }
 
-        //Brand
-        if (isCreate || req.getBrand() != null) {
-            if (req.getBrand() == null || req.getBrand().isBlank()) {
-                throw new MobileValidationException("Brand is required.");
+        //  Price Check
+        if (req.getPrice() != null) {
+            BigDecimal price = req.getPrice();
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new MobileValidationException("Price must be greater than zero.");
+            }
+            if (price.compareTo(BigDecimal.valueOf(10_000_000)) > 0) {
+                throw new MobileValidationException("Price cannot exceed 1 crore.");
+            }
+            req.setPrice(price.setScale(2, RoundingMode.HALF_UP));
+        }
+
+        // Condition Check
+        if (req.getCondition() != null) {
+            try {
+                Mobile.Condition.valueOf(req.getCondition().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new MobileValidationException("Invalid condition value. Use NEW, USED, or REFURBISHED.");
             }
         }
 
-        // Model
-        if (isCreate || req.getModel() != null) {
-            if (req.getModel() == null || req.getModel().isBlank()) {
-                throw new MobileValidationException("Model is required.");
-            }
+        // Duplicate Check
+        if (isCreate && mobileRepository.existsByTitleAndSeller_SellerId(req.getTitle(), req.getSellerId())) {
+            throw new MobileValidationException("Duplicate listing: same title already exists for this seller.");
         }
 
-        //  Color
-        if (isCreate || req.getColor() != null) {
-            if (req.getColor() == null || req.getColor().isBlank()) {
-                throw new MobileValidationException("Color is required.");
-            }
+        //  Title Check
+        if (req.getTitle() != null && req.getTitle().length() > 150) {
+            throw new MobileValidationException("Title too long. Max 150 characters allowed.");
         }
 
-        //Seller
-        if (isCreate || req.getSellerId() != null) {
-            if (req.getSellerId() == null) {
-                throw new MobileValidationException("SellerId is required.");
-            }
+        // Description Check
+        if (req.getDescription() != null) {
+            int words = req.getDescription().trim().split("\\s+").length;
+            if (words < 5) throw new MobileValidationException("Description must have at least 5 words.");
+            if (words > 70) throw new MobileValidationException("Description cannot exceed 70 words.");
         }
     }
+
 
 
 
@@ -200,6 +186,11 @@ public class MobileServiceImpl implements MobileService {
 
         Mobile m = mobileRepository.findById(id)
                 .orElseThrow(() -> new MobileNotFoundException(id));
+
+        if (m.isDeleted()) {
+            throw new MobileValidationException("Cannot update a deleted mobile.");
+        }
+
         MobileMapper.updateFromRequest(m, req);
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
@@ -341,60 +332,60 @@ public class MobileServiceImpl implements MobileService {
         return baos.size() > 0 ? baos.toByteArray() : null;
     }
 
-    // Small adapter class to wrap compressed bytes into a MultipartFile
-    private static class ByteArrayMultipartFile implements MultipartFile {
-        private final byte[] bytes;
-        private final String originalFilename;
-        private final String contentType;
-
-        public ByteArrayMultipartFile(byte[] bytes, String originalFilename, String contentType) {
-            this.bytes = bytes;
-            this.originalFilename = originalFilename;
-            this.contentType = contentType;
-        }
-
-        @Override
-        public String getName() {
-            return originalFilename;
-        }
-
-        @Override
-        public String getOriginalFilename() {
-            return originalFilename;
-        }
-
-        @Override
-        public String getContentType() {
-            return contentType;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return bytes == null || bytes.length == 0;
-        }
-
-        @Override
-        public long getSize() {
-            return bytes == null ? 0 : bytes.length;
-        }
-
-        @Override
-        public byte[] getBytes() {
-            return bytes;
-        }
-
-        @Override
-        public InputStream getInputStream() {
-            return new ByteArrayInputStream(bytes);
-        }
-
-        @Override
-        public void transferTo(File dest) throws IOException {
-            try (FileOutputStream fos = new FileOutputStream(dest)) {
-                fos.write(bytes);
-            }
-        }
-    }
+//    // Small adapter class to wrap compressed bytes into a MultipartFile
+//    private static class ByteArrayMultipartFile implements MultipartFile {
+//        private final byte[] bytes;
+//        private final String originalFilename;
+//        private final String contentType;
+//
+//        public ByteArrayMultipartFile(byte[] bytes, String originalFilename, String contentType) {
+//            this.bytes = bytes;
+//            this.originalFilename = originalFilename;
+//            this.contentType = contentType;
+//        }
+//
+//        @Override
+//        public String getName() {
+//            return originalFilename;
+//        }
+//
+//        @Override
+//        public String getOriginalFilename() {
+//            return originalFilename;
+//        }
+//
+//        @Override
+//        public String getContentType() {
+//            return contentType;
+//        }
+//
+//        @Override
+//        public boolean isEmpty() {
+//            return bytes == null || bytes.length == 0;
+//        }
+//
+//        @Override
+//        public long getSize() {
+//            return bytes == null ? 0 : bytes.length;
+//        }
+//
+//        @Override
+//        public byte[] getBytes() {
+//            return bytes;
+//        }
+//
+//        @Override
+//        public InputStream getInputStream() {
+//            return new ByteArrayInputStream(bytes);
+//        }
+//
+//        @Override
+//        public void transferTo(File dest) throws IOException {
+//            try (FileOutputStream fos = new FileOutputStream(dest)) {
+//                fos.write(bytes);
+//            }
+//        }
+//    }
 
     // ================================================= //
     // in this method the image size is not defined //
