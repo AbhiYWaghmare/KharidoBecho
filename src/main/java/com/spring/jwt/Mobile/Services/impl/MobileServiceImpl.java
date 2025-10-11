@@ -53,7 +53,7 @@ public class MobileServiceImpl implements MobileService {
 
 // This method is for Create mobile service
     private void validateCreateRequest(MobileRequestDTO req) {
-        validateCommonFields(req, true); // true = creation mode (all fields required)
+        validateCommonFields(req, true); //  all fields required
     }
 
     // This method is for Update mobile service
@@ -67,7 +67,7 @@ public class MobileServiceImpl implements MobileService {
             throw new MobileValidationException("Update request body cannot be empty.");
         }
 
-        validateCommonFields(req, false); // false = update mode (but still must remain valid)
+        validateCommonFields(req, false); //  but still must remain valid
     }
 
     //============We create this method because we have to validate this common fileds
