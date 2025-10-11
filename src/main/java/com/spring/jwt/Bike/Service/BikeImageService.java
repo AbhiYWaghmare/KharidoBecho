@@ -1,6 +1,6 @@
 package com.spring.jwt.Bike.Service;
 
-import com.spring.jwt.Bike.Entity.BikeImage;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

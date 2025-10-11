@@ -1,6 +1,12 @@
 package com.spring.jwt.Bike.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.spring.jwt.Bike.Entity.bikeStatus;
+import com.spring.jwt.entity.Seller;
+import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -61,7 +67,8 @@ public class bikeDto {
     @Size(max = 500, message = "Description must be at most 500 characters")
     private String description;
 
-    @NotNull(message = "Seller ID is required")
+
+    @Column(name = "seller_id")
     @Min(value = 1, message = "Seller ID must be positive")
     private Long sellerId;
 

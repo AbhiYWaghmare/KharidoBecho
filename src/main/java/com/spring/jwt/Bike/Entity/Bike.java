@@ -1,6 +1,8 @@
 package com.spring.jwt.Bike.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -27,12 +29,13 @@ public class Bike {
 
     @NotNull(message = "Prize must not be null")
     @Min(value = 100, message = "Prize must be at least 100")
-    @Max(value= 3000000, message = "Prize must not be greater than 30000")
+
     private Long prize;  // Price of the bike
 
     @NotBlank(message = "Brand must not be blank")
     @Size(max = 50, message = "Brand must be at most 50 characters")
-    @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Brand must contain only letters and spaces")
+    @Size(min = 3, message = "Brand has minimum 3 letter ")
+    @Pattern(regexp = "^[A-Za-z0-9\\s]+$", message = "Brand must contain only letters and spaces")
     private String brand;
 
     @NotBlank(message = "Model must not be blank")
@@ -40,6 +43,7 @@ public class Bike {
     @Pattern(regexp = "^[A-Za-z0-9\\s-]+$", message = "Model must contain only letters, numbers, spaces, or hyphens")
     private String model;
 
+   // @NotBlank(message = "Variant must not be blank")
     @Size(max = 50, message = "Variant must be at most 50 characters")
     @Pattern(regexp = "^[A-Za-z0-9\\s-]*$", message = "Variant must contain only letters, numbers, spaces, or hyphens")
     private String variant;
@@ -60,7 +64,10 @@ public class Bike {
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Fuel type must contain only letters and spaces")
     private String fuelType;
 
+
+    @NotBlank(message = "Colour must not be blank ")
     @Size(max = 20, message = "Color must be at most 20 characters")
+    @Size(min = 3, message = "Colour has minimum 3 letter ")
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Color must contain only letters and spaces")
     private String color;
 
@@ -69,13 +76,16 @@ public class Bike {
     @Pattern(regexp = "^[A-Z0-9\\s]+$", message = "registration number must contain only letters and number")
     private String registrationNumber;
 
+    @NotBlank(message ="Description Must not be Blank")
     @Size(max = 500, message = "Description must be at most 500 characters")
+    @Size(min = 10,message = "Description have at least 10 characters ")
     private String description;
 
-    @NotNull(message = "Seller ID is required")
+
     @Column(name = "seller_id")
     @Min(value = 1, message = "Seller ID must be positive")
     private Long sellerId;
+
 
     @OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
