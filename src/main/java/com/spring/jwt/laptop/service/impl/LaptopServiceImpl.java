@@ -197,6 +197,9 @@ public class LaptopServiceImpl implements LaptopService {
 
     @Override
     public Long countBySellerIdAndStatus(Long sellerId, Status status) {
+        sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new SellerNotFoundException(sellerId));
+
         return laptopRepository.countBySellerAndStatus(sellerId,status);
     }
 

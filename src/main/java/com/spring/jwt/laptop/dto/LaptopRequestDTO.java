@@ -34,7 +34,7 @@ public class LaptopRequestDTO {
     private String model;
 
     @NotBlank(message= "Brand is required")
-    @Size(max = 50, message = "Brand cannot exceed 50 characters")
+    @Size(max = 50, message = "Dealer cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
             message = "Brand must contain letters only and cannot have digits or special characters")
     private String brand;
@@ -80,7 +80,7 @@ public class LaptopRequestDTO {
     @NotBlank(message= "Storage is required")
     @Size(max = 30, message = "Storage cannot exceed 30 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
-            message = "Storage must contain at least one letter and no special characters")
+            message = "Storage must contains digits and letters only and no special characters")
     private String storage;
 
     @NotBlank(message= "Battery is required")
