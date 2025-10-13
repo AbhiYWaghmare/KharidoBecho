@@ -34,7 +34,7 @@ public class LaptopRequestDTO {
     private String model;
 
     @NotBlank(message= "Brand is required")
-    @Size(max = 50, message = "Dealer cannot exceed 50 characters")
+    @Size(max = 50, message = "Brand cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
             message = "Brand must contain letters only and cannot have digits or special characters")
     private String brand;
@@ -58,7 +58,7 @@ public class LaptopRequestDTO {
     private String processorBrand;
 
     @NotBlank(message= "Memory type is required")
-    @Size(max = 30, message = "Processor cannot exceed 30 characters")
+    @Size(max = 50, message = "Memory type cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "Memory type must contain at least one letter and no special characters")
     private String memoryType;
@@ -68,8 +68,9 @@ public class LaptopRequestDTO {
     private String screenSize;
 
     @NotBlank(message= "Colour is required")
-    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
-            message = "Colour must contain letters only and cannot have digits or special characters")
+    @Size(max = 50, message = "Colour cannot exceed 50 characters")
+    @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
+            message = "Colour must contain at least one letter and no special characters")
     private String colour;
 
     @NotBlank(message= "RAM is required")
