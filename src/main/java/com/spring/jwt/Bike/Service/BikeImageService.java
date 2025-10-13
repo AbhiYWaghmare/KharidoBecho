@@ -10,7 +10,7 @@ public interface BikeImageService {
 
 
     // Upload multiple images for a given bike
-    public List<String> uploadFiles(Long bikeId, List<MultipartFile> files,String type);
+    public List<String> uploadFiles(Long bikeId, List<MultipartFile> files);
 
 
 

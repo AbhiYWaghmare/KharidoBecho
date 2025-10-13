@@ -38,7 +38,7 @@ public class BikeImageServiceImpl implements BikeImageService {
      */
     @Override
     @Transactional
-    public List<String> uploadFiles(Long bikeId, List<MultipartFile> files,String type) {
+    public List<String> uploadFiles(Long bikeId, List<MultipartFile> files) {
         Bike bike = bikeRepository.findById(bikeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bike not found with id: " + bikeId));
        /*
@@ -90,7 +90,7 @@ public class BikeImageServiceImpl implements BikeImageService {
 
                 // Save BikeImage entity in database
                 BikeImage bikeImage = BikeImage.builder()
-                        .type(type)
+
                         .image_link(imageLink)
                         .publicId(publicId)
                         .bike(bike)
