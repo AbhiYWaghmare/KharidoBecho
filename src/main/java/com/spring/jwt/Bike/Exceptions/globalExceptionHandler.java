@@ -75,7 +75,7 @@ public class globalExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("apiPath", "uri=" + request.getRequestURI());
         errorResponse.put("errorCode", "BIKE_OPERATION_FAILED");
-        errorResponse.put("errorMessage", "Check_Your_Entered_Data");
+        errorResponse.put("errorMessage", "Check Registration number or Other Data you Entered");
         errorResponse.put("errorTime", LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);

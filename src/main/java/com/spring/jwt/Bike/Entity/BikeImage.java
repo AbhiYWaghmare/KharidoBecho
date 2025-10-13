@@ -24,8 +24,6 @@
             @Column(name = "imageLink",nullable = false)
             private String image_link;
 
-            @Column(name = "image_type",nullable = false)
-            private String type;
 
             @Column(name = "public_id",nullable = false)
             private String publicId;
