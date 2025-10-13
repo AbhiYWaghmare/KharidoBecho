@@ -11,6 +11,7 @@ import com.spring.jwt.Mobile.entity.MobileImage;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
+import com.spring.jwt.exception.mobile.MobileValidationException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.utils.CloudinaryService;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import com.spring.jwt.utils.ByteArrayMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.IIOImage;
@@ -31,7 +33,10 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
+import java.time.Year;
 import java.util.*;
 import java.util.List;
 
@@ -45,9 +50,101 @@ public class MobileServiceImpl implements MobileService {
     private final CloudinaryService cloudinaryService;
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
+
+// This method is for Create mobile service
+    private void validateCreateRequest(MobileRequestDTO req) {
+        validateCommonFields(req, true); //  all fields required
+    }
+
+    // This method is for Update mobile service
+    private void validateUpdateRequest(MobileRequestDTO req) {
+
+        if (req.getTitle() == null && req.getDescription() == null &&
+                req.getPrice() == null && req.getNegotiable() == null &&
+                req.getCondition() == null && req.getBrand() == null &&
+                req.getModel() == null && req.getColor() == null &&
+                req.getYearOfPurchase() == null && req.getSellerId() == null) {
+            throw new MobileValidationException("Update request body cannot be empty.");
+        }
+
+        validateCommonFields(req, false); //  but still must remain valid
+    }
+
+    //============We create this method because we have to validate this common fileds
+    // in both cenarios for Adding Also & for Updating Also so we create common method and implement
+    // this in there separte method that we passing in createmobile and updatemobile time method ==========//
+
+    private void validateCommonFields(MobileRequestDTO req, boolean isCreate) {
+
+        //  Seller Check
+        if (isCreate || req.getSellerId() != null) {
+            Seller seller = sellerRepository.findById(req.getSellerId())
+                    .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
+
+            if (Boolean.TRUE.equals(seller.isDeleted())) {
+                throw new MobileValidationException("Seller is deleted or inactive.");
+            }
+        }
+
+        //  Year Check
+        if (req.getYearOfPurchase() != null) {
+            int currentYear = Year.now().getValue();
+            if (req.getYearOfPurchase() > currentYear) {
+                throw new MobileValidationException("Year of purchase cannot be in the future.");
+            }
+            if (req.getYearOfPurchase() < 2000) {
+                throw new MobileValidationException("Year of purchase must be after 2000.");
+            }
+        }
+
+        //  Price Check
+        if (req.getPrice() != null) {
+            BigDecimal price = req.getPrice();
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new MobileValidationException("Price must be greater than zero.");
+            }
+            if (price.compareTo(BigDecimal.valueOf(10_000_000)) > 0) {
+                throw new MobileValidationException("Price cannot exceed 1 crore.");
+            }
+            req.setPrice(price.setScale(2, RoundingMode.HALF_UP));
+        }
+
+        // Condition Check
+        if (req.getCondition() != null) {
+            try {
+                Mobile.Condition.valueOf(req.getCondition().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new MobileValidationException("Invalid condition value. Use NEW, USED, or REFURBISHED.");
+            }
+        }
+
+        // Duplicate Check
+        if (isCreate && mobileRepository.existsByTitleAndSeller_SellerId(req.getTitle(), req.getSellerId())) {
+            throw new MobileValidationException("Duplicate listing: same title already exists for this seller.");
+        }
+
+        //  Title Check
+        if (req.getTitle() != null && req.getTitle().length() > 150) {
+            throw new MobileValidationException("Title too long. Max 150 characters allowed.");
+        }
+
+        // Description Check
+        if (req.getDescription() != null) {
+            int words = req.getDescription().trim().split("\\s+").length;
+            if (words < 5) throw new MobileValidationException("Description must have at least 5 words.");
+            if (words > 70) throw new MobileValidationException("Description cannot exceed 70 words.");
+        }
+    }
+
+
+
+
     @Override
     @Transactional
     public MobileResponseDTO createMobile(MobileRequestDTO req) {
+
+        validateCreateRequest(req);
+
         Seller seller = sellerRepository.findById(req.getSellerId())
                 .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
 
@@ -59,6 +156,9 @@ public class MobileServiceImpl implements MobileService {
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
     }
+
+
+
 
     @Override
     public Page<MobileResponseDTO> listMobiles(int page, int size, Long sellerId) {
@@ -75,11 +175,22 @@ public class MobileServiceImpl implements MobileService {
         return MobileMapper.toDTO(m);
     }
 
+
+
+
     @Override
     @Transactional
     public MobileResponseDTO updateMobile(Long id, MobileRequestDTO req) {
+
+        validateUpdateRequest(req);
+
         Mobile m = mobileRepository.findById(id)
                 .orElseThrow(() -> new MobileNotFoundException(id));
+
+        if (m.isDeleted()) {
+            throw new MobileValidationException("Cannot update a deleted mobile.");
+        }
+
         MobileMapper.updateFromRequest(m, req);
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
@@ -221,60 +332,60 @@ public class MobileServiceImpl implements MobileService {
         return baos.size() > 0 ? baos.toByteArray() : null;
     }
 
-    // Small adapter class to wrap compressed bytes into a MultipartFile
-    private static class ByteArrayMultipartFile implements MultipartFile {
-        private final byte[] bytes;
-        private final String originalFilename;
-        private final String contentType;
-
-        public ByteArrayMultipartFile(byte[] bytes, String originalFilename, String contentType) {
-            this.bytes = bytes;
-            this.originalFilename = originalFilename;
-            this.contentType = contentType;
-        }
-
-        @Override
-        public String getName() {
-            return originalFilename;
-        }
-
-        @Override
-        public String getOriginalFilename() {
-            return originalFilename;
-        }
-
-        @Override
-        public String getContentType() {
-            return contentType;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return bytes == null || bytes.length == 0;
-        }
-
-        @Override
-        public long getSize() {
-            return bytes == null ? 0 : bytes.length;
-        }
-
-        @Override
-        public byte[] getBytes() {
-            return bytes;
-        }
-
-        @Override
-        public InputStream getInputStream() {
-            return new ByteArrayInputStream(bytes);
-        }
-
-        @Override
-        public void transferTo(File dest) throws IOException {
-            try (FileOutputStream fos = new FileOutputStream(dest)) {
-                fos.write(bytes);
-            }
-        }
-    }
+//    // Small adapter class to wrap compressed bytes into a MultipartFile
+//    private static class ByteArrayMultipartFile implements MultipartFile {
+//        private final byte[] bytes;
+//        private final String originalFilename;
+//        private final String contentType;
+//
+//        public ByteArrayMultipartFile(byte[] bytes, String originalFilename, String contentType) {
+//            this.bytes = bytes;
+//            this.originalFilename = originalFilename;
+//            this.contentType = contentType;
+//        }
+//
+//        @Override
+//        public String getName() {
+//            return originalFilename;
+//        }
+//
+//        @Override
+//        public String getOriginalFilename() {
+//            return originalFilename;
+//        }
+//
+//        @Override
+//        public String getContentType() {
+//            return contentType;
+//        }
+//
+//        @Override
+//        public boolean isEmpty() {
+//            return bytes == null || bytes.length == 0;
+//        }
+//
+//        @Override
+//        public long getSize() {
+//            return bytes == null ? 0 : bytes.length;
+//        }
+//
+//        @Override
+//        public byte[] getBytes() {
+//            return bytes;
+//        }
+//
+//        @Override
+//        public InputStream getInputStream() {
+//            return new ByteArrayInputStream(bytes);
+//        }
+//
+//        @Override
+//        public void transferTo(File dest) throws IOException {
+//            try (FileOutputStream fos = new FileOutputStream(dest)) {
+//                fos.write(bytes);
+//            }
+//        }
+//    }
 
     // ================================================= //
     // in this method the image size is not defined //
