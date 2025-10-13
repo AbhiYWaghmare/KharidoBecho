@@ -29,7 +29,6 @@ public class Bike {
 
     @NotNull(message = "Prize must not be null")
     @Min(value = 100, message = "Prize must be at least 100")
-
     private Long prize;  // Price of the bike
 
     @NotBlank(message = "Brand must not be blank")
@@ -82,9 +81,11 @@ public class Bike {
     private String description;
 
 
-    @Column(name = "seller_id")
-    @Min(value = 1, message = "Seller ID must be positive")
-    private Long sellerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", nullable = false)
+    @JsonIgnore
+    private Seller seller;
+
 
 
     @OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true)
