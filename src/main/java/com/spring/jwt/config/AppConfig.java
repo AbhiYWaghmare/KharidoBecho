@@ -162,13 +162,13 @@ public class AppConfig {
                 .requestMatchers("/api/v1/users/password/**").permitAll()
                 .requestMatchers("/api/v1/exam/**").permitAll()
                 .requestMatchers("/api/v1/**").permitAll()
-<<<<<<< HEAD
+
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
-=======
+
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/photo/**").permitAll()
->>>>>>> 3a30b8e47288d8d3c3364afe35075d4e8d22d761
+
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -210,14 +210,13 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
-<<<<<<< HEAD
+
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"), // <-- ADD THIS
-=======
+
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
 
 
->>>>>>> 3a30b8e47288d8d3c3364afe35075d4e8d22d761
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-resources/**"),

@@ -24,6 +24,7 @@ public class bikeDto {
     @NotNull(message = "Prize must not be null")
     @Min(value = 100, message = "Prize must be at least 100")
     @Max(value = 3000000, message = "Prize must not be greater than 3000000")
+
     private Long prize;
 
     @NotBlank(message = "Brand must not be blank")
