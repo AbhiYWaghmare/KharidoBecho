@@ -1,12 +1,11 @@
 package com.spring.jwt.Bike.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.Bike.Entity.FuelType;
 import com.spring.jwt.Bike.Entity.bikeStatus;
 import com.spring.jwt.entity.Seller;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,13 +16,14 @@ import lombok.Builder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class bikeDto {
 
     private Long bike_id;
 
     @NotNull(message = "Prize must not be null")
     @Min(value = 100, message = "Prize must be at least 100")
-    @Max(value = 3000000, message = "Prize must not be greater than 3000000")
+
 
     private Long prize;
 
@@ -42,20 +42,20 @@ public class bikeDto {
     private String variant;
 
     @NotNull(message = "Manufacture year is required")
+    @Digits(integer = 4, fraction = 0, message = "Manufacture year must be a whole number (no decimals)")
     @Min(value = 1900, message = "Manufacture year must be after 1900")
-    @Max(value = 2100, message = "Manufacture year must be before 2100")
     private Integer manufactureYear;
 
     @Min(value = 50, message = "Engine CC must be at least 50")
     @Max(value = 3000, message = "Engine CC must be at most 3000")
     private Integer engineCC;
 
-    @Min(value = 0, message = "Kilometers driven must be >= 0")
+    @Min(value = 0, message = "Kilometers driven must be greater than zero ")
     private Integer kilometersDriven;
 
-    @NotBlank(message = "Fuel type must not be blank")
-    @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Fuel type must contain only letters and spaces")
-    private String fuelType;
+    @NotNull(message = "Fuel type must not be blank")
+
+    private FuelType fuelType;
 
     @Size(max = 20, message = "Color must be at most 20 characters")
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Color must contain only letters and spaces")

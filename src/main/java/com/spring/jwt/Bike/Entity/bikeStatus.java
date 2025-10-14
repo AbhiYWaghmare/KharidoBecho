@@ -4,5 +4,6 @@ public enum bikeStatus {
     NEW,
     AVAILABLE,
     INACTIVE,
-    DELETED
+    DELETED,
+    ACTIVE
 }
