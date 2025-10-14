@@ -1,6 +1,7 @@
 package com.spring.jwt.Bike.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
@@ -20,6 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = false)
 public class Bike {
 
     @Id
@@ -42,26 +44,27 @@ public class Bike {
     @Pattern(regexp = "^[A-Za-z0-9\\s-]+$", message = "Model must contain only letters, numbers, spaces, or hyphens")
     private String model;
 
-   // @NotBlank(message = "Variant must not be blank")
+    @NotBlank(message = "Varient must not be blank")
     @Size(max = 50, message = "Variant must be at most 50 characters")
     @Pattern(regexp = "^[A-Za-z0-9\\s-]*$", message = "Variant must contain only letters, numbers, spaces, or hyphens")
     private String variant;
 
     @NotNull(message = "Manufacture year is required")
+    @Digits(integer = 4, fraction = 0, message = "Manufacture year must be a whole number (no decimals)")
     @Min(value = 1900, message = "Manufacture year must be after 1900")
-    @Max(value = 2100, message = "Manufacture year must be before 2100")
     private Integer manufactureYear;
 
     @Min(value = 50, message = "Engine CC must be at least 50")
     @Max(value = 3000, message = "Engine CC must be at most 3000")
     private Integer engineCC;
 
-    @Min(value = 0, message = "Kilometers driven must be >= 0")
+    @Min(value = 0, message = "Kilometers driven must be greater than zero")
     private Integer kilometersDriven;
 
-    @NotBlank(message = "Fuel type must not be blank")
-    @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Fuel type must contain only letters and spaces")
-    private String fuelType;
+    @NotNull(message = "Fuel type must not be blank")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "fuel_type")
+    private FuelType fuelType;
 
 
     @NotBlank(message = "Colour must not be blank ")

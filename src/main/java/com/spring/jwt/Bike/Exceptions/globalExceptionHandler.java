@@ -1,4 +1,5 @@
 package com.spring.jwt.Bike.Exceptions;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,7 @@ public class globalExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("apiPath", "uri=" + request.getRequestURI());
         errorResponse.put("errorCode", "BIKE_OPERATION_FAILED");
-        errorResponse.put("errorMessage", "Check Registration number or Other Data you Entered");
+        errorResponse.put("errorMessage", ex.getMessage());
         errorResponse.put("errorTime", LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -103,7 +104,7 @@ public class globalExceptionHandler {
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("apiPath", request.getRequestURI());
         errorResponse.put("errorCode", "INVALID_BIKE_DATA");
-        errorResponse.put("errorMessage", "Check your Entered Data");
+        errorResponse.put("errorMessage", ex.getLocalizedMessage());
         errorResponse.put("errorTime", java.time.LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -140,6 +141,16 @@ public class globalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
+
+
+    @ExceptionHandler(UnrecognizedPropertyException.class)
+    public ResponseEntity<Map<String, Object>> handleUnknownField(UnrecognizedPropertyException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("errorTime", LocalDateTime.now());
+        error.put("errorMessage", "Unknown field: " + ex.getPropertyName());
+        error.put("errorCode", "VALIDATION_FAILED");
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 
 
 
