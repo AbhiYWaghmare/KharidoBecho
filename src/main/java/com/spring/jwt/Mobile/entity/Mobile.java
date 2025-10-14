@@ -28,6 +28,7 @@ public class Mobile {
     @Column(nullable = false)
     private String title;
 
+    @Column(length = 65535, columnDefinition = "TEXT")
     @Lob
     private String description;
 

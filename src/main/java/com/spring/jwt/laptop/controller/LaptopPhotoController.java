@@ -1,8 +1,11 @@
 package com.spring.jwt.laptop.controller;
 
 import com.cloudinary.Cloudinary;
+import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
+import com.spring.jwt.utils.BaseResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -32,37 +37,51 @@ public class LaptopPhotoController {
 
     private final Cloudinary cloudinary;
 
+    private static final long MAX_FILE_SIZE = 400 * 1024;
+
 
     //====================================================//
     //  Upload image of Laptop                            //
     //  Post /api/photo/upload                            //
     //====================================================//
+
+    //To upload images of particular laptop by ID
     @PostMapping("/upload")
-    public ResponseEntity<List<LaptopPhotos>> uploadPhotos(
-            @RequestParam("files") MultipartFile[] files,
-            @RequestParam("laptopId") Long laptopId,
-            @RequestParam("type") String type) throws IOException {
+    public ResponseEntity<LaptopResponseDTO> uploadImages(@RequestParam Long laptopId, @RequestParam("files") List<MultipartFile> files, HttpServletRequest httpServletRequest) {
+        List<String> photos = laptopPhotoService.uploadPhoto(laptopId, files);
+        String imageUrl = String.join(", ", photos);
 
-        if (files == null || files.length == 0) {
-            return ResponseEntity.badRequest().build();
-        }
+        LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO(
+                "success",
+                "Laptop photos uploaded successfully for laptop id " + laptopId,
+                "CREATED",
+                HttpStatus.OK.value(),
+                LocalDateTime.now(),
+                "NULL",
+                httpServletRequest.getRequestURI(),
+                imageUrl
+        );
 
-        List<LaptopPhotos> photos = laptopPhotoService.uploadFile(files, laptopId, type);
-        return ResponseEntity.ok(photos);
+        return ResponseEntity.ok(laptopResponseDTO);
     }
+
 
     //====================================================//
     //  Delete photo of Laptop by id                      //
     //  Delete /api/photo/delete                          //
     //====================================================//
+
+    //To delete images By Image ID
     @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, String>> deleteFile(
-            @RequestParam int laptopId,
-            @RequestParam int photoId) {
+    public ResponseEntity<BaseResponseDTO> deleteImage(@RequestParam Long photoId) {
+        laptopPhotoService.deleteImage(photoId);
 
-        Map response = laptopPhotoService.deleteFile(laptopId, photoId);
+        BaseResponseDTO response = BaseResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.OK.value()))
+                .message("Image deleted successfully")
+                .build();
+
         return ResponseEntity.ok(response);
-
     }
 
 }

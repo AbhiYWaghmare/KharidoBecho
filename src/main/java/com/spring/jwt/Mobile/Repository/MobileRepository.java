@@ -9,4 +9,7 @@ public interface MobileRepository extends JpaRepository<Mobile, Long> {
     Page<Mobile> findByDeletedFalse(Pageable pageable);
     Page<Mobile> findBySeller_SellerIdAndDeletedFalse(Long sellerId, Pageable pageable);
     java.util.Optional<Mobile> findByMobileIdAndDeletedFalse(Long id);
+    boolean existsByTitleAndSeller_SellerId(String title, Long sellerId);
+
+
 }
