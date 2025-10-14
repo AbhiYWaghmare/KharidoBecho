@@ -60,7 +60,8 @@ public class LaptopPhotoController {
                 LocalDateTime.now(),
                 "NULL",
                 httpServletRequest.getRequestURI(),
-                imageUrl
+                imageUrl,
+                laptopId
         );
 
         return ResponseEntity.ok(laptopResponseDTO);

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -124,6 +126,8 @@ public class LaptopRequestDTO {
     private Integer usbPorts;
 
     private Status status;
+
+    private LocalDate bookingDate;
 
     @NotNull(message= "Seller id is required")
     private Long sellerId;
