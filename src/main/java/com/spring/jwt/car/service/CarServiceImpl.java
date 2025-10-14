@@ -249,7 +249,7 @@ public class CarServiceImpl implements CarService {
     // Mapping Car -> CarDto
     private CarDto toDto(Car car) {
         CarDto dto = new CarDto();
-        dto.setCarId(car.getCarId());
+//        dto.setCarId(car.getCarId());
         dto.setCarName(car.getTitle());
         dto.setBrand(car.getBrand());
         dto.setModel(car.getModel());
@@ -262,7 +262,7 @@ public class CarServiceImpl implements CarService {
         dto.setYear(car.getYear());
         dto.setDate(car.getDate());
         dto.setDescription(car.getDescription());
-        dto.setBuyerId(car.getOwnerSerial());
+//        dto.setBuyerId(car.getOwnerSerial());
         dto.setCarType(car.getCarType());
         dto.setCarStatus(car.getCarStatus());
         dto.setRegistration(car.getRegistration());
@@ -303,7 +303,7 @@ public class CarServiceImpl implements CarService {
         car.setYear(dto.getYear() != null ? dto.getYear() : 0);
         car.setDate(dto.getDate() != null ? dto.getDate() : LocalDate.now());
         car.setDescription(dto.getDescription());
-        car.setOwnerSerial(dto.getBuyerId() != null ? dto.getBuyerId() : 0);
+//        car.setOwnerSerial(dto.getBuyerId() != null ? dto.getBuyerId() : 0);
         car.setCarType(dto.getCarType());
         car.setCarStatus(dto.getCarStatus() != null ? dto.getCarStatus() : Status.ACTIVE);
         car.setRegistration(dto.getRegistration());
@@ -371,7 +371,7 @@ public class CarServiceImpl implements CarService {
         if (partialDto.getYear() != null) car.setYear(partialDto.getYear());
         if (partialDto.getDate() != null) car.setDate(partialDto.getDate());
         if (partialDto.getDescription() != null) car.setDescription(partialDto.getDescription());
-        if (partialDto.getBuyerId() != null) car.setOwnerSerial(partialDto.getBuyerId());
+//        if (partialDto.getBuyerId() != null) car.setOwnerSerial(partialDto.getBuyerId());
         if (partialDto.getCarType() != null) car.setCarType(partialDto.getCarType());
 
         return toDto(carRepository.save(car));
@@ -419,6 +419,11 @@ public class CarServiceImpl implements CarService {
     @Override
     public long countCarsBySellerAndStatus(Long sellerId, Status status) {
         return carRepository.countBySellerIdAndCarStatus(sellerId, status);
+    }
+
+    @Override
+    public boolean findByRegistration(String registration) {
+        return false;
     }
 }
 

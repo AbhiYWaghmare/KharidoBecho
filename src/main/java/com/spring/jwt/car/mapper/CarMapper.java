@@ -23,7 +23,7 @@ public class CarMapper {
             @Override
             protected void configure() {
                 map().setCarName(source.getTitle());
-                map().setCarId(source.getCarId()); // ✅ Long → Long
+//                map().setCarId(source.getCarId()); // ✅ Long → Long
 //                map().setCarId(source.getCarId());
                 // sellerId handled in service if needed
             }
@@ -34,7 +34,7 @@ public class CarMapper {
             @Override
             protected void configure() {
                 map().setTitle(source.getCarName());
-                map().setCarId(source.getCarId()); // ✅ Long → Long
+//                map().setCarId(source.getCarId()); // ✅ Long → Long
                 // sellerId handled manually
             }
         });

@@ -12,4 +12,6 @@ public interface CarService {
     Page<CarDto> getCarsBySellerAndStatus(Long sellerId, Status status, int page, int size);
     Page<CarDto> getCarsByStatus(Status status, int page, int size);
     long countCarsBySellerAndStatus(Long sellerId, Status status);
+
+    boolean findByRegistration(String registration);
 }
