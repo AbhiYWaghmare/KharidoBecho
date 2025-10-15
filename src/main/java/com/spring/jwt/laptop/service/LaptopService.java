@@ -25,7 +25,7 @@ public interface LaptopService {
     //Method to get all laptops
     List<Laptop> getAllLaptops();
 
-    Page<Laptop> getByDealerIdAndStatus(Long sellerId, Status status, int page, int size, String sortBy);
+    Page<Laptop> getBySellerIdAndStatus(Long sellerId, Status status, int page, int size, String sortBy);
 
     Page<Laptop> getByStatus(Status status, int page, int size, String sortBy);
 

@@ -2,6 +2,9 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.laptop.*;
+import com.spring.jwt.laptop.dto.LaptopRequestDTO;
+
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.exception.laptop.*;
@@ -363,6 +366,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
 
+    @ExceptionHandler(LaptopNotFoundException.class)
     public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
         LaptopResponseDTO error = new LaptopResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
@@ -375,6 +379,49 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+
+    @ExceptionHandler(LaptopImageException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopImageException(
+            LaptopImageException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Laptop Image Upload Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public ResponseEntity<LaptopResponseDTO> handleValidationException(ValidationException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(BlankFieldsException.class)
+    public ResponseEntity<LaptopResponseDTO> handleBlankFieldsException(BlankFieldsException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
 
     //Mobile Exception Handler
     @ExceptionHandler(MobileNotFoundException.class)

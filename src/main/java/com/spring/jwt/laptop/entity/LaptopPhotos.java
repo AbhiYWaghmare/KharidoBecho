@@ -1,6 +1,5 @@
 package com.spring.jwt.laptop.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "laptop_Photo")
+@Table(name = "laptop_photo")
 @Builder
 public class LaptopPhotos {
 
