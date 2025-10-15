@@ -18,5 +18,6 @@ public class LaptopResponseDTO {
     private String exception;
     private String apiPath;
     private String imageUrl;
+    private Long laptopId;
 
 }

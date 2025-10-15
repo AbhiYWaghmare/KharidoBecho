@@ -219,7 +219,7 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
     @Transactional
     public void deleteImage(Long imageId) {
         LaptopPhotos laptopPhotos = laptopPhotoRepository.findById(imageId)
-                .orElseThrow(() -> new LaptopImageException("Laptop image not found with ID: " + imageId));
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop image not found with ID: " + imageId));
 
         try {
             //  first image will delete from cloudnairy then DB
@@ -248,7 +248,7 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
             image.setPhoto_link(imageUrl);
             return laptopPhotoRepository.save(image);
         } catch (IOException e) {
-            throw new LaptopImageException("Failed to upload image: " + file.getOriginalFilename(),e);
+            throw new LaptopImageException("Failed to upload image: " + file.getOriginalFilename(), e);
         }
     }
 }
