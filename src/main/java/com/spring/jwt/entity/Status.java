@@ -1,5 +1,8 @@
 package com.spring.jwt.entity;
 
+import lombok.Getter;
+
+@Getter
 public enum Status {
     PENDING("Pending"),
     ACTIVE("ACTIVE"),
@@ -15,10 +18,6 @@ public enum Status {
 
     Status(String status) {
         this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
     }
 
     public static Status fromString(String status) {
