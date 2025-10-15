@@ -389,7 +389,7 @@ public class CarServiceImpl implements CarService {
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new CarNotFoundException("Car not found for id: " + carId));
 
-        if ("soft".equalsIgnoreCase(type)) git{
+        if ("soft".equalsIgnoreCase(type)){
             car.setCarStatus(Status.DELETED);
             carRepository.save(car);
             return toDto(car);
