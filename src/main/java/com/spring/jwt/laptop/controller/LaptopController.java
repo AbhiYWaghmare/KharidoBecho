@@ -4,10 +4,12 @@ import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Laptop;
+import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.model.Status;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import java.util.Map;
 public class LaptopController {
     private final LaptopRepository laptopRepository;
     private final LaptopService laptopService;
+//    private final LaptopPhotos laptopPhotos;
     LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO();
 
 
@@ -45,7 +48,7 @@ public class LaptopController {
     //  Post /api/laptops/create                          //
     //====================================================//
     @PostMapping("/create")
-    public ResponseEntity<LaptopResponseDTO> create(@Valid @RequestBody LaptopRequestDTO laptopRequestDTO){
+    public ResponseEntity<LaptopResponseDTO> create(@Valid @RequestBody LaptopRequestDTO laptopRequestDTO, HttpServletRequest request){
         if (laptopRepository.existsBySerialNumber(laptopRequestDTO.getSerialNumber())) {
             throw new LaptopAlreadyExistsException(
                     "Laptop with serial number " + laptopRequestDTO.getSerialNumber() + " already exists"
@@ -53,9 +56,12 @@ public class LaptopController {
         }
 
         Laptop laptop = laptopService.create(laptopRequestDTO);
+        String apiPath = request.getRequestURI();
+//        String imageUrl = laptopPhotos.getPhoto_link();
+        Long laptopId = laptop.getId();
 
        return ResponseEntity.status(HttpStatus.CREATED)
-               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", laptopResponseDTO.getApiPath(), laptopResponseDTO.getImageUrl()));
+               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", apiPath,laptopResponseDTO.getImageUrl(),laptopId));
     }  
 
     //====================================================//
@@ -65,10 +71,15 @@ public class LaptopController {
     @PatchMapping("/update")
     public ResponseEntity<LaptopResponseDTO> update(
             @RequestParam Long laptopId,
-            @RequestBody LaptopRequestDTO requestDTO) {
+            @RequestBody LaptopRequestDTO requestDTO,
+            HttpServletRequest request) {
+
 
             Laptop laptop = laptopService.update(laptopId, requestDTO);
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", laptopResponseDTO.getApiPath(), laptopResponseDTO.getImageUrl()));
+            String apiPath = request.getRequestURI();
+//            String imageUrl = laptopPhotos.getPhoto_link();
+            Long laptop_Id = laptop.getId();
+            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", apiPath, laptopResponseDTO.getImageUrl(),laptop_Id));
     }
 
     //====================================================//
@@ -115,9 +126,9 @@ public class LaptopController {
             @RequestParam Status status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "laptopId") String sortBy){
+            @RequestParam(defaultValue = "id") String sortBy){
 
-        Page<Laptop> laptops = laptopService.getByDealerIdAndStatus(sellerId,status,page,size,sortBy);
+        Page<Laptop> laptops = laptopService.getBySellerIdAndStatus(sellerId,status,page,size,sortBy);
         return ResponseEntity.ok((laptops));
     }
 
