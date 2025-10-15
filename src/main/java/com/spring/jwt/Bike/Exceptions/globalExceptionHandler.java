@@ -181,7 +181,7 @@ public class globalExceptionHandler {
 ////        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 ////    }
 
-////JSON  Exception added for fuel type And status
+//JSON  Exception added for fuel type And status
 
 @ExceptionHandler(HttpMessageNotReadableException.class)
 public ResponseEntity<Map<String, Object>> handleJsonParseError(
