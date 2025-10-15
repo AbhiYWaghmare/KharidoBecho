@@ -1,5 +1,6 @@
 package com.spring.jwt.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.spring.jwt.config.filter.*;
 import com.spring.jwt.jwt.JwtConfig;
 import com.spring.jwt.jwt.JwtService;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -280,6 +282,13 @@ public class AppConfig {
                 .passwordEncoder(passwordEncoder());
         return builder.build();
     }
+
+//    Used For to not accept float value in year so user can enter only INTEGER value
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
+        return builder -> builder.featuresToDisable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+    }
+
 
 
 }
