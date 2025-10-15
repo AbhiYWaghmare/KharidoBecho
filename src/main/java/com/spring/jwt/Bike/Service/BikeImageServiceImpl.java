@@ -3,11 +3,12 @@ package com.spring.jwt.Bike.Service;
 import com.cloudinary.Cloudinary;
 import com.spring.jwt.Bike.Entity.Bike;
 import com.spring.jwt.Bike.Entity.BikeImage;
+
 import com.spring.jwt.Bike.Exceptions.BikeImageNotFound;
 import com.spring.jwt.Bike.Exceptions.bikeNotFoundException;
 import com.spring.jwt.Bike.Repository.BikeImageRepository;
 import com.spring.jwt.Bike.Repository.bikeRepository;
-import com.spring.jwt.exception.ResourceNotFoundException;
+
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class BikeImageServiceImpl implements BikeImageService {
     @Transactional
     public List<String> uploadFiles(Long bikeId, List<MultipartFile> files) {
         Bike bike = bikeRepository.findById(bikeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Bike not found with id: " + bikeId));
+                .orElseThrow(() -> new bikeNotFoundException("Bike not found with id: " + bikeId));
        /*
        * create a list for result */
         List<String> urls = new ArrayList<>();

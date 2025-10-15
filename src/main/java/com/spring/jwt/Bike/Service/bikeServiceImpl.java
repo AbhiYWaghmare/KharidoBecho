@@ -3,22 +3,19 @@ package com.spring.jwt.Bike.Service;
 import com.spring.jwt.Bike.Entity.Bike;
 import com.spring.jwt.Bike.Entity.FuelType;
 import com.spring.jwt.Bike.Entity.bikeStatus;
-import com.spring.jwt.Bike.Exceptions.*;
 import com.spring.jwt.Bike.Repository.bikeRepository;
 import com.spring.jwt.Bike.dto.bikeDto;
 import com.spring.jwt.entity.Seller;
+import com.spring.jwt.Bike.Exceptions.InvalidBikeData;
+import com.spring.jwt.Bike.Exceptions.SellerNotFound;
+import com.spring.jwt.Bike.Exceptions.StatusNotFoundException;
+import com.spring.jwt.Bike.Exceptions.bikeNotFoundException;
 import com.spring.jwt.repository.SellerRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Valid;
-import org.apache.coyote.BadRequestException;
-import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 
@@ -71,11 +68,20 @@ public class bikeServiceImpl implements bikeService {
         if (bikedto.getStatus() != bikeStatus.ACTIVE) {
             throw new StatusNotFoundException("Only ACTIVE status is allowed while Posting  a bike");
         }
+        // Accept year till current year
 
-        int currentYear = java.time.Year.now().getValue();
-        if (bikedto.getManufactureYear() > currentYear) {
-            throw new InvalidBikeData("Manufacture year cannot be in the future (" + currentYear + ")");
+        if (bikedto.getManufactureYear() != null) {
+            int currentYear = java.time.Year.now().getValue();
+
+            if (bikedto.getManufactureYear() > currentYear) {
+                throw new InvalidBikeData("Manufacture year cannot be in the future (" + currentYear + ")");
+            }
+
+            if (bikedto.getManufactureYear() < 2000) {
+                throw new InvalidBikeData("Manufacture year must be after 2000.");
+            }
         }
+
 
 
         // Save valid bike
