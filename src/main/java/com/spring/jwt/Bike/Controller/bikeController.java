@@ -45,12 +45,16 @@ public class bikeController {
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike updated successfully"));
     }
 
-    /** SOFT DELETE Bike */
-    @PatchMapping(value = "/patch/{id}/soft-delete", produces = "application/json")
+
+    /*
+    soft delete bike
+     */
+    @DeleteMapping(value = "/delete/{id}/soft", produces = "application/json")
     public ResponseEntity<ApiResponse> softDeleteBike(@PathVariable Long id) {
         bikeService.softDeletebike(id);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike soft deleted successfully"));
     }
+
 
     /** HARD DELETE Bike */
     @DeleteMapping("/delete/{id}")

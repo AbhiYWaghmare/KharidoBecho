@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -228,7 +229,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
-    public Map<String, String> handleConstraintViolation(ConstraintViolationException ex) {
+    public Map<String, String> handleConstraintViolationE(ConstraintViolationException ex) {
         log.error("Constraint violation: {}", ex.getMessage());
         return ex.getConstraintViolations().stream()
                 .collect(Collectors.toMap(
@@ -420,7 +421,9 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-
+//==================bike exception ========================
 
 
 }
+
+
