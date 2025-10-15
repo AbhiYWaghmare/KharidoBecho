@@ -185,11 +185,11 @@ public class AppConfig {
 
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/photo/**").permitAll()
-<<<<<<< HEAD
-                .requestMatchers("/api/car/photo/**").permitAll()
-=======
 
->>>>>>> 53090b6dccdb585d3f62faf511435ba2716439ae
+                .requestMatchers("/api/car/photo/**").permitAll()
+
+
+
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
