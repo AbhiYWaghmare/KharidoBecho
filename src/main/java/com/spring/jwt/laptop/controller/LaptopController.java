@@ -3,6 +3,7 @@ package com.spring.jwt.laptop.controller;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
+import com.spring.jwt.laptop.entity.Booking;
 import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.model.Status;
@@ -38,7 +39,7 @@ import java.util.Map;
 public class LaptopController {
     private final LaptopRepository laptopRepository;
     private final LaptopService laptopService;
-//    private final LaptopPhotos laptopPhotos;
+    Booking booking;
     LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO();
 
 
@@ -59,9 +60,10 @@ public class LaptopController {
         String apiPath = request.getRequestURI();
 //        String imageUrl = laptopPhotos.getPhoto_link();
         Long laptopId = laptop.getId();
+        Long bookingId = booking.getId();
 
        return ResponseEntity.status(HttpStatus.CREATED)
-               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", apiPath,laptopResponseDTO.getImageUrl(),laptopId));
+               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", apiPath,laptopResponseDTO.getImageUrl(),laptopId,bookingId));
     }  
 
     //====================================================//
@@ -79,7 +81,8 @@ public class LaptopController {
             String apiPath = request.getRequestURI();
 //            String imageUrl = laptopPhotos.getPhoto_link();
             Long laptop_Id = laptop.getId();
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", apiPath, laptopResponseDTO.getImageUrl(),laptop_Id));
+            Long bookingId = booking.getId();
+            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", apiPath, laptopResponseDTO.getImageUrl(),laptop_Id,bookingId));
     }
 
     //====================================================//

@@ -2,11 +2,13 @@ package com.spring.jwt.laptop.controller;
 
 import com.cloudinary.Cloudinary;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
+import com.spring.jwt.laptop.entity.Booking;
 import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ import java.util.Map;
 //*******************************************************//
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/photo")
 public class LaptopPhotoController {
 
@@ -37,6 +39,7 @@ public class LaptopPhotoController {
 
     private final Cloudinary cloudinary;
 
+    Booking booking;
     private static final long MAX_FILE_SIZE = 400 * 1024;
 
 
@@ -61,7 +64,9 @@ public class LaptopPhotoController {
                 "NULL",
                 httpServletRequest.getRequestURI(),
                 imageUrl,
-                laptopId
+                laptopId,
+                booking.getId()
+
         );
 
         return ResponseEntity.ok(laptopResponseDTO);

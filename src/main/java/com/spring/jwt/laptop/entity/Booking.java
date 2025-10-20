@@ -23,11 +23,11 @@ public class Booking {
     @Column(name = "bookingId")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name= "buyer_id",nullable = false)
-    private Buyer buyer;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name= "buyer_id",nullable = false)
+//    private Buyer buyer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "laptop_id",nullable = false)
     private Laptop laptop;
 
