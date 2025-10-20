@@ -5,20 +5,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LaptopResponseDTO {
-    private String status;
-    private String message;
+public class BookingResponseDTO {
     private String code;
+    private String message;
     private Integer statusCode;
     private LocalDateTime timeStamp;
     private String exception;
     private String apiPath;
-    private String imageUrl;
     private Long laptopId;
     private Long bookingId;
+    private String bookingStatus;
+
 
 }

@@ -2,7 +2,10 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.bookings.BookingNotFoundException;
+import com.spring.jwt.exception.bookings.PendingBookingException;
 import com.spring.jwt.exception.laptop.*;
+import com.spring.jwt.laptop.dto.BookingResponseDTO;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -422,6 +425,31 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<BookingResponseDTO> handleBookingNotFoundException(BookingNotFoundException ex,WebRequest webRequest){
+        BookingResponseDTO error = new BookingResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
+        error.setCode("error");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setMessage(ex.getMessage());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(PendingBookingException.class)
+    public ResponseEntity<BookingResponseDTO> handlePendingBookingException(PendingBookingException ex, WebRequest webRequest){
+        BookingResponseDTO error = new BookingResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
+        error.setCode("error");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setMessage(ex.getMessage());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 
     //Mobile Exception Handler
     @ExceptionHandler(MobileNotFoundException.class)

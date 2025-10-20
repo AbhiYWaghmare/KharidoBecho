@@ -16,6 +16,9 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
     boolean existsBySerialNumber(String serialNumber);
 
 
+    Optional<Laptop> findBySerialNumber(String serialNumber);
+
+
     @Query("SELECT l FROM Laptop l WHERE l.seller.sellerId = :sellerId AND l.status = :status")
     Page<Laptop> findBySellerIdAndStatus(@Param("sellerId") Long sellerId,
                                        @Param("status") Status status,
