@@ -114,12 +114,11 @@ public class AppConfig {
             .ignoringRequestMatchers(
                 "/api/**",
                 "api/v1/user/**",
-
-                "/api/laptops/**",
-
+                    "api/v1/cars/**",
+                    "/api/v1/car-images",
+                    "/api/laptops/**",
+                    "/api/laptop-photo/**",
                     "api/v1/auth/**",
-
-
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
                     "api/v1/mobiles/**",
@@ -154,17 +153,23 @@ public class AppConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
-
                 .requestMatchers("/api/v1/buyers/**").permitAll()
                 .requestMatchers("/api/v1/sellers/**").permitAll()
+                .requestMatchers("/api/v1/users/password/**").permitAll()
+
                 .requestMatchers("/api/v1/mobiles/**").permitAll()
                 .requestMatchers("/api/v1/mobile-images/**").permitAll()
 
-                .requestMatchers("/api/v1/users/password/**").permitAll()
+                .requestMatchers("/api/v1/cars/**").permitAll()
+                .requestMatchers("/api/v1/car-images/**").permitAll()
+
+
                 .requestMatchers("/api/v1/exam/**").permitAll()
                 .requestMatchers("/api/v1/**").permitAll()
+
                 .requestMatchers("/api/laptops/**").permitAll()
-                .requestMatchers("/api/photo/**").permitAll()
+                .requestMatchers("/api/laptop-photo/**").permitAll()
+
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -202,12 +207,17 @@ public class AppConfig {
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
+
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
 
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
+
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
-                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
