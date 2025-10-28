@@ -114,10 +114,14 @@ public class AppConfig {
             .ignoringRequestMatchers(
                 "/api/**",
                 "api/v1/user/**",
+
                     "api/v1/cars/**",
                     "/api/v1/car-images",
                     "/api/laptops/**",
                     "/api/laptop-photo/**",
+
+                    "/bikes/**",
+
                     "api/v1/auth/**",
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
@@ -170,6 +174,13 @@ public class AppConfig {
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/laptop-photo/**").permitAll()
 
+                .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
+
+
+                .requestMatchers("/api/laptops/**").permitAll()
+                .requestMatchers("/api/photo/**").permitAll()
+
+
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -218,6 +229,11 @@ public class AppConfig {
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"), // <-- ADD THIS
+
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
