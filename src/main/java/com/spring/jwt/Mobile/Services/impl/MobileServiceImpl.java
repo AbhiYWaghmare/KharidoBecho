@@ -270,7 +270,7 @@ public class MobileServiceImpl implements MobileService {
     }
 
 
-    //  compress image to fit under maxBytes (tries lowering JPEG quality)(Helper)
+    //  compress image to fit under maxBytes (tries lowering JPEG quality)
     private byte[] compressImageToMaxSize(MultipartFile file, long maxBytes) throws IOException {
 
         BufferedImage inputImage = ImageIO.read(file.getInputStream());

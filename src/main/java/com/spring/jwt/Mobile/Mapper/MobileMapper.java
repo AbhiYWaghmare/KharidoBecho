@@ -25,9 +25,7 @@ public class MobileMapper {
         dto.setCreatedAt(m.getCreatedAt());
         dto.setUpdatedAt(m.getUpdatedAt());
         dto.setSellerId(m.getSeller() != null ? m.getSeller().getSellerId() : null);
-        dto.setImages(
-                m.getImages().stream().map(MobileImage::getImageUrl).collect(Collectors.toList())
-        );
+        dto.setImages(m.getImages().stream().map(MobileImage::getImageUrl).collect(Collectors.toList()));
         return dto;
     }
 
