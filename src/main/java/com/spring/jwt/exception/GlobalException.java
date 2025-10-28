@@ -2,16 +2,19 @@ package com.spring.jwt.exception;
 
 
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 
 import com.spring.jwt.utils.BaseResponseDTO;
+import com.spring.jwt.utils.ErrorResponseDTO1;
 import com.spring.jwt.utils.ErrorResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -41,6 +44,30 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 @Slf4j
 public class GlobalException extends ResponseEntityExceptionHandler {
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        String message = "Invalid request payload.";
+
+        if (ex.getCause() instanceof UnrecognizedPropertyException cause) {
+            message = "Unknown field: " + cause.getPropertyName();
+        }
+
+        ErrorResponseDTO1 response = new ErrorResponseDTO1(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid Field",
+                message,
+                request.getDescription(false)
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<BaseResponseDTO> handleBaseException(BaseException e) {
@@ -229,7 +256,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
-    public Map<String, String> handleConstraintViolationE(ConstraintViolationException ex) {
+    public Map<String, String> handleConstraintViolation(ConstraintViolationException ex) {
         log.error("Constraint violation: {}", ex.getMessage());
         return ex.getConstraintViolations().stream()
                 .collect(Collectors.toMap(
@@ -419,11 +446,47 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         body.put("path", request.getDescription(false));
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+
     }
 
-//==================bike exception ========================
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
+//            HttpMessageNotReadableException ex, WebRequest req) {
+//
+//        String message = "Invalid request payload.";
+//
+//        // Check if the cause is UnrecognizedPropertyException
+//        if (ex.getCause() instanceof UnrecognizedPropertyException) {
+//            UnrecognizedPropertyException cause = (UnrecognizedPropertyException) ex.getCause();
+//            message = "Unknown field: " + cause.getPropertyName();
+//        }
+//
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("status", HttpStatus.BAD_REQUEST.value());
+//        body.put("error", "Invalid Field");
+//        body.put("message", message);
+//        body.put("path", req.getDescription(false));
+//
+//        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+//    }
 
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<Map<String, Object>> handleDataIntegrity(
+                DataIntegrityViolationException ex, WebRequest req) {
 
+            Map<String, Object> body = new HashMap<>();
+            body.put("timestamp", LocalDateTime.now());
+            body.put("status", HttpStatus.CONFLICT.value());
+            body.put("error", "Conflict");
+            body.put("message", "Duplicate or invalid database entry.");
+            body.put("path", req.getDescription(false));
+
+            return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+        }
 }
+
+
+
 
 
