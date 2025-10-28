@@ -3,7 +3,6 @@ package com.spring.jwt.exception;
 
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.spring.jwt.exception.car.CarValidationException;
 import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
@@ -449,22 +448,6 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 
     }
-
-    @ExceptionHandler(CarValidationException.class)
-    public ResponseEntity<Map<String, Object>> handleCarValidationException(
-            CarValidationException ex, WebRequest request) {
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Validation Error");
-        body.put("message", ex.getMessage());
-        body.put("path", request.getDescription(false));
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
-
 
 //    @ExceptionHandler(HttpMessageNotReadableException.class)
 //    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
