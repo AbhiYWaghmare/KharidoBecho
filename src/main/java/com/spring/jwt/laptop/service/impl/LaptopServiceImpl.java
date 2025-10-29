@@ -3,7 +3,6 @@ package com.spring.jwt.laptop.service.impl;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.exception.laptop.BlankFieldsException;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
-import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.exception.laptop.LaptopNotFoundException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;

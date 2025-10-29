@@ -83,9 +83,4 @@ public class LaptopBookingServiceImpl implements LaptopBookingService {
         return laptopBookingRepository.save(booking);
     }
 
-//    @Override
-//    public boolean datesOverlap(Booking existing, Long bookingId){
-//
-//        return existing.getId().equals(bookingId);
-//    }
 }

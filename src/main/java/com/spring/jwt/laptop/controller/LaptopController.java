@@ -5,7 +5,6 @@ import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Booking;
 import com.spring.jwt.laptop.entity.Laptop;
-import com.spring.jwt.laptop.entity.LaptopPhotos;
 import com.spring.jwt.laptop.model.Status;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopService;

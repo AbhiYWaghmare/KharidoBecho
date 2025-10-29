@@ -116,6 +116,7 @@ public class AppConfig {
                     "api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
+                    "/api/colours/**",
                     "api/v1/auth/**",
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
@@ -163,6 +164,7 @@ public class AppConfig {
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/photo/**").permitAll()
                 .requestMatchers("/api/laptopBookings/**").permitAll()
+                .requestMatchers("/api/colours/**").permitAll()
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -207,6 +209,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptopBookings/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/colours/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),

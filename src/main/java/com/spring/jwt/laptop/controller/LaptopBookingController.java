@@ -96,7 +96,7 @@ public class LaptopBookingController {
     //  PATCH /api/laptopBookings/rejectBooking           //
     //====================================================//
     @PatchMapping("/rejectBooking")
-    public ResponseEntity<BookingResponseDTO> rejectBooking(@RequestParam Long bookingId, HttpServletRequest request){
+    public ResponseEntity<BookingResponseDTO> rejectBooking(@RequestParam Long bookingId, HttpServletRequest request) {
         Booking rejectBooking = laptopBookingService.rejectBooking(bookingId);
 
         BookingResponseDTO responseDTO = new BookingResponseDTO();
@@ -109,8 +109,6 @@ public class LaptopBookingController {
         responseDTO.setBookingStatus(rejectBooking.getStatus().name());
 
         return ResponseEntity.ok(responseDTO);
-
-
     }
 
 }
