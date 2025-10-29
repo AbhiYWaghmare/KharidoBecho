@@ -2,15 +2,16 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
+import com.spring.jwt.exception.colour.ColourNotFoundException;
+import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
 import com.spring.jwt.exception.bookings.BookingNotFoundException;
 import com.spring.jwt.exception.bookings.PendingBookingException;
 import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.BookingResponseDTO;
-import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
-import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -450,6 +451,35 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(ColourNotFoundException.class)
+    public ResponseEntity<ColourResponseDTO> handleColourNotFoundException(ColourNotFoundException ex,WebRequest request) {
+        ColourResponseDTO error = new ColourResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ColourAlreadyExistsException.class)
+    public ResponseEntity<ColourResponseDTO> handleColourAlreadyExistsException(ColourAlreadyExistsException ex,WebRequest request) {
+        ColourResponseDTO error = new ColourResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("CONFLICT");
+        error.setStatusCode(HttpStatus.CONFLICT.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
 
     //Mobile Exception Handler
     @ExceptionHandler(MobileNotFoundException.class)
