@@ -2,6 +2,8 @@ package com.spring.jwt.exception;
 
 
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.exception.Bike.*;
 import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
@@ -12,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -421,7 +424,142 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-//==================bike exception ========================
+
+
+// ========================= BIKE EXCEPTIONS =========================
+
+    @ExceptionHandler(bikeNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBikeNotFound(
+            bikeNotFoundException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_NOT_FOUND");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(StatusNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBikeStatusNotFound(
+            StatusNotFoundException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_STATUS_NOT_FOUND");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(BikeImageNotFound.class)
+    public ResponseEntity<Map<String, Object>> handleBikeImageNotFound(
+            BikeImageNotFound ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_IMAGE_NOT_FOUND");
+        errorResponse.put("errorMessage", "Bike Image Issue");
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidBikeData.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidBikeData(
+            InvalidBikeData ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", request.getRequestURI());
+        errorResponse.put("errorCode", "INVALID_BIKE_DATA");
+        errorResponse.put("errorMessage", ex.getLocalizedMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+
+
+    @ExceptionHandler(ResourceNotFound.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+            ResourceNotFound ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = Map.of(
+                "apiPath", request.getRequestURI(),
+                "errorCode", "RESOURCE_NOT_FOUND",
+                "errorMessage", ex.getMessage(),
+                "errorTime", LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(
+            RuntimeException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        String message = ex.getLocalizedMessage();
+
+        if (message != null && message.contains("registration_number")) {
+            message = "Registration number already exists. Please provide a unique registration number.";
+        } else {
+            message = "An unexpected error occurred: " + message;
+        }
+
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_OPERATION_FAILED");
+        errorResponse.put("errorMessage", message);
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+// thi
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        String message = "Invalid or malformed JSON";
+
+        if (ex.getMessage() != null) {
+            String errorMsg = ex.getMessage();
+
+            if (errorMsg.contains("bikeStatus")) {
+                message = "Allowed status values are: NEW, AVAILABLE, INACTIVE, ACTIVE, DELETED";
+            } else if (errorMsg.contains("FuelType")) {
+                message = "Allowed fuel type values are: PETROL, EV";
+            }
+        }
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", message);
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+
+
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("error", "Duplicate Entry");
+        body.put("message", "Registration number already exists. Please use a unique one.");
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+
 
 
 }
