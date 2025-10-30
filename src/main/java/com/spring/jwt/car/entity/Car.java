@@ -1,5 +1,6 @@
 package com.spring.jwt.car.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Car {
 
     @Id
@@ -41,6 +43,10 @@ public class Car {
     //SUNROOF
     @Column(name = "sunroof")
     private Boolean sunroof;
+
+    @Column(name = "registration_number", length = 20, unique = true)
+    private String registrationNumber;
+
 
     //CHILD SAFETY LOCK
     @Column(name = "child_safety_locks")
@@ -157,5 +163,6 @@ public class Car {
     // SELLER
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Seller seller;
 }

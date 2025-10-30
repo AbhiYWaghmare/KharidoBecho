@@ -112,9 +112,11 @@ public class JwtServiceImpl implements JwtService {
         if (userDetailsCustom.getUserProfileId() != null) {
             jwtBuilder.claim("userProfileId", userDetailsCustom.getUserProfileId());
         }
-        
 
-        
+
+
+
+
         jwtBuilder.claim(CLAIM_KEY_TOKEN_TYPE, TOKEN_TYPE_ACCESS)
                 .setIssuedAt(Date.from(now))
                 .setNotBefore(Date.from(notBefore))
