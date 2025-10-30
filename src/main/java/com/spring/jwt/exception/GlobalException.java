@@ -549,20 +549,10 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
-// thi
 
 
 
 
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("error", "Duplicate Entry");
-        body.put("message", "Registration number already exists. Please use a unique one.");
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
-    }
 
 
 
