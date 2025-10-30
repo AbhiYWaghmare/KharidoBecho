@@ -9,5 +9,6 @@ public class LaptopBookingDTO {
 
     private String serialNumber;
     private LocalDate bookingDate;
+    private Long buyerId;
 
 }
