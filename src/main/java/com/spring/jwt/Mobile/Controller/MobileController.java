@@ -69,7 +69,7 @@ public class MobileController {
 
     //To update the details of mobile by id
     @PatchMapping("/update/{id}")
-    public ResponseEntity<MobileResponseDTO> update(@PathVariable Long id, @RequestBody MobileRequestDTO req) {
+    public ResponseEntity<MobileResponseDTO> update(@PathVariable Long id,@Valid @RequestBody MobileRequestDTO req) {
         return ResponseEntity.ok(mobileService.updateMobile(id, req));
     }
 
