@@ -113,12 +113,11 @@ public class AppConfig {
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .ignoringRequestMatchers(
                 "/api/**",
-<<<<<<< HEAD
+
                     "api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
                     "/api/colours/**",
-=======
                 "api/v1/user/**",
 
                     "api/v1/cars/**",
@@ -128,7 +127,6 @@ public class AppConfig {
 
                     "/bikes/**",
 
->>>>>>> e16dc60bfb5b00a9e5ce802e8170090f24f1bbcd
                     "api/v1/auth/**",
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
@@ -186,13 +184,12 @@ public class AppConfig {
 
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/photo/**").permitAll()
-<<<<<<< HEAD
+
                 .requestMatchers("/api/laptopBookings/**").permitAll()
                 .requestMatchers("/api/colours/**").permitAll()
-=======
 
 
->>>>>>> e16dc60bfb5b00a9e5ce802e8170090f24f1bbcd
+
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
