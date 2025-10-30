@@ -5,7 +5,7 @@ public enum Status {
     AVAILABLE("Available"),
     DELETED("Deleted"),
     DEACTIVATE("Deactivated"),
-    PENDING("Pending"),
+    PENDINGREQUEST("Pending"),
     SOLD("Sold");
 
 

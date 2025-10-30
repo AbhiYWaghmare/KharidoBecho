@@ -42,7 +42,7 @@ public class LaptopBookingController {
         Long bookingId = booking.getId();
         String booKingStatus = booking.getStatus().name();
 
-        bookingResponseDTO.setMessage(booking.getStatus() == Status.PENDING
+        bookingResponseDTO.setMessage(booking.getStatus() == Status.PENDINGREQUEST
                 ? "Laptop booking created successfully and currently status is pending"
                 : "Laptop booked Successfully!");
 
@@ -67,7 +67,7 @@ public class LaptopBookingController {
     //====================================================//
     @GetMapping("/getPendingBookings")
     public ResponseEntity<List<Booking>> getPendingApis() {
-        List<Booking> pendingBookings = laptopBookingService.getPendingBookings();
+        List<Booking> pendingBookings = laptopBookingService.getAllPendingBookings();
         return ResponseEntity.ok(pendingBookings);
     }
 

@@ -5,6 +5,7 @@ import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.entity.Booking;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,7 +14,10 @@ public interface LaptopBookingService {
 
     Booking createBooking(LaptopBookingDTO laptopBookingDTO);
 
-    List<Booking> getPendingBookings();
+    List<Booking> getAllPendingBookings();
+
+    Booking getPendingBookingsByBuyerId(Long buyerId);
+
 
     Booking approveBooking(Long id);
 

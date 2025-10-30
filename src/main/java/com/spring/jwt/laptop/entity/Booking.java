@@ -1,12 +1,13 @@
 package com.spring.jwt.laptop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.laptop.model.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,19 +17,23 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Booking {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bookingId")
+    @Column(name = "booking_id")
     private Long id;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name= "buyer_id",nullable = false)
-//    private Buyer buyer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "buyer_id", nullable = false)
+//    @JsonIgnoreProperties({"user", "deleted", "deletedAt"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Buyer buyer;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "laptop_id",nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "laptop_id", nullable = false)
+    @JsonIgnoreProperties({"seller", "laptopPhotos"})
     private Laptop laptop;
 
     @Column(name = "booking_date")
@@ -37,7 +42,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
-
 
 }
