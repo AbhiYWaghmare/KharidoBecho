@@ -7,6 +7,7 @@ import com.spring.jwt.laptop.service.LaptopPhotoService;
 import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(force = true)
 @RequestMapping("/api/laptop-photo")
 public class LaptopPhotoController {
 
