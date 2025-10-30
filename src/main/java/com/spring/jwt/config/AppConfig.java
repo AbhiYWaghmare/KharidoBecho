@@ -177,10 +177,6 @@ public class AppConfig {
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
 
-                .requestMatchers("/api/laptops/**").permitAll()
-                .requestMatchers("/api/photo/**").permitAll()
-
-
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
 
@@ -232,8 +228,6 @@ public class AppConfig {
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"), // <-- ADD THIS
 
-                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
