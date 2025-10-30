@@ -30,7 +30,7 @@ import java.util.Map;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/photo")
+@RequestMapping("/api/laptop-photo")
 public class LaptopPhotoController {
 
     private final LaptopPhotoService laptopPhotoService;
