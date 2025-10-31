@@ -1,5 +1,6 @@
 package com.spring.jwt.Bike.Controller;
 
+import com.spring.jwt.Bike.Entity.Bike;
 import com.spring.jwt.Bike.Entity.bikeStatus;
 import com.spring.jwt.Bike.Service.bikeService;
 import com.spring.jwt.Bike.dto.bikeDto;
@@ -27,7 +28,7 @@ public class bikeController {
     public ResponseEntity<ApiResponse> createBike( @RequestBody bikeDto bikedto) {
         bikeService.createBike(bikedto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse("SUCCESS", "Bike created successfully"));
+                .body(new ApiResponse("SUCCESS", "Bike created successfully","BikeId:"+ bikedto.getBike_id()));
     }
 
 
@@ -52,6 +53,7 @@ public class bikeController {
     @DeleteMapping(value = "/delete/{id}/soft", produces = "application/json")
     public ResponseEntity<ApiResponse> softDeleteBike(@PathVariable Long id) {
         bikeService.softDeletebike(id);
+        bikeDto deletedBike = bikeService.softDeletebike(id);
         return ResponseEntity.ok(new ApiResponse("SUCCESS", "Bike soft deleted successfully"));
     }
 
