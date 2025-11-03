@@ -2,6 +2,8 @@ package com.spring.jwt.exception;
 
 
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.exception.laptop.*;
@@ -449,6 +451,111 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
     }
 
+
+
+
+// ========================= BIKE EXCEPTIONS =========================
+
+    @ExceptionHandler(bikeNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBikeNotFound(
+            bikeNotFoundException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_NOT_FOUND");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(StatusNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBikeStatusNotFound(
+            StatusNotFoundException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_STATUS_NOT_FOUND");
+        errorResponse.put("errorMessage", ex.getMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(BikeImageNotFound.class)
+    public ResponseEntity<Map<String, Object>> handleBikeImageNotFound(
+            BikeImageNotFound ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_IMAGE_NOT_FOUND");
+        errorResponse.put("errorMessage", "Bike Image Issue");
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidBikeData.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidBikeData(
+            InvalidBikeData ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("apiPath", request.getRequestURI());
+        errorResponse.put("errorCode", "INVALID_BIKE_DATA");
+        errorResponse.put("errorMessage", ex.getLocalizedMessage());
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+
+
+    @ExceptionHandler(ResourceNotFound.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+            ResourceNotFound ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = Map.of(
+                "apiPath", request.getRequestURI(),
+                "errorCode", "RESOURCE_NOT_FOUND",
+                "errorMessage", ex.getMessage(),
+                "errorTime", LocalDateTime.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(
+            RuntimeException ex,
+            HttpServletRequest request) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        String message = ex.getLocalizedMessage();
+
+        if (message != null && message.contains("registration_number")) {
+            message = "Registration number already exists. Please provide a unique registration number.";
+        } else {
+            message = "An unexpected error occurred: " + message;
+        }
+
+        errorResponse.put("apiPath", "uri=" + request.getRequestURI());
+        errorResponse.put("errorCode", "BIKE_OPERATION_FAILED");
+        errorResponse.put("errorMessage", message);
+        errorResponse.put("errorTime", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+
+
+
+
+
+
 //    @ExceptionHandler(HttpMessageNotReadableException.class)
 //    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
 //            HttpMessageNotReadableException ex, WebRequest req) {
@@ -471,6 +578,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 //        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 //    }
 
+
         @ExceptionHandler(DataIntegrityViolationException.class)
         public ResponseEntity<Map<String, Object>> handleDataIntegrity(
                 DataIntegrityViolationException ex, WebRequest req) {
@@ -484,6 +592,29 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
             return new ResponseEntity<>(body, HttpStatus.CONFLICT);
         }
+
+    @ExceptionHandler(MobileRequestNotFoundException.class)
+    public ResponseEntity<Map<String,Object>> handleReqNotFound(MobileRequestNotFoundException ex, WebRequest req) {
+        Map<String,Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Request not found");
+        body.put("message", ex.getMessage());
+        body.put("path", req.getDescription(false));
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MobileRequestException.class)
+    public ResponseEntity<Map<String,Object>> handleReqValidation(MobileRequestException ex, WebRequest req) {
+        Map<String,Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Request error");
+        body.put("message", ex.getMessage());
+        body.put("path", req.getDescription(false));
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
 }
 
 

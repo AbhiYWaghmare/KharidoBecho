@@ -1,200 +1,253 @@
-package com.spring.jwt.Mobile.Services.impl ;
+package com.spring.jwt.mobile.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.entity.Seller;
+import com.spring.jwt.entity.User;
 import com.spring.jwt.Mobile.dto.*;
-import com.spring.jwt.Mobile.entity.*;
-import com.spring.jwt.exception.mobile.*;
-import com.spring.jwt.Mobile.Repository.*;
+import com.spring.jwt.Mobile.entity.MobileRequest;
+import com.spring.jwt.Mobile.entity.RequestStatus;
+import com.spring.jwt.exception.mobile.MobileRequestException;
+import com.spring.jwt.exception.mobile.MobileRequestNotFoundException;
+import com.spring.jwt.Mobile.Repository.MobileRequestRepository;
 import com.spring.jwt.Mobile.Services.MobileRequestService;
-import com.spring.jwt.repository.BuyerRepository; // assume buyer/user repo exists
-import com.spring.jwt.exception.mobile.MobileNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.spring.jwt.repository.BuyerRepository;
+import com.spring.jwt.repository.SellerRepository;
+import com.spring.jwt.repository.UserRepository;
+import com.spring.jwt.Mobile.Repository.MobileRepository;
+import com.spring.jwt.Mobile.entity.*; // adjust import path to your Mobile entity
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MobileRequestServiceImpl implements MobileRequestService {
 
-    private final MobileRequestRepository mobileRequestRepository;
-    private final MobileRepository mobileRepository;
-    private final MobileRequestMessageRepository messageRepository;
-    private final BuyerRepository buyerRepository; // or BuyerRepository if exists
+    private final MobileRequestRepository requestRepo;
+    private final MobileRepository mobileRepo;
+    private final BuyerRepository buyerRepo;
+    private final SellerRepository sellerRepo;
+    private final UserRepository userRepo;
+//    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Create a new interest request (buyer)
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule()) // enables OffsetDateTime, LocalDateTime, etc.
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+
+
+
+
     @Override
     @Transactional
-    public MobileReqResponseDTO createRequest(ConversationMessage dto) {
-        var mobile = mobileRepository.findByMobileIdAndDeletedFalse(dto.getMobileId())
-                .orElseThrow(() -> new MobileNotFoundException(dto.getMobileId()));
+    public MobileRequestResponseDTO createRequest(MobileRequestCreateDTO dto) {
+        var mobile = mobileRepo.findByMobileIdAndDeletedFalse(dto.getMobileId())
+                .orElseThrow(() -> new MobileRequestException("Mobile not found: " + dto.getMobileId()));
 
-        if (mobile.getStatus() == Mobile.Status.SOLD) {
+        if (mobile.getStatus() != null && mobile.getStatus().name().equalsIgnoreCase("SOLD")) {
             throw new MobileRequestException("Product already sold.");
         }
 
-        // optional: verify buyer exists
-        if (dto.getBuyerId() == null || !buyerRepository.existsById(dto.getBuyerId())) {
-            throw new MobileRequestException("Buyer not found: " + dto.getBuyerId());
+        User buyerUser = userRepo.findById(dto.getBuyerUserId())
+                .orElseThrow(() -> new MobileRequestException("Buyer (user) not found: " + dto.getBuyerUserId()));
+
+        // verify buyer has a Buyer record
+        Buyer buyer = buyerRepo.findByUser_IdAndDeletedFalse(dto.getBuyerUserId())
+                .orElseThrow(() -> new MobileRequestException("User is not registered as a buyer: " + dto.getBuyerUserId()));
+
+        Seller seller = mobile.getSeller();
+        if (seller == null) throw new MobileRequestException("Mobile has no seller assigned");
+
+        // prevent duplicate request from same buyer for same mobile
+        var existing = requestRepo.findByMobile_MobileIdAndStatus(mobile.getMobileId(), RequestStatus.PENDING);
+        boolean alreadyRequested = requestRepo.findByBuyer_BuyerId(buyer.getBuyerId())
+                .stream().anyMatch(r -> r.getMobile().getMobileId().equals(mobile.getMobileId()));
+        if (alreadyRequested) {
+            throw new MobileRequestException("You have already sent a request for this product.");
         }
 
-        MobileRequest req = MobileRequest.builder()
+        MobileRequest r = MobileRequest.builder()
                 .mobile(mobile)
-                .buyerId(dto.getBuyerId())
-                .initialMessage(dto.getMessage())
-                .status(MobileRequest.Status.PENDING)
+                .buyer(buyer)
+                .seller(seller)
+                .status(RequestStatus.PENDING)
+                .conversation("[]")
                 .build();
 
-        mobileRequestRepository.save(req);
-        return toResponse(req);
+        // append initial message if provided
+        if (dto.getMessage() != null && !dto.getMessage().isBlank()) {
+            appendMessageInternal(r, buyerUser.getId(), "BUYER", dto.getMessage());
+        }
+
+        try {
+            r = requestRepo.save(r);
+        } catch (DataIntegrityViolationException e) {
+            // if you use DB unique constraints, handle them here
+            throw new MobileRequestException("Failed to create request: " + e.getMessage(), e);
+        }
+
+        return toResponse(r);
     }
 
-    // list pending/others for a mobile
     @Override
-    public List<MobileReqResponseDTO> listRequestsForMobile(Long mobileId) {
-        return mobileRequestRepository.findByMobile_MobileIdOrderByCreatedAtAsc(mobileId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+    public List<MobileRequestResponseDTO> listRequestsForMobile(Long mobileId) {
+        return requestRepo.findByMobile_MobileIdOrderByCreatedAtAsc(mobileId).stream()
+                .map(this::toResponse).toList();
     }
 
     @Override
-    public List<MobileReqResponseDTO> listRequestsForBuyer(Long buyerId) {
-        return mobileRequestRepository.findByBuyerId(buyerId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+    public List<MobileRequestResponseDTO> listRequestsForBuyer(Long buyerId) {
+        return requestRepo.findByBuyer_BuyerId(buyerId).stream()
+                .map(this::toResponse).toList();
     }
 
-    // Update a request status (accept/reject/negotiation start/completed)
     @Override
     @Transactional
-    public MobileReqResponseDTO updateRequestStatus(Long requestId, String statusStr) {
-        MobileRequest req = mobileRequestRepository.findById(requestId)
+    public MobileRequestResponseDTO updateRequestStatus(Long requestId, String statusStr) {
+        MobileRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
 
-        var mobile = req.getMobile();
-        MobileRequest.Status newStatus;
+        RequestStatus newStatus;
         try {
-            newStatus = MobileRequest.Status.valueOf(statusStr.toUpperCase());
+            newStatus = RequestStatus.valueOf(statusStr.toUpperCase());
         } catch (IllegalArgumentException ex) {
             throw new MobileRequestException("Invalid status: " + statusStr);
         }
 
-        // synchronize by mobile to avoid races across threads in this JVM
-        synchronized (("mobile-lock-" + mobile.getMobileId()).intern()) {
-            if (newStatus == MobileRequest.Status.ACCEPTED) {
-                // DB check: prevent double-accept
-                boolean exists = mobileRequestRepository.existsByMobile_MobileIdAndStatus(mobile.getMobileId(), MobileRequest.Status.ACCEPTED);
-                if (exists) {
-                    throw new MobileRequestException("Another request is already accepted for this product.");
+        //  In production multi-instance use DB constraint or distributed lock.
+        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
+            if (newStatus == RequestStatus.ACCEPTED) {
+                // ensure no other accepted request exists
+                boolean exists = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
+                if (exists) throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
+                req.setStatus(RequestStatus.IN_NEGOTIATION); // move to negotiation first
+                // optionally set mobile status to reserved/active
+                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
+                mobileRepo.save(req.getMobile());
+            } else if (newStatus == RequestStatus.REJECTED) {
+                req.setStatus(RequestStatus.REJECTED);
+                // if no accepted requests exist, you can revert mobile to AVAILABLE (if not sold)
+                boolean anyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
+                if (!anyAccepted && req.getMobile().getStatus() != com.spring.jwt.Mobile.entity.Mobile.Status.SOLD) {
+                    req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE); // or AVAILABLE depending on your Mobile.Status enum
+                    mobileRepo.save(req.getMobile());
                 }
-                req.setStatus(MobileRequest.Status.ACCEPTED);
-                mobile.setStatus(Mobile.Status.ACTIVE); // negotiation / hold
-                mobileRepository.save(mobile);
-            } else if (newStatus == MobileRequest.Status.REJECTED) {
-                req.setStatus(MobileRequest.Status.REJECTED);
-                // if no accepted requests exist, we keep mobile AVAILABLE
-                boolean anyAccepted = mobileRequestRepository.existsByMobile_MobileIdAndStatus(mobile.getMobileId(), MobileRequest.Status.ACCEPTED);
-                if (!anyAccepted && mobile.getStatus() != Mobile.Status.SOLD) {
-                    mobile.setStatus(Mobile.Status.ACTIVE); // remain active or AVAILABLE depending on your logic
-                    // you may set AVAILABLE enum if you have it; using ACTIVE to indicate still listed
-                    mobileRepository.save(mobile);
-                }
-            } else if (newStatus == MobileRequest.Status.IN_NEGOTIATION) {
-                req.setStatus(MobileRequest.Status.IN_NEGOTIATION);
-                // optionally set mobile status
-                mobile.setStatus(Mobile.Status.ACTIVE);
-                mobileRepository.save(mobile);
-            } else if (newStatus == MobileRequest.Status.COMPLETED) {
-                // completing a request should mark mobile sold
-                req.setStatus(MobileRequest.Status.COMPLETED);
-                mobile.setStatus(Mobile.Status.SOLD);
-                mobileRepository.save(mobile);
+            } else if (newStatus == RequestStatus.IN_NEGOTIATION) {
+                req.setStatus(RequestStatus.IN_NEGOTIATION);
+                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
+                mobileRepo.save(req.getMobile());
+            } else if (newStatus == RequestStatus.COMPLETED) {
+                // completed -> final sold
+                req.setStatus(RequestStatus.COMPLETED);
+                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.SOLD);
+                mobileRepo.save(req.getMobile());
 
-                // set all other requests to REJECTED
-                List<MobileRequest> others = mobileRequestRepository.findByMobile_MobileIdAndStatus(mobile.getMobileId(), MobileRequest.Status.PENDING);
-                for (MobileRequest other : others) {
-                    other.setStatus(MobileRequest.Status.REJECTED);
-                    mobileRequestRepository.save(other);
+                // reject other pending requests
+                var others = requestRepo.findByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.PENDING);
+                for (var o : others) {
+                    o.setStatus(RequestStatus.REJECTED);
+                    requestRepo.save(o);
                 }
-            } else {
-                // PENDING or other statuses
-                req.setStatus(newStatus);
+            } else if (newStatus == RequestStatus.PENDING) {
+                req.setStatus(RequestStatus.PENDING);
+            } else if (newStatus == RequestStatus.ACCEPTED) {
+                // if you allow direct ACCEPTED (skipping negotiation)
+                boolean alreadyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
+                if (alreadyAccepted) throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
+                req.setStatus(RequestStatus.ACCEPTED);
+                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
+                mobileRepo.save(req.getMobile());
             }
-
-            mobileRequestRepository.save(req);
+            requestRepo.save(req);
         }
 
         return toResponse(req);
     }
 
-    // Send a message within a request (buyer or seller)
     @Override
     @Transactional
-    public void sendMessage(Long requestId, Long senderId, String message) {
-        MobileRequest req = mobileRequestRepository.findById(requestId)
+    public MobileRequestResponseDTO appendMessage(Long requestId, Long senderUserId, String message) {
+        MobileRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
 
-        // optional: check sender is either buyer or seller (if sellerId exists)
-        MobileRequestMessage msg = MobileRequestMessage.builder()
-                .request(req)
-                .senderId(senderId)
-                .message(message)
-                .build();
-        messageRepository.save(msg);
+        User sender = userRepo.findById(senderUserId)
+                .orElseThrow(() -> new MobileRequestException("Sender user not found: " + senderUserId));
+
+        String senderType = determineSenderType(senderUserId, req);
+        appendMessageInternal(req, senderUserId, senderType, message);
+        requestRepo.save(req);
+        return toResponse(req);
     }
 
-    @Override
-    public List<MobileRequestMessageDTO> listMessages(Long requestId) {
-        return messageRepository.findByRequest_RequestIdOrderBySentAtAsc(requestId)
-                .stream().map(m -> {
-                    MobileRequestMessageDTO dto = new MobileRequestMessageDTO();
-                    dto.setMessageId(m.getMessageId());
-                    dto.setRequestId(m.getRequest().getRequestId());
-                    dto.setSenderId(m.getSenderId());
-                    dto.setMessage(m.getMessage());
-                    dto.setSentAt(m.getSentAt());
-                    return dto;
-                }).collect(Collectors.toList());
-    }
-
-    // Mark mobile sold using an accepted request. This will set mobile.SOLD and other requests -> REJECTED
+    // Mark accepted or in negotiation request completed & mark mobile sold
     @Override
     @Transactional
-    public void markMobileSold(Long requestId) {
-        MobileRequest req = mobileRequestRepository.findById(requestId)
+    public void markRequestCompletedAndMarkSold(Long requestId) {
+        MobileRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
 
         synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
-            // ensure this request is ACCEPTED or will be accepted now
-            if (req.getStatus() != MobileRequest.Status.ACCEPTED && req.getStatus() != MobileRequest.Status.IN_NEGOTIATION) {
-                throw new MobileRequestException("Cannot mark sold: request is not accepted or in negotiation.");
+            if (req.getStatus() != RequestStatus.ACCEPTED && req.getStatus() != RequestStatus.IN_NEGOTIATION) {
+                throw new MobileRequestException("Request must be ACCEPTED or IN_NEGOTIATION to mark completed.");
             }
+            req.setStatus(RequestStatus.COMPLETED);
+            req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.SOLD);
+            mobileRepo.save(req.getMobile());
 
-            // mark request completed and mobile sold
-            req.setStatus(MobileRequest.Status.COMPLETED);
-            Mobile mobile = req.getMobile();
-            mobile.setStatus(Mobile.Status.SOLD);
-            mobileRepository.save(mobile);
-            mobileRequestRepository.save(req);
-
-            // reject all other pending requests
-            List<MobileRequest> others = mobileRequestRepository.findByMobile_MobileIdOrderByCreatedAtAsc(mobile.getMobileId());
-            for (MobileRequest other : others) {
-                if (!other.getRequestId().equals(requestId)) {
-                    other.setStatus(MobileRequest.Status.REJECTED);
-                    mobileRequestRepository.save(other);
-                }
+            // reject other requests
+            var others = requestRepo.findByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.PENDING);
+            for (var o : others) {
+                o.setStatus(RequestStatus.REJECTED);
+                requestRepo.save(o);
             }
+            requestRepo.save(req);
         }
     }
 
-    // helper mapping
-    private MobileReqResponseDTO toResponse(MobileRequest r) {
-        return MobileReqResponseDTO.builder()
+    // ---------------- helpers ----------------
+    private void appendMessageInternal(MobileRequest req, Long senderId, String senderType, String text) {
+        try {
+            List<ConversationMessage> msgs = objectMapper.readValue(
+                    req.getConversation(), new TypeReference<List<ConversationMessage>>() {});
+            if (msgs == null) msgs = new ArrayList<>();
+            ConversationMessage cm = new ConversationMessage(senderId, senderType, text, OffsetDateTime.now());
+            msgs.add(cm);
+            req.setConversation(objectMapper.writeValueAsString(msgs));
+        } catch (Exception e) {
+            throw new MobileRequestException("Failed to append message", e);
+        }
+    }
+
+    private String determineSenderType(Long userId, MobileRequest req) {
+        if (req.getBuyer() != null && req.getBuyer().getUser() != null &&
+                req.getBuyer().getUser().getId().equals(userId)) {
+            return "BUYER";
+        }
+        if (req.getSeller() != null && req.getSeller().getUser() != null &&
+                req.getSeller().getUser().getId().equals(userId)) {
+            return "SELLER";
+        }
+        // fallback: check roles or assume BUYER
+        return "UNKNOWN";
+    }
+
+    private MobileRequestResponseDTO toResponse(MobileRequest r) {
+        return MobileRequestResponseDTO.builder()
                 .requestId(r.getRequestId())
                 .mobileId(r.getMobile().getMobileId())
-                .buyerId(r.getBuyerId())
-                .initialMessage(r.getInitialMessage())
+                .buyerId(r.getBuyer().getBuyerId())
+                .sellerId(r.getSeller().getSellerId())
                 .status(r.getStatus().name())
+                .conversationJson(r.getConversation())
                 .createdAt(r.getCreatedAt())
                 .updatedAt(r.getUpdatedAt())
                 .build();

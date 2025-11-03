@@ -127,6 +127,7 @@ public class AppConfig {
                     "api/v1/sellers/**",
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
+                    "/api/v1/mobile/requests/**",
 
 
                 jwtConfig.getUrl(),
@@ -163,6 +164,7 @@ public class AppConfig {
 
                 .requestMatchers("/api/v1/mobiles/**").permitAll()
                 .requestMatchers("/api/v1/mobile-images/**").permitAll()
+                .requestMatchers("/api/v1/mobile/requests/**").permitAll()
 
                 .requestMatchers("/api/v1/cars/**").permitAll()
                 .requestMatchers("/api/v1/car-images/**").permitAll()
@@ -217,6 +219,7 @@ public class AppConfig {
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),

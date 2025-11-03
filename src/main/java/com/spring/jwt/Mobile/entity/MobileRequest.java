@@ -40,7 +40,7 @@ public class MobileRequest {
      * JSON column storing an array of ConversationMessage objects.
      * Use columnDefinition = "json" on MySQL (or use TEXT/LONGTEXT if your DB doesn't support json typed column).
      */
-    @Lob
+//    @Lob
     @Column(name = "conversation", columnDefinition = "JSON")
     private String conversation; // JSON array string
 
@@ -62,11 +62,11 @@ public class MobileRequest {
         this.updatedAt = OffsetDateTime.now();
     }
 
-    public enum RequestStatus {
-        PENDING,
-        IN_NEGOTIATION,
-        ACCEPTED,
-        REJECTED,
-        COMPLETED
-    }
+//    public enum RequestStatus {
+//        PENDING,
+//        IN_NEGOTIATION,
+//        ACCEPTED,
+//        REJECTED,
+//        COMPLETED
+//    }
 }
