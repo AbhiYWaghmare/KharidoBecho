@@ -27,7 +27,6 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", nullable = false)
-//    @JsonIgnoreProperties({"user", "deleted", "deletedAt"})
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Buyer buyer;
 
