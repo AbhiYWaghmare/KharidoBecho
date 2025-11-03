@@ -1,0 +1,54 @@
+package com.spring.jwt.Mobile.Controller;
+
+import com.spring.jwt.Mobile.dto.*;
+import com.spring.jwt.Mobile.Services.MobileRequestService;
+import com.spring.jwt.utils.BaseResponseDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/mobile/requests")
+@RequiredArgsConstructor
+public class MobileRequestController {
+
+    private final MobileRequestService service;
+
+    @PostMapping("/create")
+    public ResponseEntity<MobileRequestResponseDTO> create(@RequestBody MobileRequestCreateDTO dto) {
+        return ResponseEntity.ok(service.createRequest(dto));
+    }
+
+    @GetMapping("/mobile/{mobileId}")
+    public ResponseEntity<List<MobileRequestResponseDTO>> listForMobile(@PathVariable Long mobileId) {
+        return ResponseEntity.ok(service.listRequestsForMobile(mobileId));
+    }
+
+    @GetMapping("/buyer/{buyerId}")
+    public ResponseEntity<List<MobileRequestResponseDTO>> listForBuyer(@PathVariable Long buyerId) {
+        return ResponseEntity.ok(service.listRequestsForBuyer(buyerId));
+    }
+
+    @PatchMapping("/{requestId}/status")
+    public ResponseEntity<MobileRequestResponseDTO> updateStatus(
+            @PathVariable Long requestId,
+            @RequestParam String status) {
+        return ResponseEntity.ok(service.updateRequestStatus(requestId, status));
+    }
+
+    @PostMapping("/{requestId}/message")
+    public ResponseEntity<MobileRequestResponseDTO> sendMessage(
+            @PathVariable Long requestId,
+            @RequestParam Long senderUserId,
+            @RequestParam String message) {
+        return ResponseEntity.ok(service.appendMessage(requestId, senderUserId, message));
+    }
+
+    @PostMapping("/{requestId}/complete")
+    public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
+        service.markRequestCompletedAndMarkSold(requestId);
+        return ResponseEntity.ok(BaseResponseDTO.builder().code("200").message("Marked sold and others rejected").build());
+    }
+}
