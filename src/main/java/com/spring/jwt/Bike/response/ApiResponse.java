@@ -17,6 +17,7 @@ public class ApiResponse {
     private String status; // "SUCCESS" or "FAILURE"
     private String message;
     private Object data;
+    private Long bikeId;
     private LocalDateTime timestamp;
 
     // Constructor
@@ -27,6 +28,12 @@ public class ApiResponse {
         this.timestamp = LocalDateTime.now();
 
 
+    }
+    public ApiResponse(String status, String message, Long bikeId) {
+        this.status = status;
+        this.message = message;
+        this.bikeId = bikeId;
+        this.timestamp = LocalDateTime.now();
     }
     public ApiResponse(String status, String message) {
         this.status = status;
