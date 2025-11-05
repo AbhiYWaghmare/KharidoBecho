@@ -1,9 +1,10 @@
-package com.spring.jwt.mobile.service.impl;
+package com.spring.jwt.Mobile.Services.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.spring.jwt.Mobile.entity.ConversationMessage;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.User;
@@ -18,7 +19,6 @@ import com.spring.jwt.repository.BuyerRepository;
 import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.repository.UserRepository;
 import com.spring.jwt.Mobile.Repository.MobileRepository;
-import com.spring.jwt.Mobile.entity.*; // adjust import path to your Mobile entity
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -42,9 +42,6 @@ public class MobileRequestServiceImpl implements MobileRequestService {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule()) // enables OffsetDateTime, LocalDateTime, etc.
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-
-
 
 
     @Override
@@ -162,7 +159,8 @@ public class MobileRequestServiceImpl implements MobileRequestService {
             } else if (newStatus == RequestStatus.ACCEPTED) {
                 // if you allow direct ACCEPTED (skipping negotiation)
                 boolean alreadyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
-                if (alreadyAccepted) throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
+                if (alreadyAccepted)
+                    throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
                 req.setStatus(RequestStatus.ACCEPTED);
                 req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
                 mobileRepo.save(req.getMobile());
@@ -217,7 +215,8 @@ public class MobileRequestServiceImpl implements MobileRequestService {
     private void appendMessageInternal(MobileRequest req, Long senderId, String senderType, String text) {
         try {
             List<ConversationMessage> msgs = objectMapper.readValue(
-                    req.getConversation(), new TypeReference<List<ConversationMessage>>() {});
+                    req.getConversation(), new TypeReference<List<ConversationMessage>>() {
+                    });
             if (msgs == null) msgs = new ArrayList<>();
             ConversationMessage cm = new ConversationMessage(senderId, senderType, text, OffsetDateTime.now());
             msgs.add(cm);
@@ -227,29 +226,62 @@ public class MobileRequestServiceImpl implements MobileRequestService {
         }
     }
 
-    private String determineSenderType(Long userId, MobileRequest req) {
-        if (req.getBuyer() != null && req.getBuyer().getUser() != null &&
-                req.getBuyer().getUser().getId().equals(userId)) {
-            return "BUYER";
+    private String determineSenderType(Long senderUserId, MobileRequest req) {
+        try {
+            // 🔹 Buyer side check
+            if (req.getBuyer() != null && req.getBuyer().getUser() != null) {
+                Long buyerUserId = req.getBuyer().getUser().getId();
+                if (senderUserId.equals(buyerUserId)) {
+                    return "BUYER";
+                }
+            }
+
+            // 🔹 Seller side check
+            if (req.getSeller() != null && req.getSeller().getUser() != null) {
+                Long sellerUserId = req.getSeller().getUser().getId();
+                if (senderUserId.equals(sellerUserId)) {
+                    return "SELLER";
+                }
+            }
+
+        } catch (Exception e) {
+            throw new MobileRequestException("Failed to determine sender type", e);
         }
-        if (req.getSeller() != null && req.getSeller().getUser() != null &&
-                req.getSeller().getUser().getId().equals(userId)) {
-            return "SELLER";
-        }
-        // fallback: check roles or assume BUYER
+
         return "UNKNOWN";
     }
 
-    private MobileRequestResponseDTO toResponse(MobileRequest r) {
-        return MobileRequestResponseDTO.builder()
-                .requestId(r.getRequestId())
-                .mobileId(r.getMobile().getMobileId())
-                .buyerId(r.getBuyer().getBuyerId())
-                .sellerId(r.getSeller().getSellerId())
-                .status(r.getStatus().name())
-                .conversationJson(r.getConversation())
-                .createdAt(r.getCreatedAt())
-                .updatedAt(r.getUpdatedAt())
-                .build();
+
+
+
+    private MobileRequestResponseDTO toResponse(MobileRequest req) {
+        MobileRequestResponseDTO dto = new MobileRequestResponseDTO();
+
+        dto.setRequestId(req.getRequestId());
+        dto.setMobileId(req.getMobile().getMobileId());
+        dto.setBuyerId(req.getBuyer().getBuyerId());
+        dto.setSellerId(req.getSeller().getSellerId());
+        dto.setStatus(req.getStatus().name());
+        dto.setCreatedAt(req.getCreatedAt());
+        dto.setUpdatedAt(req.getUpdatedAt());
+
+        // Raw JSON (optional, for debugging)
+//        dto.setConversationJson(req.getConversation());
+
+        // Convert JSON string → List<ConversationMessage>
+        try {
+            if (req.getConversation() != null && !req.getConversation().isEmpty()) {
+                List<ConversationMessage> messages = objectMapper.readValue(
+                        req.getConversation(),
+                        new TypeReference<List<ConversationMessage>>() {
+                        }
+                );
+                dto.setConversation(messages);
+            }
+        } catch (Exception e) {
+            dto.setConversation(null);
+        }
+
+        return dto;
     }
 }
