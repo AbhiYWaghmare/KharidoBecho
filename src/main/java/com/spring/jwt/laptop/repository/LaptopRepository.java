@@ -1,7 +1,8 @@
 package com.spring.jwt.laptop.repository;
 
+import com.spring.jwt.entity.Status;
 import com.spring.jwt.laptop.entity.Laptop;
-import com.spring.jwt.laptop.model.Status;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,7 +17,7 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
     boolean existsBySerialNumber(String serialNumber);
 
 
-    Optional<Laptop> findBySerialNumber(String serialNumber);
+//    Optional<Laptop> findByLaptopId(Long id);
 
 
     @Query("SELECT l FROM Laptop l WHERE l.seller.sellerId = :sellerId AND l.status = :status")
@@ -26,7 +27,7 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
 
 
 
-    Page<Laptop> findByStatus(Status status, Pageable pageable);
+    Page<Laptop> findByStatus(Status pendingStatus, Pageable pageable);
 
 
     @Query("SELECT COUNT(l) FROM Laptop l WHERE l.seller.sellerId = :sellerId AND l.status = :status")
@@ -34,4 +35,5 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
                                 @Param("status") Status status);
 
 
+    Optional<Laptop> findByIdAndDeletedFalse(Long id);
 }
