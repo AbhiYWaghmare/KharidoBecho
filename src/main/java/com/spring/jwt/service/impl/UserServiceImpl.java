@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
         User user = insertUser(userDTO);
 
-        response.setCode(String.valueOf(HttpStatus.OK.value()));
+        response.setCode(String.valueOf(HttpStatus.CREATED.value()));
         response.setMessage("Account Created Successfully !!");
 
         return response;

@@ -1,18 +1,21 @@
 package com.spring.jwt.Mobile.dto;
 
-import lombok.Builder;
+import com.spring.jwt.Mobile.entity.ConversationMessage;
 import lombok.Data;
+
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
-@Builder
 public class MobileRequestResponseDTO {
     private Long requestId;
     private Long mobileId;
     private Long buyerId;
     private Long sellerId;
     private String status;
-    private String conversationJson;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
+//    private String conversationJson; // Raw JSON from DB
+    private List<ConversationMessage> conversation; // Parsed JSON for frontend
 }

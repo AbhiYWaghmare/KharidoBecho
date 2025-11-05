@@ -1,4 +1,4 @@
-package com.spring.jwt.Mobile.dto;
+package com.spring.jwt.Mobile.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
