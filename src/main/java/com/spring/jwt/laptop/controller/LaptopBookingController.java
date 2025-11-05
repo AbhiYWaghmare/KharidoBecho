@@ -1,10 +1,12 @@
 package com.spring.jwt.laptop.controller;
 
 import com.spring.jwt.laptop.dto.BookingResponseDTO;
-import com.spring.jwt.laptop.dto.LaptopBookingDTO;
-import com.spring.jwt.laptop.entity.Booking;
-import com.spring.jwt.laptop.model.Status;
-import com.spring.jwt.laptop.service.LaptopBookingService;
+import com.spring.jwt.laptop.dto.LaptopRequestCreateDTO;
+import com.spring.jwt.laptop.dto.LaptopRequestResponseDTO;
+import com.spring.jwt.laptop.entity.LaptopBooking;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
+import com.spring.jwt.laptop.service.LaptopRequestService;
+import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,89 +28,72 @@ import java.util.List;
 @RequestMapping("/api/laptopBookings")
 @RequiredArgsConstructor
 public class LaptopBookingController {
-    private final LaptopBookingService laptopBookingService;
-    BookingResponseDTO bookingResponseDTO = new BookingResponseDTO();
+    private final LaptopRequestService service;
 
-
-    //====================================================//
-    //  Create Laptop Booking                             //
-    //  Post /api/laptopBookings/createBooking            //
-    //====================================================//
-    @PostMapping("/createBooking")
-    public ResponseEntity<BookingResponseDTO> createBooking(@RequestBody LaptopBookingDTO laptopBookingDTO, HttpServletRequest request){
-        Booking booking = laptopBookingService.createBooking(laptopBookingDTO);
-        String apiPath = request.getRequestURI();
-        Long laptopId = (booking.getLaptop() != null) ? booking.getLaptop().getId() : null;
-        Long bookingId = booking.getId();
-        String booKingStatus = booking.getStatus().name();
-
-        bookingResponseDTO.setMessage(booking.getStatus() == Status.PENDINGREQUEST
-                ? "Laptop booking created successfully and currently status is pending"
-                : "Laptop booked Successfully!");
-
-        String message = bookingResponseDTO.getMessage();
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new BookingResponseDTO(
-                        "CREATED",
-                        message,
-                        200,
-                        LocalDateTime.now(),
-                        "NULL",
-                        apiPath,
-                        laptopId,
-                        bookingId,
-                        booKingStatus));
+    /**
+     * Create a new laptop request
+     * Returns 201 CREATED on success
+     */
+    @PostMapping("/create")
+    public ResponseEntity<LaptopRequestResponseDTO> create(@RequestBody LaptopRequestCreateDTO dto) {
+        LaptopRequestResponseDTO response = service.createRequest(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    //====================================================//
-    //  Get Laptop pending Booking                        //
-    //  GET /api/laptopBookings/getPendingBookings        //
-    //====================================================//
-    @GetMapping("/getPendingBookings")
-    public ResponseEntity<List<Booking>> getPendingApis() {
-        List<Booking> pendingBookings = laptopBookingService.getAllPendingBookings();
-        return ResponseEntity.ok(pendingBookings);
+    /**
+     * List all requests for a specific laptop
+     * Returns 200 OK
+     */
+    @GetMapping("/{laptopId}")
+    public ResponseEntity<List<LaptopRequestResponseDTO>> listForLaptop(@PathVariable Long laptopId) {
+        return ResponseEntity.ok(service.listRequestsForLaptop(laptopId));
     }
 
-    //====================================================//
-    //  Approve Laptop pending Booking                    //
-    //  PATCH /api/laptopBookings/approveBooking          //
-    //====================================================//
-    @PatchMapping("/approveBooking")
-    public ResponseEntity<BookingResponseDTO> approveBookings(@RequestParam Long booking_Id, HttpServletRequest request){
-        Booking approvedBooking = laptopBookingService.approveBooking(booking_Id);
-
-        BookingResponseDTO responseDTO = new BookingResponseDTO();
-        responseDTO.setMessage("Booking approved successfully");
-        responseDTO.setStatusCode(200);
-        responseDTO.setTimeStamp(LocalDateTime.now());
-        responseDTO.setApiPath(request.getRequestURI());
-        responseDTO.setLaptopId(approvedBooking.getLaptop() != null ? approvedBooking.getLaptop().getId() : null);
-        responseDTO.setBookingId(approvedBooking.getId());
-        responseDTO.setBookingStatus(approvedBooking.getStatus().name());
-
-        return ResponseEntity.ok(responseDTO);
+    /**
+     * List all requests made by a specific buyer
+     * Returns 200 OK
+     */
+    @GetMapping("/buyer/{buyerId}")
+    public ResponseEntity<List<LaptopRequestResponseDTO>> listForBuyer(@PathVariable Long buyerId) {
+        return ResponseEntity.ok(service.listRequestsForBuyer(buyerId));
     }
 
-    //====================================================//
-    //  Reject Laptop Booking                             //
-    //  PATCH /api/laptopBookings/rejectBooking           //
-    //====================================================//
-    @PatchMapping("/rejectBooking")
-    public ResponseEntity<BookingResponseDTO> rejectBooking(@RequestParam Long bookingId, HttpServletRequest request) {
-        Booking rejectBooking = laptopBookingService.rejectBooking(bookingId);
+    /**
+     * Update status (PENDING / ACCEPTED / REJECTED / COMPLETED)
+     * Returns 200 OK
+     */
+    @PatchMapping("/{requestId}/status")
+    public ResponseEntity<LaptopRequestResponseDTO> updateStatus(
+            @PathVariable Long requestId,
+            @RequestParam String status) {
+        return ResponseEntity.ok(service.updateRequestStatus(requestId, status));
+    }
 
-        BookingResponseDTO responseDTO = new BookingResponseDTO();
-        responseDTO.setMessage("Booking rejected successfully");
-        responseDTO.setStatusCode(200);
-        responseDTO.setTimeStamp(LocalDateTime.now());
-        responseDTO.setApiPath(request.getRequestURI());
-        responseDTO.setLaptopId(rejectBooking.getLaptop() != null ? rejectBooking.getLaptop().getId() : null);
-        responseDTO.setBookingId(rejectBooking.getId());
-        responseDTO.setBookingStatus(rejectBooking.getStatus().name());
+    /**
+     * Append a chat message to a laptop request conversation
+     * Returns 200 OK
+     */
+    @PostMapping("/{requestId}/message")
+    public ResponseEntity<LaptopRequestResponseDTO> sendMessage(
+            @PathVariable Long requestId,
+            @RequestParam Long senderUserId,
+            @RequestParam String message) {
+        return ResponseEntity.ok(service.appendMessage(requestId, senderUserId, message));
+    }
 
-        return ResponseEntity.ok(responseDTO);
+    /**
+     * Mark request as completed (sold) and reject others
+     * Returns 200 OK
+     */
+    @PostMapping("/{requestId}/complete")
+    public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
+        service.markRequestCompletedAndMarkSold(requestId);
+        return ResponseEntity.ok(
+                BaseResponseDTO.builder()
+                        .code("200")
+                        .message("Marked sold and others rejected")
+                        .build()
+        );
     }
 
 }

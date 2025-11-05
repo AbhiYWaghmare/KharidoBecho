@@ -1,11 +1,12 @@
 package com.spring.jwt.laptop.controller;
 
+import com.spring.jwt.entity.Status;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
-import com.spring.jwt.laptop.entity.Booking;
 import com.spring.jwt.laptop.entity.Laptop;
-import com.spring.jwt.laptop.model.Status;
+import com.spring.jwt.laptop.entity.LaptopBooking;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopService;
 
@@ -38,7 +39,7 @@ import java.util.Map;
 public class LaptopController {
     private final LaptopRepository laptopRepository;
     private final LaptopService laptopService;
-    Booking booking;
+    LaptopBooking booking;
     LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO();
 
 
@@ -59,10 +60,10 @@ public class LaptopController {
         String apiPath = request.getRequestURI();
 //        String imageUrl = laptopPhotos.getPhoto_link();
         Long laptopId = laptop.getId();
-        Long bookingId = booking.getId();
+//        Long bookingId = booking.getLaptopBookingId();
 
        return ResponseEntity.status(HttpStatus.CREATED)
-               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", apiPath,laptopResponseDTO.getImageUrl(),laptopId,bookingId));
+               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", apiPath,laptopResponseDTO.getImageUrl(),laptopId));
     }  
 
     //====================================================//
@@ -80,8 +81,8 @@ public class LaptopController {
             String apiPath = request.getRequestURI();
 //            String imageUrl = laptopPhotos.getPhoto_link();
             Long laptop_Id = laptop.getId();
-            Long bookingId = booking.getId();
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", apiPath, laptopResponseDTO.getImageUrl(),laptop_Id,bookingId));
+//            Long bookingId = booking.getLaptopBookingId();
+            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", apiPath, laptopResponseDTO.getImageUrl(),laptop_Id));
     }
 
     //====================================================//
@@ -110,11 +111,11 @@ public class LaptopController {
     //====================================================//
     @DeleteMapping("/delete")
     public ResponseEntity<Map<String, String>> deleteLaptopById(@RequestParam @Min(1) Long laptopId) {
-        laptopService.deleteLaptopById(laptopId);
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "Laptop deleted successfully");
-        return ResponseEntity.ok(response);
+        String message = laptopService.deleteLaptopById(laptopId);
+        return ResponseEntity.ok(Map.of(
+                "message", message,
+                "status", "success"
+        ));
     }
 
 

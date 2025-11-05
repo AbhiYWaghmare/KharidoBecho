@@ -3,10 +3,10 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
 import com.spring.jwt.exception.colour.ColourNotFoundException;
 import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
-import com.spring.jwt.exception.bookings.BookingNotFoundException;
 import com.spring.jwt.exception.bookings.PendingBookingException;
 import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.BookingResponseDTO;
@@ -428,8 +428,8 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(BookingNotFoundException.class)
-    public ResponseEntity<BookingResponseDTO> handleBookingNotFoundException(BookingNotFoundException ex,WebRequest webRequest){
+    @ExceptionHandler(LaptopRequestNotFoundException.class)
+    public ResponseEntity<BookingResponseDTO> handleBookingNotFoundException(LaptopRequestNotFoundException ex,WebRequest webRequest){
         BookingResponseDTO error = new BookingResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri",""));
         error.setCode("error");

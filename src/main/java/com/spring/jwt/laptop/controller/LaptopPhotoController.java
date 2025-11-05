@@ -2,7 +2,7 @@ package com.spring.jwt.laptop.controller;
 
 import com.cloudinary.Cloudinary;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
-import com.spring.jwt.laptop.entity.Booking;
+import com.spring.jwt.laptop.entity.LaptopBooking;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +37,7 @@ public class LaptopPhotoController {
 
     private final Cloudinary cloudinary;
 
-    Booking booking;
+    LaptopBooking booking;
     private static final long MAX_FILE_SIZE = 400 * 1024;
 
 
@@ -61,8 +61,8 @@ public class LaptopPhotoController {
                 "NULL",
                 httpServletRequest.getRequestURI(),
                 imageUrl,
-                laptopId,
-                booking.getId()
+                laptopId
+
         );
         return ResponseEntity.ok(laptopResponseDTO);
     }
