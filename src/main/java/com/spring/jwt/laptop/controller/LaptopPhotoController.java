@@ -28,8 +28,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@AllArgsConstructor
-@NoArgsConstructor(force = true)
 @RequestMapping("/api/laptop-photo")
 public class LaptopPhotoController {
 
