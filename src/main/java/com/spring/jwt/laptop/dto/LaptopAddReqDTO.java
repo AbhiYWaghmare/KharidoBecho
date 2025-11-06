@@ -8,5 +8,5 @@ import lombok.Data;
 public class LaptopAddReqDTO {
     private String code;
     private String message;
-    private Long mobileId;
+    private Long laptopId;
 }

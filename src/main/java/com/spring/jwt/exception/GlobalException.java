@@ -3,9 +3,12 @@ package com.spring.jwt.exception;
 
 
 
+import com.spring.jwt.exception.bookings.LaptopRequestException;
 import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
 import com.spring.jwt.exception.colour.ColourNotFoundException;
+import com.spring.jwt.laptop.dto.LaptopErrorResponse;
+import com.spring.jwt.laptop.dto.LaptopRequestResponseDTO;
 import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
 import com.spring.jwt.exception.bookings.PendingBookingException;
 import com.spring.jwt.exception.laptop.*;
@@ -373,6 +376,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
 
+    @ExceptionHandler(LaptopNotFoundException.class)
     public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
         LaptopResponseDTO error = new LaptopResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
@@ -428,31 +432,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    @ExceptionHandler(LaptopRequestNotFoundException.class)
-    public ResponseEntity<BookingResponseDTO> handleBookingNotFoundException(LaptopRequestNotFoundException ex,WebRequest webRequest){
-        BookingResponseDTO error = new BookingResponseDTO();
-        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
-        error.setCode("error");
-        error.setStatusCode(HttpStatus.NOT_FOUND.value());
-        error.setMessage(ex.getMessage());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-    }
-
-    @ExceptionHandler(PendingBookingException.class)
-    public ResponseEntity<BookingResponseDTO> handlePendingBookingException(PendingBookingException ex, WebRequest webRequest){
-        BookingResponseDTO error = new BookingResponseDTO();
-        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
-        error.setCode("error");
-        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        error.setMessage(ex.getMessage());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-    }
 
     @ExceptionHandler(ColourNotFoundException.class)
     public ResponseEntity<ColourResponseDTO> handleColourNotFoundException(ColourNotFoundException ex,WebRequest request) {
@@ -468,6 +448,19 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(LaptopRequestException.class)
+    public ResponseEntity<LaptopErrorResponse> handleLaptopRequestException(LaptopRequestException ex, WebRequest request) {
+        LaptopErrorResponse error = new LaptopErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatus("error");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setApiPath(request.getDescription(false).replace("uri=", ""));
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
     @ExceptionHandler(ColourAlreadyExistsException.class)
     public ResponseEntity<ColourResponseDTO> handleColourAlreadyExistsException(ColourAlreadyExistsException ex,WebRequest request) {
         ColourResponseDTO error = new ColourResponseDTO();
