@@ -8,6 +8,7 @@ import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import com.spring.jwt.laptop.service.LaptopRequestService;
 import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class LaptopBookingController {
      * Returns 201 CREATED on success
      */
     @PostMapping("/create")
-    public ResponseEntity<LaptopRequestResponseDTO> create(@RequestBody LaptopRequestCreateDTO dto) {
+    public ResponseEntity<LaptopRequestResponseDTO> create(@Valid @RequestBody LaptopRequestCreateDTO dto) {
         LaptopRequestResponseDTO response = service.createRequest(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -62,32 +63,32 @@ public class LaptopBookingController {
      * Update status (PENDING / ACCEPTED / REJECTED / COMPLETED)
      * Returns 200 OK
      */
-    @PatchMapping("/{requestId}/status")
+    @PatchMapping("/{laptopBookingId}/status")
     public ResponseEntity<LaptopRequestResponseDTO> updateStatus(
-            @PathVariable Long requestId,
+            @PathVariable Long laptopBookingId,
             @RequestParam String status) {
-        return ResponseEntity.ok(service.updateRequestStatus(requestId, status));
+        return ResponseEntity.ok(service.updateRequestStatus(laptopBookingId, status));
     }
 
     /**
      * Append a chat message to a laptop request conversation
      * Returns 200 OK
      */
-    @PostMapping("/{requestId}/message")
+    @PostMapping("/{laptopBookingId}/message")
     public ResponseEntity<LaptopRequestResponseDTO> sendMessage(
-            @PathVariable Long requestId,
+            @PathVariable Long laptopBookingId,
             @RequestParam Long senderUserId,
             @RequestParam String message) {
-        return ResponseEntity.ok(service.appendMessage(requestId, senderUserId, message));
+        return ResponseEntity.ok(service.appendMessage(laptopBookingId, senderUserId, message));
     }
 
     /**
      * Mark request as completed (sold) and reject others
      * Returns 200 OK
      */
-    @PostMapping("/{requestId}/complete")
-    public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
-        service.markRequestCompletedAndMarkSold(requestId);
+    @PostMapping("/{laptopBookingId}/complete")
+    public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long laptopBookingId) {
+        service.markRequestCompletedAndMarkSold(laptopBookingId);
         return ResponseEntity.ok(
                 BaseResponseDTO.builder()
                         .code("200")
