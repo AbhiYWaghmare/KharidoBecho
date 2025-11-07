@@ -4,17 +4,12 @@ package com.spring.jwt.exception;
 
 
 import com.spring.jwt.exception.bookings.LaptopRequestException;
-import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
 import com.spring.jwt.exception.colour.ColourNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopErrorResponse;
-import com.spring.jwt.laptop.dto.LaptopRequestResponseDTO;
 import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
-import com.spring.jwt.exception.bookings.PendingBookingException;
 import com.spring.jwt.exception.laptop.*;
-import com.spring.jwt.laptop.dto.BookingResponseDTO;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;

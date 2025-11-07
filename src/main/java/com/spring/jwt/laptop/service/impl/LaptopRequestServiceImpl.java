@@ -24,6 +24,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +68,16 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
             throw new LaptopRequestException("You have already sent a request for this product.");
         }
 
+        if (dto.getBookingDate() == null || !dto.getBookingDate().isAfter(LocalDate.now())) {
+            throw new LaptopRequestException("Booking date must be in the future.");
+        }
+
+
         LaptopBooking r = LaptopBooking.builder()
                 .laptop(laptop)
                 .buyer(buyer)
                 .seller(seller)
+                .onDate(dto.getBookingDate())
                 .pendingStatus(LaptopRequestStatus.PENDING)
                 .requestConversation("[]")
                 .build();
@@ -124,7 +131,10 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                 laptopRepo.save(req.getLaptop());
 
             } else if (newStatus == LaptopRequestStatus.REJECTED) {
+                boolean exists = requestRepo.existsByLaptop_IdAndPendingStatus(req.getLaptop().getId(), LaptopRequestStatus.REJECTED);
+                if (exists) throw new LaptopRequestException("Request already REJECTED for this laptop.");
                 req.setPendingStatus(LaptopRequestStatus.REJECTED);
+
                 boolean anyAccepted = requestRepo.existsByLaptop_IdAndPendingStatus(req.getLaptop().getId(), LaptopRequestStatus.ACCEPTED);
                 if (!anyAccepted && req.getLaptop().getStatus() != Status.SOLD) {
                     req.getLaptop().setStatus(Status.ACTIVE);
@@ -132,6 +142,9 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                 }
 
             } else if (newStatus == LaptopRequestStatus.COMPLETED) {
+                boolean exists = requestRepo.existsByLaptop_IdAndPendingStatus(req.getLaptop().getId(), LaptopRequestStatus.COMPLETED);
+                if (exists) throw new LaptopRequestException("Request already COMPLETED for this laptop.");
+
                 req.setPendingStatus(LaptopRequestStatus.COMPLETED);
                 req.getLaptop().setStatus(Status.SOLD);
                 laptopRepo.save(req.getLaptop());
@@ -141,7 +154,24 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                     requestRepo.save(o);
                 }
 
-            } else {
+            } else if(newStatus == LaptopRequestStatus.IN_NEGOTIATION){
+                boolean exists = requestRepo.existsByLaptop_IdAndPendingStatus(req.getLaptop().getId(), LaptopRequestStatus.IN_NEGOTIATION);
+                if (exists) throw new LaptopRequestException("Laptop is already is in IN_NEGOTIATION.");
+
+                req.setPendingStatus(LaptopRequestStatus.IN_NEGOTIATION);
+                req.getLaptop().setStatus(Status.ACTIVE);
+                laptopRepo.save(req.getLaptop());
+
+            }
+            else if(newStatus == LaptopRequestStatus.PENDING){
+                boolean exists = requestRepo.existsByLaptop_IdAndPendingStatus(req.getLaptop().getId(), LaptopRequestStatus.PENDING);
+                if (exists) throw new LaptopRequestException("Laptop request is already PENDING.");
+
+                req.setPendingStatus(LaptopRequestStatus.PENDING);
+                req.getLaptop().setStatus(Status.ACTIVE);
+                laptopRepo.save(req.getLaptop());
+            }
+            else {
                 req.setPendingStatus(newStatus);
             }
 
@@ -212,13 +242,14 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
 
     private LaptopRequestResponseDTO toResponse(LaptopBooking r) {
         return LaptopRequestResponseDTO.builder()
-                .requestId(r.getLaptopBookingId())
+                .laptopBookingId(r.getLaptopBookingId())
                 .laptopId(r.getLaptop().getId())
                 .buyerId(r.getBuyer().getBuyerId())
                 .sellerId(r.getSeller().getSellerId())
                 .status(r.getPendingStatus().name())
                 .conversationJson(r.getRequestConversation())
                 .createdAt(r.getCreatedAt())
+                .bookingDate(r.getOnDate())
                 .build();
     }
 
