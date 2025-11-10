@@ -30,6 +30,7 @@ public interface CarBookingRepository extends JpaRepository<CarBooking, Long> {
     List<CarBooking> findByBookingStatus(CarBooking.Status bookingStatus);
     List<CarBooking> findByCar_CarId(Long carId);
     boolean existsByCar_CarIdAndBookingStatus(Long carId, CarBooking.Status bookingStatus);
+    boolean existsByBuyer_BuyerIdAndCar_CarId(Long buyerId, Long carId);
 
 
 }
