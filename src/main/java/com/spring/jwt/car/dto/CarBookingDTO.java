@@ -1,15 +1,20 @@
-package com.spring.jwt.car.dto;
+             package com.spring.jwt.car.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.OffsetDateTime;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+//@AllArgsConstructor
+//@NoArgsConstructor
+@Getter
+@Setter
 public class CarBookingDTO {
     private Long carId;
     private Long buyerId;
+    private Long userId;
+
+    private String message;
+
 //    private OffsetDateTime bookingDate;
 }

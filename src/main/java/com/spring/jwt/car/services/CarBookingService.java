@@ -6,7 +6,10 @@ import java.util.List;
 
 public interface CarBookingService {
     CarBooking createBooking(CarBookingDTO carBookingDTO);
+    CarBooking acceptBooking(Long bookingId);
     List<CarBooking> getPendingBookings();
     CarBooking approveBooking(Long bookingId);
     CarBooking rejectBooking(Long bookingId);
+    CarBooking addMessage(Long id, CarBookingDTO conversation);
+
 }

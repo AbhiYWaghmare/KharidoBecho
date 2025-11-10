@@ -36,9 +36,25 @@ public class CarBookingController {
                 ));
     }
 
+
+
+    // ✅ Accept booking
+    @PatchMapping("/acceptBooking")
+    public ResponseEntity<CarBookingResponseDTO> acceptBooking(@RequestParam Long bookingId) {
+        CarBooking booking = carBookingService.acceptBooking(bookingId);
+        return ResponseEntity.ok(
+                new CarBookingResponseDTO(
+                        "Car booking accepted successfully",
+                        booking.getCar() != null ? booking.getCar().getCarId() : null,
+                        booking.getBookingId(),
+                        booking.getBookingStatus().name()
+                )
+        );
+    }
+
     // ✅ Get all pending bookings
     @GetMapping("/getPendingBookings")
-    public ResponseEntity<List<CarBooking>> getPendingBookings() {
+    public ResponseEntity<List<CarBooking> > getPendingBookings() {
         return ResponseEntity.ok(carBookingService.getPendingBookings());
     }
 
@@ -68,4 +84,13 @@ public class CarBookingController {
                 booking.getBookingStatus().name()
         ));
     }
+    @PostMapping("/send")
+    public ResponseEntity<?> sendMessage(
+            @RequestParam Long bookingId,
+            @RequestBody CarBookingDTO newMessage) {
+
+        carBookingService.addMessage(bookingId, newMessage);
+        return ResponseEntity.ok("Message added successfully");
+    }
+
 }

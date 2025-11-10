@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
+
 public class OtpUtil {
 
     private static final String HASH_ALGORITHM = "SHA-256";

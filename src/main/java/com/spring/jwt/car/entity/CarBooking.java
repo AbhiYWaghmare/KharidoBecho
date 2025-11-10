@@ -24,7 +24,7 @@
 ////    @OneToOne(fetch = FetchType.EAGER)
 //    @JoinColumn(name = "car_id", nullable = false)
 //    @ManyToOne
-//    private Car car;
+//    private Cesar car;
 //
 //    @Column(name = "booking_date")
 //    private LocalDate onDate;
@@ -32,7 +32,6 @@
 //    @Enumerated(EnumType.STRING)
 //    @Column(name = "status")
 //    private Status status;
-//
 //    @Column(name = "created_at")
 //    private LocalDateTime createdAt;
 //}
@@ -42,7 +41,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Buyer;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "car_bookings")
@@ -75,14 +78,32 @@ public class CarBooking {
     @Column(name = "booking_date", nullable = false)
     private OffsetDateTime bookingDate;
 
+//    @ElementCollection
+//    @CollectionTable(
+//            name = "booking_conversations",
+//            joinColumns = @JoinColumn(name = "booking_id")
+//    )
+//    private List<ConversationMessage> conversation = new ArrayList<>();
+//
+//    @PrePersist
+//    private void prePersist() {
+//        if (this.bookingDate == null) {
+//            this.bookingDate = OffsetDateTime.now();
+//        }
+//        if (this.bookingStatus == null) {
+//            this.bookingStatus = Status.PENDING;
+//        }
+//    }
+        @Column(name = "created_at")
+        private LocalDateTime createdAt;
+
+    @Column(name = "conversation", columnDefinition = "JSON")
+    private String conversation;
     @PrePersist
-    private void prePersist() {
-        if (this.bookingDate == null) {
-            this.bookingDate = OffsetDateTime.now();
-        }
-        if (this.bookingStatus == null) {
-            this.bookingStatus = Status.PENDING;
-        }
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        if (this.bookingStatus == null) this.bookingStatus = Status.PENDING;
+        if (this.conversation == null) this.conversation = "[]";
     }
 
     public enum Status {
