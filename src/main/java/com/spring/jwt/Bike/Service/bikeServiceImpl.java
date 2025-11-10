@@ -6,10 +6,10 @@ import com.spring.jwt.Bike.Entity.bikeStatus;
 import com.spring.jwt.Bike.Repository.bikeRepository;
 import com.spring.jwt.Bike.dto.bikeDto;
 import com.spring.jwt.entity.Seller;
-import com.spring.jwt.Bike.Exceptions.InvalidBikeData;
-import com.spring.jwt.Bike.Exceptions.SellerNotFound;
-import com.spring.jwt.Bike.Exceptions.StatusNotFoundException;
-import com.spring.jwt.Bike.Exceptions.bikeNotFoundException;
+import com.spring.jwt.exception.Bike.InvalidBikeData;
+import com.spring.jwt.exception.Bike.SellerNotFound;
+import com.spring.jwt.exception.Bike.StatusNotFoundException;
+import com.spring.jwt.exception.Bike.bikeNotFoundException;
 import com.spring.jwt.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -86,6 +86,7 @@ public class bikeServiceImpl implements bikeService {
 
         // Save valid bike
         Bike savedBike = bikerepository.save(bike);
+        bikedto.setBike_id(savedBike.getBike_id());
         return convertToDto(savedBike);
     }
 

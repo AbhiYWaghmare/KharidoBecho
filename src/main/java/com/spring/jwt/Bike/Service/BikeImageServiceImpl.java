@@ -4,8 +4,8 @@ import com.cloudinary.Cloudinary;
 import com.spring.jwt.Bike.Entity.Bike;
 import com.spring.jwt.Bike.Entity.BikeImage;
 
-import com.spring.jwt.Bike.Exceptions.BikeImageNotFound;
-import com.spring.jwt.Bike.Exceptions.bikeNotFoundException;
+import com.spring.jwt.exception.Bike.BikeImageNotFound;
+import com.spring.jwt.exception.Bike.bikeNotFoundException;
 import com.spring.jwt.Bike.Repository.BikeImageRepository;
 import com.spring.jwt.Bike.Repository.bikeRepository;
 
