@@ -592,6 +592,15 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
             return new ResponseEntity<>(body, HttpStatus.CONFLICT);
         }
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBookingNotFound(BookingNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Booking Not Found");
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
 }
 
 
