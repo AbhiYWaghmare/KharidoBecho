@@ -143,8 +143,9 @@ public Bike_booking rejectBooking(Long bookingId) {
             .orElseThrow(() -> new BookingNotFoundException("Booking not found with ID: " + bookingId));
 
     // Allow rejection only if the booking is APPROVED
-    if (booking.getStatus() != Bike_booking.BookingStatus.APPROVED) {
-        throw new ResourceNotFoundException("Only APPROVED bookings can be rejected.");
+    if (booking.getStatus() != Bike_booking.BookingStatus.ACCEPTED&&
+            booking.getStatus() != Bike_booking.BookingStatus.IN_NEGOTIATION) {
+        throw new ResourceNotFoundException("Only ACCEPTED & IN_NEGOTIATION bookings can be rejected.");
     }
 
     // Set status

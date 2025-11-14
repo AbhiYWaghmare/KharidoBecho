@@ -21,7 +21,7 @@ public class Bike_booking_controller {
     @Autowired
     Bike_booking_service bikeBookingService;
 
-
+/*
     @PostMapping("/post")
     public ResponseEntity<BookingResponce> createBooking(
             @RequestParam Long bikeId,
@@ -45,6 +45,24 @@ public class Bike_booking_controller {
                         booking.getBuyer().getBuyerId()
                 ));
     }
+
+ */
+@PostMapping("/post")
+public ResponseEntity<BookingResponce> createBooking(
+        @RequestBody Bike_booking_dto dto
+) {
+
+    Bike_booking booking = bikeBookingService.createBooking(dto);
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+            .body(new BookingResponce(
+                    "SUCCESS",
+                    "Bike booking created successfully",
+                    booking.getId(),
+                    booking.getBike().getBike_id(),
+                    booking.getBuyer().getBuyerId()
+            ));
+}
 
 
 
