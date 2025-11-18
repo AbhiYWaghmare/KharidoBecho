@@ -127,6 +127,7 @@ public class AppConfig {
                     "api/v1/sellers/**",
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
+                    "/api/v1/mobile/requests/**",
 
 
                 jwtConfig.getUrl(),
@@ -163,6 +164,7 @@ public class AppConfig {
 
                 .requestMatchers("/api/v1/mobiles/**").permitAll()
                 .requestMatchers("/api/v1/mobile-images/**").permitAll()
+                .requestMatchers("/api/v1/mobile/requests/**").permitAll()
 
                 .requestMatchers("/api/v1/cars/**").permitAll()
                 .requestMatchers("/api/v1/car-images/**").permitAll()
@@ -175,10 +177,6 @@ public class AppConfig {
                 .requestMatchers("/api/laptop-photo/**").permitAll()
 
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
-
-
-                .requestMatchers("/api/laptops/**").permitAll()
-                .requestMatchers("/api/photo/**").permitAll()
 
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
@@ -221,6 +219,7 @@ public class AppConfig {
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
@@ -232,8 +231,6 @@ public class AppConfig {
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"), // <-- ADD THIS
 
-                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),

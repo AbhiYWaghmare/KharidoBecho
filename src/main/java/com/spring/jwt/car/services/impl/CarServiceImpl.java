@@ -56,7 +56,7 @@ public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
         if (req.getYearOfPurchase() != null) {
             int currentYear = Year.now().getValue();
             if (req.getYearOfPurchase() > currentYear) {
-                throw new CarValidationException("Year of manufacture cannot be in the future.");
+                throw new CarValidationException("Year of Purchase cannot be in the future.");
             }
             if (req.getYearOfPurchase() < 2000) {
                 throw new CarValidationException("Year must be after 2000.");
