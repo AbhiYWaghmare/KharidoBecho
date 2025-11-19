@@ -3,8 +3,10 @@ package com.spring.jwt.car.mapper;
 import com.spring.jwt.car.dto.CarRequestDTO;
 import com.spring.jwt.car.dto.CarResponseDTO;
 import com.spring.jwt.car.entity.Car;
+import com.spring.jwt.car.entity.CarImage;
 //import com.spring.jwt.car.entity.CarImage;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class CarMapper {
@@ -55,7 +57,10 @@ public class CarMapper {
 
 
         // Images
-//        dto.setImages(car.getImages().stream().map(CarImage::getImageUrl).collect(Collectors.toList()));
+        dto.setImages(
+                car.getImages() == null ? Collections.emptyList() :
+                        car.getImages().stream().map(CarImage::getImageUrl).collect(Collectors.toList())
+        );
 
         return dto;
     }
