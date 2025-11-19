@@ -84,6 +84,15 @@ public class bikeController {
         Page<bikeDto> bikes = bikeService.getBikesBySellerAndStatus(sellerId, status, page, size);
         return ResponseEntity.ok(bikes);
     }
+    @GetMapping("/seller/{sellerId}/page/{page}/size/{size}")
+    public ResponseEntity<Page<bikeDto>> getBikesBySeller(
+            @PathVariable Long sellerId,
+            @PathVariable int page,
+            @PathVariable int size
+    ) {
+        Page<bikeDto> bikes = bikeService.getBikesBySeller(sellerId, page, size);
+        return ResponseEntity.ok(bikes);
+    }
 
     /** GET Bikes by Status with Pagination */
     @GetMapping("/status/{status}/page/{page}/size/{size}")
