@@ -601,26 +601,6 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
         response.put("status", HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 
-    @ExceptionHandler(MobileRequestNotFoundException.class)
-    public ResponseEntity<Map<String,Object>> handleReqNotFound(MobileRequestNotFoundException ex, WebRequest req) {
-        Map<String,Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.NOT_FOUND.value());
-        body.put("error", "Request not found");
-        body.put("message", ex.getMessage());
-        body.put("path", req.getDescription(false));
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(MobileRequestException.class)
-    public ResponseEntity<Map<String,Object>> handleReqValidation(MobileRequestException ex, WebRequest req) {
-        Map<String,Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Request error");
-        body.put("message", ex.getMessage());
-        body.put("path", req.getDescription(false));
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 
     }
 
