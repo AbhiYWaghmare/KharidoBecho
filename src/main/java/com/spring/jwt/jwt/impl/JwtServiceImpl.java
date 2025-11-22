@@ -71,6 +71,44 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public Long extractUserId(String token) {
+        Claims claims = extractClaims(token);
+
+        // Try multiple common keys – adjust if you know exact one
+        Object rawId = claims.get("userId");      // preferred
+        if (rawId == null) {
+            rawId = claims.get("uid");
+        }
+        if (rawId == null) {
+            rawId = claims.get("id");
+        }
+
+        // If you store user id in "sub" as string number, you can fallback:
+        if (rawId == null) {
+            rawId = claims.getSubject(); // sub
+        }
+
+        if (rawId == null) return null;
+
+        if (rawId instanceof Integer i) {
+            return i.longValue();
+        }
+        if (rawId instanceof Long l) {
+            return l;
+        }
+        if (rawId instanceof String s) {
+            try {
+                return Long.parseLong(s);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+
+    @Override
     public Key  getKey() {
         byte[] key = Decoders.BASE64.decode(jwtConfig.getSecret());
         return Keys.hmacShaKeyFor(key);

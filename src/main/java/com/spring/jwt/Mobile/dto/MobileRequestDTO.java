@@ -49,6 +49,7 @@ public class MobileRequestDTO {
     private String model;
 
     // COLOR
+    @NotBlank(message = "Color is required")
     @Pattern(
             regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^[A-Za-z ]{2,30}$",
             message = "Color must be a valid hex code or alphabetic name (2–30 characters)"
