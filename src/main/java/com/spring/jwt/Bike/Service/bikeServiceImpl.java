@@ -305,6 +305,18 @@ public class bikeServiceImpl implements bikeService {
 
         return bikes.map(this::convertToDto);
     }
+    @Override
+    public Page<bikeDto> getBikesBySeller(Long sellerId, int page, int size) {
+        Page<Bike> bikes = bikerepository.findBySeller_SellerId(
+                sellerId, PageRequest.of(page, size)
+        );
+
+        if (bikes.isEmpty()) {
+            throw new bikeNotFoundException("No bikes found for sellerId: " + sellerId);
+        }
+
+        return bikes.map(this::convertToDto);
+    }
 
 
     /** Fetch Bikes by Status (with Pagination) */
