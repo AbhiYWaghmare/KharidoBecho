@@ -1,5 +1,9 @@
 package com.spring.jwt.car.mapper;
 
+import com.spring.jwt.Mobile.Mapper.MobileMapper;
+import com.spring.jwt.Mobile.dto.MobileImageDTO;
+import com.spring.jwt.Mobile.entity.MobileImage;
+import com.spring.jwt.car.dto.CarImageDTO;
 import com.spring.jwt.car.dto.CarRequestDTO;
 import com.spring.jwt.car.dto.CarResponseDTO;
 import com.spring.jwt.car.entity.Car;
@@ -55,13 +59,27 @@ public class CarMapper {
         dto.setPincode(car.getPincode());
 
 
-
         // Images
-        dto.setImages(
-                car.getImages() == null ? Collections.emptyList() :
-                        car.getImages().stream().map(CarImage::getImageUrl).collect(Collectors.toList())
-        );
+//        dto.setImages(
+//                car.getImages() == null ? Collections.emptyList() :
+//                        car.getImages().stream().map(CarImage::getImageUrl).collect(Collectors.toList())
+//        );
+//
+//        return dto;
+//    }
 
+        dto.setImages(
+                car.getImages().stream()
+                        .map(CarMapper::toImageDTO)
+                        .collect(Collectors.toList())
+        );
+        return dto;
+    }
+
+    private static CarImageDTO toImageDTO(CarImage image) {
+        CarImageDTO dto = new CarImageDTO();
+        dto.setImageId(image.getImageId());
+        dto.setImageUrl(image.getImageUrl());
         return dto;
     }
 

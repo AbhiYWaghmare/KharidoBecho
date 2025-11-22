@@ -1,5 +1,6 @@
 package com.spring.jwt.Mobile.Mapper;
 
+import com.spring.jwt.Mobile.dto.MobileImageDTO;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
 import com.spring.jwt.Mobile.entity.Mobile;
@@ -25,7 +26,21 @@ public class MobileMapper {
         dto.setCreatedAt(m.getCreatedAt());
         dto.setUpdatedAt(m.getUpdatedAt());
         dto.setSellerId(m.getSeller() != null ? m.getSeller().getSellerId() : null);
-        dto.setImages(m.getImages().stream().map(MobileImage::getImageUrl).collect(Collectors.toList()));
+//        dto.setImages(m.getImages().stream().map(MobileImage::getImageUrl).collect(Collectors.toList()));
+
+        // changed part: map MobileImage -> MobileImageDTO (id + url)
+        dto.setImages(
+                m.getImages().stream()
+                        .map(MobileMapper::toImageDTO)
+                        .collect(Collectors.toList())
+        );
+        return dto;
+    }
+
+    private static MobileImageDTO toImageDTO(MobileImage image) {
+        MobileImageDTO dto = new MobileImageDTO();
+        dto.setImageId(image.getImageId());
+        dto.setImageUrl(image.getImageUrl());
         return dto;
     }
 

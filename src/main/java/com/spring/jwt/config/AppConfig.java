@@ -122,6 +122,7 @@ public class AppConfig {
 
                     "/bikes/**",
 
+
                     "api/v1/auth/**",
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
@@ -131,7 +132,9 @@ public class AppConfig {
 
 
                 jwtConfig.getUrl(),
-                jwtConfig.getRefreshUrl()
+                jwtConfig.getRefreshUrl(),
+
+                    "/ws-auction/**"
             )
         );
 
@@ -178,6 +181,13 @@ public class AppConfig {
 
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
+                // existing rules...
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/v1/users/**").permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/buyers/**").permitAll()
+                .requestMatchers("/api/v1/sellers/**").permitAll()
+//                .requestMatchers("/ws-auction/**").permitAll()   //  add this
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
@@ -197,13 +207,14 @@ public class AppConfig {
 
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/user/**").permitAll()
+                .requestMatchers("/ws-auction/**").permitAll()
 
 
-                .anyRequest().authenticated());
+//                .anyRequest().authenticated());
 
               //=====================================================
                 //Use When we want to permit all request
-                //.anyRequest().permitAll());
+                .anyRequest().permitAll());
             //=========================================================
 
         // Create a request matcher for public URLs
@@ -242,7 +253,8 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui.html"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/user/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getUrl()),
-                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl())
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl()),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws-auction/**")
             );
 
         log.debug("Configuring security filters");
@@ -278,6 +290,7 @@ public class AppConfig {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
+//                config.setAllowedOrigins(allowedOrigins); // now includes 63342
                 config.setAllowedOrigins(allowedOrigins);
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowCredentials(true);

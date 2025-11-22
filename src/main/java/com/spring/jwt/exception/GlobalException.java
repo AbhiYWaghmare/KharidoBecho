@@ -3,6 +3,8 @@ package com.spring.jwt.exception;
 
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.auction.exception.AuctionException;
+import com.spring.jwt.auction.exception.BidException;
 import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
@@ -603,6 +605,30 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 
 
     }
+
+
+    @ExceptionHandler(com.spring.jwt.auction.exception.AuctionException.class)
+    public ResponseEntity<Map<String, Object>> handleAuctionException(AuctionException ex, WebRequest request) {
+        Map<String,Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Auction Error");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(com.spring.jwt.auction.exception.BidException.class)
+    public ResponseEntity<Map<String, Object>> handleBidException(BidException ex, WebRequest request) {
+        Map<String,Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Bid Error");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
 
 }
 
