@@ -129,6 +129,7 @@ public class AppConfig {
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
                     "/api/v1/mobile/requests/**",
+                    "/api/v1/auctions/**",
 
 
                 jwtConfig.getUrl(),
@@ -187,6 +188,9 @@ public class AppConfig {
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/buyers/**").permitAll()
                 .requestMatchers("/api/v1/sellers/**").permitAll()
+
+                .requestMatchers("/api/v1/auctions/**").permitAll()
+
 //                .requestMatchers("/ws-auction/**").permitAll()   //  add this
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
@@ -224,6 +228,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/public/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
@@ -235,12 +240,12 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
 
-                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
 
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"), // <-- ADD THIS
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
 
 
 
