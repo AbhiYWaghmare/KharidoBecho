@@ -31,7 +31,7 @@
         <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">
         <span>(SockJS URL)</span>
     </div>
-    <!-- 🔥 removed JWT token field completely -->
+    <!--  removed JWT token field completely -->
     <button onclick="connect()">Connect</button>
     <button onclick="disconnect()">Disconnect</button>
 </fieldset>
@@ -112,7 +112,7 @@
             return;
         }
 
-        // 🔥 No token, just plain SockJS URL
+        //  No token, just plain SockJS URL
         const fullUrl = baseUrl;
 
         log('Connecting to: ' + fullUrl);
@@ -185,7 +185,7 @@
 
         const destination = '/app/auction/' + auctionId + '/bid';
         const payload = {
-            userId: Number(userId),      // 🔥 send userId
+            userId: Number(userId),      //  send userId
             auctionId: Number(auctionId),
             bidAmount: Number(bidAmount)
         };
