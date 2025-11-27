@@ -74,13 +74,13 @@ public class LaptopBookingController {
      * Append a chat message to a laptop request conversation
      * Returns 200 OK
      */
-    @PostMapping("/{laptopBookingId}/message")
-    public ResponseEntity<LaptopRequestResponseDTO> sendMessage(
-            @PathVariable Long laptopBookingId,
-            @RequestParam Long senderUserId,
-            @RequestParam String message) {
-        return ResponseEntity.ok(service.appendMessage(laptopBookingId, senderUserId, message));
-    }
+//    @PostMapping("/{laptopBookingId}/message")
+//    public ResponseEntity<LaptopRequestResponseDTO> sendMessage(
+//            @PathVariable Long laptopBookingId,
+//            @RequestParam Long senderUserId,
+//            @RequestParam String message) {
+//        return ResponseEntity.ok(service.appendMessage(laptopBookingId, senderUserId, message));
+//    }
 
     /**
      * Mark request as completed (sold) and reject others
@@ -96,5 +96,5 @@ public class LaptopBookingController {
                         .build()
         );
     }
-
 }
+

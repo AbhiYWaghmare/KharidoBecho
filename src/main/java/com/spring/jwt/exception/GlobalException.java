@@ -3,9 +3,11 @@ package com.spring.jwt.exception;
 
 
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.spring.jwt.exception.bookings.LaptopRequestException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
 import com.spring.jwt.exception.colour.ColourNotFoundException;
+import com.spring.jwt.laptop.dto.AuctionErrReponse;
 import com.spring.jwt.laptop.dto.LaptopErrorResponse;
 import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
 import com.spring.jwt.exception.laptop.*;
@@ -42,6 +44,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
@@ -469,6 +472,46 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
+
+    @ExceptionHandler(AuctionException.class)
+    public ResponseEntity<AuctionErrReponse> handleAuctionException(AuctionException ex,WebRequest request){
+        AuctionErrReponse error = new AuctionErrReponse();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT_FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity<Object> handleInvalidDateFormat(HttpMessageNotReadableException ex) {
+//        // Check if Jackson failed to parse a LocalDate
+//        Throwable cause = ex.getCause();
+//        if (cause instanceof InvalidFormatException invalidFormatException &&
+//                invalidFormatException.getTargetType() == LocalDate.class) {
+//
+//            return ResponseEntity
+//                    .status(HttpStatus.BAD_REQUEST)
+//                    .body(Map.of(
+//                            "error", "Invalid date format",
+//                            "message", "Please use date format yyyy-MM-dd (e.g. 2025-11-13)",
+//                            "status", HttpStatus.BAD_REQUEST.value()
+//                    ));
+//        }
+
+//        // Default fallback for other parse issues
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(Map.of(
+//                        "error", "Invalid request",
+//                        "message", "Malformed JSON or invalid data format",
+//                        "status", HttpStatus.BAD_REQUEST.value()
+//                ));
+//    }
 
 
 

@@ -32,5 +32,7 @@ public interface LaptopService {
 
     Long countBySellerIdAndStatus(Long sellerId, Status status);
 
+    Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy);
+
 
 }

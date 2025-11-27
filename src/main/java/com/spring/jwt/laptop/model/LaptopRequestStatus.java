@@ -7,6 +7,5 @@ public enum LaptopRequestStatus {
     ACCEPTED,
     REJECTED,
     COMPLETED,
-
     DELETED
 }

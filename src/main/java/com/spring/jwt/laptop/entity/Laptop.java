@@ -97,8 +97,15 @@ public class Laptop {
     @JsonIgnore
     private Seller seller;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
+    private List<LaptopPhotos> laptopPhotos;
+
+
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LaptopPhotos> laptopPhotos = new ArrayList<>();
+    @JsonIgnore
+    private List<LaptopBooking> bookings = new ArrayList<>();
+
 
     private boolean deleted = false;
 

@@ -36,4 +36,6 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
 
 
     Optional<Laptop> findByIdAndDeletedFalse(Long id);
+    Page<Laptop> findBySeller_SellerId(Long sellerId, Pageable pageable);
+
 }

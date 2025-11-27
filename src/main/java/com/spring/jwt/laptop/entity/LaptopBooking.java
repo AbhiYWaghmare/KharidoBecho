@@ -1,5 +1,6 @@
 package com.spring.jwt.laptop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
@@ -13,6 +14,7 @@ import com.spring.jwt.laptop.entity.Laptop;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -33,9 +35,9 @@ public class LaptopBooking {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Buyer buyer;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "laptop_id", nullable = false)
-    @JsonIgnoreProperties({"seller", "laptopPhotos"})
+    @JsonIgnore
     private Laptop laptop;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -54,6 +56,8 @@ public class LaptopBooking {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
+
+
 
 
     @PrePersist

@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,9 +69,10 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
             throw new LaptopRequestException("You have already sent a request for this product.");
         }
 
-        if (dto.getBookingDate() == null || !dto.getBookingDate().isAfter(LocalDate.now())) {
-            throw new LaptopRequestException("Booking date must be in the future.");
+        if (dto.getBookingDate() == null || dto.getBookingDate().isBefore(LocalDate.now())) {
+            throw new LaptopRequestException("Booking date must be today or in the future.");
         }
+
 
 
         LaptopBooking r = LaptopBooking.builder()
@@ -97,14 +99,30 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
 
     @Override
     public List<LaptopRequestResponseDTO> listRequestsForLaptop(Long laptopId) {
-        return requestRepo.findByLaptop_IdOrderByCreatedAtAsc(laptopId).stream()
-                .map(this::toResponse).toList();
+        laptopRepo.findById(laptopId)
+                .orElseThrow(() -> new LaptopRequestException("Laptop with ID " + laptopId + " not found."));
+
+        List<LaptopBooking> requests = requestRepo.findByLaptop_IdOrderByCreatedAtAsc(laptopId);
+
+        if (requests.isEmpty()) {
+            throw new LaptopRequestException("No requests found for laptop ID " + laptopId + ".");
+        }
+
+        return requests.stream().map(this::toResponse).toList();
     }
 
     @Override
     public List<LaptopRequestResponseDTO> listRequestsForBuyer(Long buyerId) {
-        return requestRepo.findByBuyer_BuyerId(buyerId).stream()
-                .map(this::toResponse).toList();
+        buyerRepo.findById(buyerId)
+                .orElseThrow(() -> new LaptopRequestException("Buyer with ID " + buyerId + " not found."));
+
+        List<LaptopBooking> requests = requestRepo.findByBuyer_BuyerId(buyerId);
+
+        if (requests.isEmpty()) {
+            throw new LaptopRequestException("No requests found for buyer ID " + buyerId + ".");
+        }
+
+        return requests.stream().map(this::toResponse).toList();
     }
 
     @Override
@@ -147,7 +165,10 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
 
                 req.setPendingStatus(LaptopRequestStatus.COMPLETED);
                 req.getLaptop().setStatus(Status.SOLD);
-                laptopRepo.save(req.getLaptop());
+                laptopRepo.save(req.getLaptop(
+
+
+                ));
                 var others = requestRepo.findByLaptop_IdAndPendingStatus(req.getLaptop().getId(), LaptopRequestStatus.PENDING);
                 for (var o : others) {
                     o.setPendingStatus(LaptopRequestStatus.REJECTED);

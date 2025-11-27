@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auction WebSocket Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        input { padding: 5px; margin: 5px; width: 220px; }
+        button { padding: 7px 15px; margin: 5px; }
+        #log { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<h2>🔥 Auction WebSocket Tester</h2>
+
+<div>
+    <label>Auction ID:</label>
+    <input id="auctionId" value=""/>
+
+    <label>Buyer ID:</label>
+    <input id="buyerId" value=""/>
+    <br><br>
+
+
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+
+    <br><br>
+
+    <button onclick="subscribe()">Subscribe to Topic</button>
+
+    <br><br>
+
+    <!-- ✅ ADDED BUTTON -->
+    <button onclick="subscribeLiveAuctions()">Subscribe Live Auctions</button>
+
+    <br><br>
+
+    <label>Bid Amount:</label>
+    <input id="bidAmount" value="15000"/>
+
+    <button onclick="sendBid()">Send Bid</button>
+</div>
+
+<h3>Logs:</h3>
+<div id="log"></div>
+
+<script>
+    let stompClient = null;
+    let connected = false;
+
+    function log(message) {
+        const logDiv = document.getElementById("log");
+        logDiv.innerHTML += message + "<br>";
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function connect() {
+        log("Connecting to: http://localhost:8087/Auction");
+
+        const socket = new SockJS("http://localhost:8087/Auction");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, frame => {
+            connected = true;
+            log("CONNECTED: " + frame);
+        });
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        connected = false;
+        log("DISCONNECTED");
+    }
+
+    function subscribe() {
+        if (!connected) return log("❌ Not connected yet!");
+
+        const auctionId = document.getElementById("auctionId").value;
+        const topic = "/topic/auction/" + auctionId;
+
+        log("Subscribing to " + topic);
+
+        stompClient.subscribe(topic, message => {
+            log("<b>[MESSAGE]</b> " + message.body);
+        });
+    }
+
+   function sendBid() {
+    if (!connected) return log("❌ Connect first!");
+
+    const auctionId = document.getElementById("auctionId").value;
+    const bidAmount = document.getElementById("bidAmount").value;
+
+    const payload = {
+        buyerId: 2,             // real buyerId that exists in DB
+        bidAmount: Number(bidAmount)
+    };
+
+    const destination = `/app/auction/${auctionId}/bid`;
+
+    log("Sending to " + destination + " => " + JSON.stringify(payload));
+
+    stompClient.send(destination, {}, JSON.stringify(payload));
+}
+
+
+
+    /* ✅ NEW FUNCTION FOR LIVE AUCTIONS */
+    function subscribeLiveAuctions() {
+        if (!connected) return log("❌ Connect first!");
+
+        const topic = "/topic/auctions/live";
+
+        log("Subscribing to " + topic);
+
+        stompClient.subscribe(topic, msg => {
+            log("<b>[LIVE AUCTIONS]</b> " + msg.body);
+        });
+
+        // Trigger server to send live auctions
+        stompClient.send("/app/auctions/live", {}, "");
+        log("Requested live auctions...");
+    }
+</script>
+
+</body>
+</html>
