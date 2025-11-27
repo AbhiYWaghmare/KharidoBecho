@@ -26,9 +26,10 @@ public class bikeController {
     /** CREATE Bike */
     @PostMapping(value = "/post", consumes = "application/json", produces = "application/json")
     public ResponseEntity<ApiResponse> createBike( @RequestBody bikeDto bikedto) {
-        bikeService.createBike(bikedto);
+       // bikeService.createBike(bikedto);
+        bikeDto createdBike = bikeService.createBike(bikedto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse("SUCCESS", "Bike created successfully","BikeId:"+ bikedto.getBike_id()));
+                .body(new ApiResponse("SUCCESS", "Bike created successfully", createdBike.getBike_id() ));
     }
 
 
@@ -81,6 +82,15 @@ public class bikeController {
             @PathVariable int size
     ) {
         Page<bikeDto> bikes = bikeService.getBikesBySellerAndStatus(sellerId, status, page, size);
+        return ResponseEntity.ok(bikes);
+    }
+    @GetMapping("/seller/{sellerId}/page/{page}/size/{size}")
+    public ResponseEntity<Page<bikeDto>> getBikesBySeller(
+            @PathVariable Long sellerId,
+            @PathVariable int page,
+            @PathVariable int size
+    ) {
+        Page<bikeDto> bikes = bikeService.getBikesBySeller(sellerId, page, size);
         return ResponseEntity.ok(bikes);
     }
 

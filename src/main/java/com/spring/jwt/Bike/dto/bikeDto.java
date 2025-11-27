@@ -2,6 +2,7 @@ package com.spring.jwt.Bike.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.Bike.Entity.BikeImage;
 import com.spring.jwt.Bike.Entity.FuelType;
 import com.spring.jwt.Bike.Entity.bikeStatus;
 import com.spring.jwt.entity.Seller;
@@ -11,6 +12,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -75,4 +78,5 @@ public class bikeDto {
 
     @NotNull(message = "Bike status must not be null")
     private bikeStatus status;
+    private List<BikeImage> images;
 }

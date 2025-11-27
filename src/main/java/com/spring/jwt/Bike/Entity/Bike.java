@@ -89,11 +89,9 @@ public class Bike {
     @JsonIgnore
     private Seller seller;
 
-
-
-    @OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<BikeImage> images = new ArrayList<>();
+@OneToMany(mappedBy = "bike", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+@JsonManagedReference
+private List<BikeImage> images = new ArrayList<>();
 
     @NotNull(message = "Bike status must not be null")
     @Enumerated(EnumType.STRING)
