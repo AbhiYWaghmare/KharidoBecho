@@ -154,6 +154,7 @@ public class LaptopServiceImpl implements LaptopService {
 
 
     @Override
+    @Transactional
     public String deleteLaptopById(Long laptopId) {
         Laptop laptop = laptopRepository.findById(laptopId)
                 .orElseThrow(() -> new LaptopNotFoundException("Laptop not found with id: " + laptopId));
@@ -161,12 +162,24 @@ public class LaptopServiceImpl implements LaptopService {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
         log.debug("Processing delete for Laptop with ID {} at {}", laptopId, now);
 
+        // === HARD DELETE (if already soft deleted) ===
         if (laptop.isDeleted() || laptop.getStatus() == Status.DELETE) {
+
+            if (laptop.getBookings() != null && !laptop.getBookings().isEmpty()) {
+                laptop.getBookings().clear();
+            }
+
+            if (laptop.getLaptopPhotos() != null && !laptop.getLaptopPhotos().isEmpty()) {
+                laptop.getLaptopPhotos().clear();
+            }
+
+            // Now safe to hard delete
             laptopRepository.delete(laptop);
             log.info("Hard deleted Laptop with ID {}", laptopId);
             return "Laptop with ID " + laptopId + " was permanently deleted from database.";
         }
 
+        // === SOFT DELETE (first delete call) ===
         laptop.setDeleted(true);
         laptop.setDeletedAt(now);
         laptop.setStatus(Status.DELETE);
@@ -201,6 +214,12 @@ public class LaptopServiceImpl implements LaptopService {
                 .orElseThrow(() -> new SellerNotFoundException(sellerId));
 
         return laptopRepository.countBySellerAndStatus(sellerId,status);
+    }
+
+    @Override
+    public Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
+        return laptopRepository.findBySeller_SellerId(sellerId, pageable);
     }
 
 

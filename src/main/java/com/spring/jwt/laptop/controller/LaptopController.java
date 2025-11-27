@@ -140,16 +140,16 @@ public class LaptopController {
     //  Get Laptop By status only                         //
     //  Get /api/laptops/getByStatus                      //
     //====================================================//
-    @GetMapping("/getByStatus")
-    public ResponseEntity<Page<Laptop>> getLaptopByStatus(
-            @RequestParam Status status,
-            @RequestParam (defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy) {
-
-        Page<Laptop> laptops = laptopService.getByStatus(status,page,size,sortBy);
-        return  ResponseEntity.ok(laptops);
-    }
+//    @GetMapping("/getByStatus")
+//    public ResponseEntity<Page<Laptop>> getLaptopByStatus(
+//            @RequestParam Status status,
+//            @RequestParam (defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size,
+//            @RequestParam(defaultValue = "id") String sortBy) {
+//
+//        Page<Laptop> laptops = laptopService.getByStatus(status,page,size,sortBy);
+//        return  ResponseEntity.ok(laptops);
+//    }
 
 
     //====================================================//
@@ -167,5 +167,21 @@ public class LaptopController {
         response.put("count", count);
         return ResponseEntity.ok(response);
     }
+
+    //====================================================//
+//  Get All Laptops By SellerId (Unified API)         //
+//  GET /api/laptops/getAllBySellerId                 //
+//====================================================//
+    @GetMapping("/getAllBySellerId")
+    public ResponseEntity<Page<Laptop>> getAllBySellerId(
+            @RequestParam Long sellerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(defaultValue = "id") String sortBy) {
+
+        Page<Laptop> laptops = laptopService.getAllBySellerId(sellerId, page, size, sortBy);
+        return ResponseEntity.ok(laptops);
+    }
+
 }
 

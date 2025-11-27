@@ -1,11 +1,12 @@
 package com.spring.jwt.laptop.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -18,14 +19,17 @@ public class LaptopRequestCreateDTO {
     private Long buyerUserId;
 
     @NotBlank(message = "Message is required")
-    @Size(max = 50, message = "Message field cannot exceed 50 characters")
+    @Size(min = 10, max = 50, message = "Message must be between {min} and {max} characters long")
     @Pattern(
-            regexp = "^[\\p{L}\\p{N}\\p{P}\\p{Zs}]+$",
-            message = "Message contains invalid characters"
+            regexp = "^[\\p{L}\\p{P}\\p{Zs}]+$",
+            message = "Message can only contain letters, punctuation, and spaces (no digits allowed)"
     )
     private String message;
 
+
     @NotNull(message = "Booking date is required")
-    @Future(message = "Booking date must be in the future")
+    @FutureOrPresent(message = "Booking date must be today or in the future")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Kolkata")
     private LocalDate bookingDate;
+
 }
