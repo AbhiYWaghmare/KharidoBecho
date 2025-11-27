@@ -14,6 +14,8 @@ public interface bikeRepository extends JpaRepository<Bike ,Long> {
 
     // Find all bikes by status
     Page<Bike> findByStatus(bikeStatus status, Pageable pageable);
+    Page<Bike> findBySeller_SellerId(Long sellerId, Pageable pageable);
+
 
     Long countBySeller_SellerIdAndStatus(Long sellerId, bikeStatus status);
 

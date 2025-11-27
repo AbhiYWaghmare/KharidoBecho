@@ -25,5 +25,6 @@ MobileResponseDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Long sellerId;
-    private List<String> images; // list of image URLs
+//    private List<String> images; // list of image URLs
+    private List<MobileImageDTO> images;
 }
