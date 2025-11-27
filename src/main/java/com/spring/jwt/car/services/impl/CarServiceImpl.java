@@ -12,9 +12,11 @@ import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-//import com.spring.jwt.car.mapper.CarMapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,7 +25,7 @@ import java.time.Year;
 
 @Service
 @RequiredArgsConstructor
-public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
+public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
 
     private final CarRepository carRepository;
     private final SellerRepository sellerRepository;
@@ -56,7 +58,7 @@ public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
         if (req.getYearOfPurchase() != null) {
             int currentYear = Year.now().getValue();
             if (req.getYearOfPurchase() > currentYear) {
-                throw new CarValidationException("Year of manufacture cannot be in the future.");
+                throw new CarValidationException("Year of Purchase cannot be in the future.");
             }
             if (req.getYearOfPurchase() < 2000) {
                 throw new CarValidationException("Year must be after 2000.");
@@ -116,7 +118,7 @@ public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
         car.setDeleted(false);
         car.setStatus(Car.Status.ACTIVE);
         car = carRepository.save(car);
-        return com.spring.jwt.car.mapper.CarMapper.toDTO(car);
+        return CarMapper.toDTO(car);
     }
 
     @Override
@@ -134,7 +136,7 @@ public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
     public CarResponseDTO getCar(Long id) {
         Car car = carRepository.findByCarIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
-        return com.spring.jwt.car.mapper.CarMapper.toDTO(car);
+        return CarMapper.toDTO(car);
     }
 
     @Override
@@ -149,9 +151,9 @@ public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
             throw new CarValidationException("Cannot update a deleted car.");
         }
 
-        com.spring.jwt.car.mapper.CarMapper.updateFromRequest(car, req);
+        CarMapper.updateFromRequest(car, req);
         car = carRepository.save(car);
-        return com.spring.jwt.car.mapper.CarMapper.toDTO(car);
+        return CarMapper.toDTO(car);
     }
 
     @Override

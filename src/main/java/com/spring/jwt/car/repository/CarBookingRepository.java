@@ -14,9 +14,9 @@
 package com.spring.jwt.car.repository;
 
 import com.spring.jwt.car.entity.CarBooking;
-import com.spring.jwt.entity.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository

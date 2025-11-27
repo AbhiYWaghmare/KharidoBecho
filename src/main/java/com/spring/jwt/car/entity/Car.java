@@ -3,9 +3,14 @@ package com.spring.jwt.car.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "cars")
@@ -150,6 +155,7 @@ public class Car {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+
     public enum Status {
         ACTIVE, SOLD, DELETED
     }
@@ -165,4 +171,8 @@ public class Car {
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Seller seller;
+
+    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<CarImage> images;
+
 }

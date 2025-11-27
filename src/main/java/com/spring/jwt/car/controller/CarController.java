@@ -3,7 +3,7 @@ package com.spring.jwt.car.controller;
 import com.spring.jwt.car.dto.CarCreateResponseDTO;
 import com.spring.jwt.car.dto.CarRequestDTO;
 import com.spring.jwt.car.dto.CarResponseDTO;
-import com.spring.jwt.car.service.CarService;
+import com.spring.jwt.car.services.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,7 @@ import java.util.Map;
 //********************************************************//
 // Author : Abhishek Waghmare
 // Car Controller
-// Date   : 15/10/2025
+// Date   : 15/10/202/??5
 //********************************************************//
 
 @RestController
@@ -38,14 +38,13 @@ public class CarController {
         CarResponseDTO savedCar = carService.createCar(request);
 
         CarCreateResponseDTO response = CarCreateResponseDTO.builder()
-                .code("201")
+                .code("2 01")
                 .message("Car Added Successfully !!")
                 .carId(savedCar.getCarId())
                 .build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
     // Get all cars
     @GetMapping("/getAllCars")
     public ResponseEntity<Page<CarResponseDTO>> list(

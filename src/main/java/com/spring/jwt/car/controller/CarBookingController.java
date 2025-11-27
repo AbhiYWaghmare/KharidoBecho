@@ -4,6 +4,7 @@ import com.spring.jwt.car.dto.CarBookingDTO;
 import com.spring.jwt.car.dto.CarBookingResponseDTO;
 import com.spring.jwt.car.entity.CarBooking;
 import com.spring.jwt.car.services.CarBookingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,9 @@ public class CarBookingController {
     private final CarBookingService carBookingService;
 
     // ✅ Create booking
+
     @PostMapping("/createBooking")
-    public ResponseEntity<CarBookingResponseDTO> createBooking(@RequestBody CarBookingDTO carBookingDTO) {
+    public ResponseEntity<CarBookingResponseDTO> createBooking( @Valid @RequestBody CarBookingDTO carBookingDTO) {
         CarBooking booking = carBookingService.createBooking(carBookingDTO);
 
         String message = booking.getBookingStatus() == CarBooking.Status.PENDING

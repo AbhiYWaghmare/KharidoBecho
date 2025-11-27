@@ -1,4 +1,4 @@
-package com.spring.jwt.car.service;
+package com.spring.jwt.car.services;
 
 import com.spring.jwt.car.dto.CarRequestDTO;
 import com.spring.jwt.car.dto.CarResponseDTO;
