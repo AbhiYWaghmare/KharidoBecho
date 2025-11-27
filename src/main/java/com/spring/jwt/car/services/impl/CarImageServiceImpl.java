@@ -1,25 +1,28 @@
 package com.spring.jwt.car.services.impl;
 
 import com.spring.jwt.car.entity.Car;
-import com.spring.jwt.car.dto.CarImageResponseDTO;
 import com.spring.jwt.car.entity.CarImage;
-import com.spring.jwt.exception.car.CarImageException;
 import com.spring.jwt.car.repository.CarImageRepository;
-import com.spring.jwt.car.services.CarImageService;
 import com.spring.jwt.car.repository.CarRepository;
+import com.spring.jwt.car.services.CarImageService;
+import com.spring.jwt.exception.car.CarImageException;
 import com.spring.jwt.exception.car.CarNotFoundException;
-import com.spring.jwt.utils.CloudinaryService;
 import com.spring.jwt.utils.ByteArrayMultipartFile;
+import com.spring.jwt.utils.CloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.*;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 

@@ -1,19 +1,17 @@
 package com.spring.jwt.Mobile.Controller;
 
 import com.spring.jwt.Mobile.Services.MobileService;
-import com.spring.jwt.Mobile.dto.MobileCreateResponseDTO;
+import com.spring.jwt.Mobile.dto.MobileAddReqDTO;
+import com.spring.jwt.Mobile.dto.MobileRequestCreateDTO;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
-import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 //********************************************************//
@@ -33,14 +31,14 @@ public class MobileController {
 
     //To Add mobile for sell
     @PostMapping("/add")
-    public ResponseEntity<MobileCreateResponseDTO> createMobile(@Valid @RequestBody MobileRequestDTO request) {
+    public ResponseEntity<MobileAddReqDTO> createMobile(@Valid @RequestBody MobileRequestDTO request) {
 
         // Convert condition to uppercase before mapping
         request.setCondition(request.getCondition().toUpperCase());
 
        MobileResponseDTO savedMobile = mobileService.createMobile(request);
 
-        MobileCreateResponseDTO response = MobileCreateResponseDTO.builder()
+        MobileAddReqDTO response = MobileAddReqDTO.builder()
                 .code("201")
                 .message("Mobile Added Successfully !!")
                 .mobileId(savedMobile.getMobileId())

@@ -44,8 +44,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "car_bookings")
@@ -112,6 +110,7 @@ public class CarBooking {
         CANCELLED,
         COMPLETED,
         ACTIVE,
+
         SOLD
     }
 }

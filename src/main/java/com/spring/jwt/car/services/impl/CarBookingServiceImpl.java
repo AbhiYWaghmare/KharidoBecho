@@ -9,13 +9,13 @@ import com.spring.jwt.car.repository.CarBookingRepository;
 import com.spring.jwt.car.repository.CarRepository;
 import com.spring.jwt.car.services.CarBookingService;
 import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.exception.car.*;
 import com.spring.jwt.repository.BuyerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,90 +30,69 @@ public class CarBookingServiceImpl implements CarBookingService {
     private final CarRepository carRepository;
     private final BuyerRepository buyerRepository;
 
-//    @Transactional
-//    @Override
-//    public CarBooking createBooking(CarBookingDTO dto) {
-//
-//        Buyer buyer = buyerRepository.findById(dto.getBuyerId())
-//                .orElseThrow(() -> new BuyerNotFoundException("Buyer not found with id " + dto.getBuyerId()));
-//
-//        Car car = carRepository.findById(dto.getCarId())
-//                .orElseThrow(() -> new CarNotFoundException("Car with ID " + dto.getCarId() + " not found"));
-//
-//        // ✅ Check if same buyer already booked the same car
-//        boolean alreadyBooked = carBookingRepository
-//                .existsByBuyer_BuyerIdAndCar_CarId(dto.getBuyerId(), dto.getCarId());
-//
-//        if (alreadyBooked) {
-//            throw new DuplicateBookingException("Buyer has already booked this car");
-//        }
-//
-//        // ✅ Check if car already has a pending booking
-//        boolean hasActiveBooking = carBookingRepository
-//                .existsByCar_CarIdAndBookingStatus(car.getCarId(), CarBooking.Status.PENDING);
-//
-//        CarBooking booking = CarBooking.builder()
-//                .buyer(buyer)
-//                .car(car)
-//                .bookingDate(OffsetDateTime.now())
-//                .bookingStatus(hasActiveBooking ? CarBooking.Status.PENDING : CarBooking.Status.ACTIVE)
-//                .build();
-//
-//        return carBookingRepository.save(booking);
-//    }
-@Override
-@Transactional
-public CarBooking createBooking(CarBookingDTO dto) {
 
-    Buyer buyer = buyerRepository.findById(dto.getBuyerId())
-            .orElseThrow(() -> new BuyerNotFoundException("Buyer not found with id " + dto.getBuyerId()));
+    @Override
+    @Transactional
+    public CarBooking createBooking(CarBookingDTO dto) {
 
-    Car car = carRepository.findById(dto.getCarId())
-            .orElseThrow(() -> new CarNotFoundException("Car with ID " + dto.getCarId() + " not found"));
+        // 1️⃣ Fetch Buyer
+        Buyer buyer = buyerRepository.findById(dto.getBuyerId())
+                .orElseThrow(() -> new BuyerNotFoundException(
+                        "Buyer not found with id " + dto.getBuyerId()
+                ));
 
-    // ✅ Check if car is available for booking
-    if (car.getStatus() != Car.Status.ACTIVE) {
-        throw new DuplicateBookingException("Car with ID " + dto.getCarId() +
-                " cannot be booked because it is not active.");
+        // 2️⃣ Fetch Car
+        Car car = carRepository.findById(dto.getCarId())
+                .orElseThrow(() -> new CarNotFoundException(
+                        "Car with ID " + dto.getCarId() + " not found"
+                ));
+
+        if (!(car.getStatus() == Car.Status.ACTIVE )) {
+
+            throw new DuplicateBookingException(
+                    "Car with ID " + dto.getCarId() +
+                            " cannot be booked because it is not active, available, or new."
+            );
+        }
+
+
+        boolean alreadyBooked = carBookingRepository
+                .existsByBuyer_BuyerIdAndCar_CarId(dto.getBuyerId(), dto.getCarId());
+
+        if (alreadyBooked) {
+            throw new DuplicateBookingException(
+                    "You already created a booking for this car."
+            );
+        }
+
+
+        // 5️⃣ Create Car Booking object
+        CarBooking booking = new CarBooking();
+        booking.setBuyer(buyer);
+        booking.setCar(car);
+        booking.setBookingDate(OffsetDateTime.now());
+        booking.setBookingStatus(CarBooking.Status.PENDING);  // bike logic प्रमाणे default PENDING
+
+
+        // 6️⃣ Add message to conversation JSON
+        if (dto.getMessage() != null && !dto.getMessage().isEmpty()) {
+
+            String conversationJson = String.format(
+                    "[{\"userId\": %d, \"message\": \"%s\", \"timestamp\": \"%s\", \"senderType\": \"BUYER\"}]",
+                    buyer.getBuyerId(),
+                    dto.getMessage().replace("\"", "\\\""),
+                    OffsetDateTime.now()
+            );
+
+            booking.setConversation(conversationJson);
+
+        } else {
+            booking.setConversation("[]");
+        }
+
+        // 7️⃣ Save and return
+        return carBookingRepository.save(booking);
     }
-
-    // ✅ Check if same buyer already booked the same car
-    boolean alreadyBooked = carBookingRepository
-            .existsByBuyer_BuyerIdAndCar_CarId(dto.getBuyerId(), dto.getCarId());
-    if (alreadyBooked) {
-        throw new DuplicateBookingException("Buyer has already booked this car");
-    }
-
-    // ✅ Check if car already has a pending booking
-    boolean hasActiveBooking = carBookingRepository
-            .existsByCar_CarIdAndBookingStatus(car.getCarId(), CarBooking.Status.PENDING);
-
-    // ✅ Create booking object
-    CarBooking booking = CarBooking.builder()
-            .buyer(buyer)
-            .car(car)
-            .bookingDate(OffsetDateTime.now())
-            .bookingStatus(hasActiveBooking ? CarBooking.Status.PENDING : CarBooking.Status.ACTIVE)
-            .build();
-
-    // ✅ Add message in conversation JSON format
-    if (dto.getMessage() != null && !dto.getMessage().isEmpty()) {
-        String conversationJson = String.format(
-                "[{\"userId\": %d, \"message\": \"%s\", \"timestamp\": \"%s\", \"senderType\": \"BUYER\"}]",
-                buyer.getBuyerId(),
-                dto.getMessage().replace("\"", "\\\""),
-                java.time.OffsetDateTime.now()
-        );
-        booking.setConversation(conversationJson);
-    } else {
-        booking.setConversation("[]");
-    }
-
-    // ✅ Save booking
-    return carBookingRepository.save(booking);
-}
-
-
 
 
 
@@ -122,25 +101,37 @@ public CarBooking createBooking(CarBookingDTO dto) {
         return carBookingRepository.findByBookingStatus(CarBooking.Status.PENDING);
     }
 
-    @Override
     @Transactional
+    @Override
     public CarBooking approveBooking(Long bookingId) {
+
+        // Find the booking by ID
         CarBooking booking = carBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking not found with id " + bookingId));
 
-        // ✅ Mark the booking as completed (SOLD)
+        // Check valid statuses before selling
+        if (booking.getBookingStatus() != CarBooking.Status.CONFIRMED &&
+                booking.getBookingStatus() != CarBooking.Status.PENDING) {
+
+            throw new ResourceNotFoundException("Only CONFIRMED and PENDING bookings can be Sold.");
+        }
+
+        // Mark booking as SOLD
         booking.setBookingStatus(CarBooking.Status.SOLD);
 
-        // ✅ Get associated car
+        // Get associated car
         Car car = booking.getCar();
 
-        // ✅ Update car status as DELETED
+        // Update car status to DELETED
         car.setStatus(Car.Status.DELETED);
 
-        // ✅ Save both entities
+        // Save car
         carRepository.save(car);
+
+        // Save booking
         return carBookingRepository.save(booking);
     }
+
 
 
     @Override
@@ -148,11 +139,11 @@ public CarBooking createBooking(CarBookingDTO dto) {
         CarBooking booking = carBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking not found with id " + bookingId));
 
-        if (booking.getBookingStatus() != CarBooking.Status.PENDING) {
-            throw new InvalidBookingOperationException("Only pending bookings can be rejected");
+        if (booking.getBookingStatus() != CarBooking.Status.CONFIRMED) {
+            throw new InvalidBookingOperationException("Only confirmed bookings can be rejected");
         }
 
-        booking.setBookingStatus(CarBooking.Status.CANCELLED);
+        booking.setBookingStatus(CarBooking.Status.PENDING);
         return carBookingRepository.save(booking);
     }
     @Override
@@ -172,13 +163,13 @@ public CarBooking createBooking(CarBookingDTO dto) {
     @Transactional
     public CarBooking addMessage(Long bookingId, CarBookingDTO newMessage) {
         CarBooking booking = carBookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found with id: " + bookingId));
 
         try {
             ObjectMapper mapper = new ObjectMapper();
             List<Map<String, Object>> conversationList;
 
-            // Check if conversation JSON field is empty or null
+            // If conversation JSON is empty
             if (booking.getConversation() == null || booking.getConversation().isEmpty()) {
                 conversationList = new ArrayList<>();
             } else {
@@ -188,20 +179,20 @@ public CarBooking createBooking(CarBookingDTO dto) {
                 );
             }
 
-            // Automatically determine sender type (BUYER or SELLER)
+            // Automatically determine sender
             String senderType = determineSenderType(newMessage.getUserId(), booking);
 
-            // Prepare message object
+            // Prepare new message
             Map<String, Object> msg = new LinkedHashMap<>();
             msg.put("userId", newMessage.getUserId());
             msg.put("senderType", senderType);
             msg.put("message", newMessage.getMessage());
             msg.put("timestamp", OffsetDateTime.now().toString());
 
-            // Add message to list
+            // Add message to conversation
             conversationList.add(msg);
 
-            // Convert list back to JSON and save
+            // Convert back to JSON
             booking.setConversation(mapper.writeValueAsString(conversationList));
 
             return carBookingRepository.save(booking);
@@ -210,6 +201,7 @@ public CarBooking createBooking(CarBookingDTO dto) {
             throw new RuntimeException("Error while adding message: " + e.getMessage());
         }
     }
+
     // Helper method to determine who sent the message (Buyer or Seller)
     private String determineSenderType(Long senderUserId, CarBooking booking) {
         if (booking.getBuyer() != null &&
