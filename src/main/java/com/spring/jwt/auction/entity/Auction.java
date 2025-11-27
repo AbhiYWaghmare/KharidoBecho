@@ -2,31 +2,43 @@ package com.spring.jwt.auction.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "auctions")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Auction {
+
+    public enum Status {
+        SCHEDULED,
+        RUNNING,
+        ENDED,      // bidding time over, waiting for winner to accept
+        COMPLETED,  // sold or closed
+        CANCELLED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "auction_id")
     private Long auctionId;
 
-    @Column(name = "listing_id", nullable = false)
-    private Long listingId; // mobile_id
+    // Link to your existing Mobile listing
+    @Column(name = "mobile_id", nullable = false)
+    private Long mobileId;
 
-    @Column(name = "start_price", nullable = false, precision = 12, scale = 2)
+    @Column(name = "start_price", nullable = false)
     private BigDecimal startPrice;
 
-    @Column(name = "current_price", precision = 12, scale = 2)
+    @Column(name = "current_price", nullable = false)
     private BigDecimal currentPrice;
+
+    @Column(name = "min_increment_in_rupees", nullable = false)
+    private BigDecimal minIncrementInRupees;
 
     @Column(name = "start_time", nullable = false)
     private OffsetDateTime startTime;
@@ -36,14 +48,13 @@ public class Auction {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private AuctionStatus status;
+    private Status status;
 
+    // highest current bidder while RUNNING
     @Column(name = "highest_bidder_user_id")
     private Long highestBidderUserId;
 
-    @Column(name = "min_increment_in_rupees")
-    private Integer minIncrementInRupees = 100;
-
+    // optimistic locking to avoid race conditions
     @Version
     private Long version;
 }
