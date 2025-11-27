@@ -3,8 +3,11 @@ package com.spring.jwt.exception;
 
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.spring.jwt.auction.exception.AuctionException;
-import com.spring.jwt.auction.exception.BidException;
+//import com.spring.jwt.auction.exception.AuctionException;
+import com.spring.jwt.auction.exception.AuctionNotFoundException;
+import com.spring.jwt.auction.exception.BadBidException;
+//import com.spring.jwt.auction.exception.BidException;
+import com.spring.jwt.auction.exception.BidNotFoundException;
 import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
@@ -39,6 +42,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -607,29 +611,53 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     }
 
 
-    @ExceptionHandler(com.spring.jwt.auction.exception.AuctionException.class)
-    public ResponseEntity<Map<String, Object>> handleAuctionException(AuctionException ex, WebRequest request) {
-        Map<String,Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Auction Error");
+//    @ExceptionHandler(com.spring.jwt.auction.exception.AuctionException.class)
+//    public ResponseEntity<Map<String, Object>> handleAuctionException(AuctionException ex, WebRequest request) {
+//        Map<String,Object> body = new HashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("status", HttpStatus.BAD_REQUEST.value());
+//        body.put("error", "Auction Error");
+//        body.put("message", ex.getMessage());
+//        body.put("path", request.getDescription(false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+//    }
+//
+//    @ExceptionHandler(com.spring.jwt.auction.exception.BidException.class)
+//    public ResponseEntity<Map<String, Object>> handleBidException(BidException ex, WebRequest request) {
+//        Map<String,Object> body = new HashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("status", HttpStatus.BAD_REQUEST.value());
+//        body.put("error", "Bid Error");
+//        body.put("message", ex.getMessage());
+//        body.put("path", request.getDescription(false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+//    }
+@ExceptionHandler(AuctionNotFoundException.class)
+public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFoundException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", OffsetDateTime.now());
+    body.put("error", "Auction not found");
+    body.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+}
+
+    @ExceptionHandler(BidNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBidNotFound(BidNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Bid not found");
         body.put("message", ex.getMessage());
-        body.put("path", request.getDescription(false));
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
-    @ExceptionHandler(com.spring.jwt.auction.exception.BidException.class)
-    public ResponseEntity<Map<String, Object>> handleBidException(BidException ex, WebRequest request) {
-        Map<String,Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("error", "Bid Error");
+    @ExceptionHandler(BadBidException.class)
+    public ResponseEntity<Map<String, Object>> handleBadBid(BadBidException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Invalid bid");
         body.put("message", ex.getMessage());
-        body.put("path", request.getDescription(false));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
-
-
 }
 
 

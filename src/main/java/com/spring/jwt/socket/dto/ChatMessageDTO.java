@@ -1,9 +1,13 @@
 package com.spring.jwt.socket.dto;
-//
-//import java.time.OffsetDateTime;
-//
-//public record ChatMessageDTO(Long requestId, Long senderUserId, String message, OffsetDateTime timestamp) { }
-public record ChatMessageDTO(
-        Long userId,
-        String message
-) {}
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChatMessageDTO {
+    private Long userId;
+    private String message;
+}
