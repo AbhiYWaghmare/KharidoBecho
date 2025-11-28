@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auction Live Bid Test</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        #log {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #333;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 15px;
+            background: #f6f6f6;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px 18px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
+        .row {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2> Live Auction WebSocket Tester</h2>
+
+<!-- CONNECT + DISCONNECT BUTTONS -->
+<div class="row">
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+</div>
+
+<!-- AUCTION INPUTS -->
+<div class="row">
+    <input id="auctionId" type="number" placeholder="Auction/Bidding ID">
+    <br>
+    <input id="bidderId" type="number" placeholder="Bidder ID">
+    <br>
+    <input id="bidAmount" type="number" placeholder="Bid Amount">
+    <br>
+    <button onclick="sendBid()">Send Live Bid</button>
+</div>
+
+<h3> Live Broadcast Log:</h3>
+<div id="log"></div>
+
+<script>
+
+    let stompClient = null;
+
+    function log(message) {
+        let box = document.getElementById("log");
+        box.innerHTML += message + "<br>";
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // CONNECT FUNCTION
+    function connect() {
+        let socket = new SockJS("http://localhost:8087/ws");
+        stompClient = Stomp.over(socket);
+
+        log("🔌 Connecting...");
+
+        stompClient.connect({}, function () {
+            log(" CONNECTED to WebSocket");
+
+            // Subscribe to broadcast channel
+            stompClient.subscribe("/topic/bids", function (msg) {
+                log(" BROADCAST → " + msg.body);
+            });
+        });
+    }
+
+    // DISCONNECT FUNCTION
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+            log(" DISCONNECTED");
+        }
+    }
+
+    // SEND LIVE BID
+    function sendBid() {
+        if (!stompClient || !stompClient.connected) {
+            log("⚠ Not connected!");
+            return;
+        }
+
+        const auctionId = document.getElementById("auctionId").value;
+        const bidderId = document.getElementById("bidderId").value;
+        const amount = document.getElementById("bidAmount").value;
+
+        if (!auctionId || !bidderId || !amount) {
+            log("⚠ Please fill all fields!");
+            return;
+        }
+
+        const bid = {
+            biddingId: parseInt(auctionId),
+            bidderId: parseInt(bidderId),
+            amount: parseFloat(amount)
+        };
+
+        log(" SENDING BID → " + JSON.stringify(bid));
+
+        stompClient.send("/app/bid", {}, JSON.stringify(bid));
+    }
+
+</script>
+
+</body>
+</html>

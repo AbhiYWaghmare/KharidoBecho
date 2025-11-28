@@ -128,6 +128,18 @@ public class AppConfig {
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
                     "/api/v1/mobile/requests/**",
+                    "/ws/**",
+                    "/ws/**/**",
+                    "/ws/info",
+                    "/ws/info/**",
+                    "/ws/info/**/**",
+                    "/ws/**",
+                    "/ws",
+                    "/ws/info/**",
+                    "/topic/**",
+                    "/app/**",
+                    "/bikes/ws/**",
+
 
 
                 jwtConfig.getUrl(),
@@ -143,7 +155,14 @@ public class AppConfig {
                 .xssProtection(xss -> xss
                     .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                 .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"))
+                        .policyDirectives(
+                                "default-src 'self'; " +
+                                        "script-src 'self' 'unsafe-inline'; " +
+                                        "style-src 'self' 'unsafe-inline'; " +
+                                        "img-src 'self' data:; " +
+                                        "font-src 'self'; " +
+                                        "connect-src 'self' http://localhost:5173 http://localhost:8087 http://localhost:8087/ws http://localhost:8087/ws/info ws://localhost:8087 ws://localhost:8087/ws;"
+                        ))
                 .frameOptions(frame -> frame.deny())
                 .referrerPolicy(referrer -> referrer
                     .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
@@ -177,6 +196,15 @@ public class AppConfig {
                 .requestMatchers("/api/laptop-photo/**").permitAll()
 
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
+
+                .requestMatchers("/ws", "/ws/**", "/ws/info", "/ws/info/**").permitAll()
+                .requestMatchers("/topic/**").permitAll()
+                .requestMatchers("/app/**").permitAll()
+                .requestMatchers("/ws/**").permitAll()
+                .requestMatchers("/ws").permitAll()
+
+
+
 
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
@@ -230,10 +258,14 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"), // <-- ADD THIS
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/ws/**"),
 
 
 
-                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-resources/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui/**"),
