@@ -191,7 +191,7 @@ public class AppConfig {
 
                 .requestMatchers("/api/v1/auctions/**").permitAll()
 
-//                .requestMatchers("/ws-auction/**").permitAll()   //  add this
+                .requestMatchers("/ws-auction/**").permitAll()   //  add this
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
