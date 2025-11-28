@@ -25,9 +25,7 @@ public class BikeImageController {
 
 
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, Object>> uploadPhoto(@RequestParam("files") MultipartFile[] files,
-                                                  @RequestParam("bikeId") Long bikeId
-                                                  )
+    public ResponseEntity<Map<String, Object>> uploadPhoto(@RequestParam("files") MultipartFile[] files, @RequestParam("bikeId") Long bikeId)
     {
         List<String> uploadedUrls = bikeImageService.uploadFiles(bikeId, Arrays.asList(files) );
         return ResponseEntity.status(HttpStatus.ACCEPTED)
