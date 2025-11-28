@@ -1,14 +1,13 @@
 package com.spring.jwt.laptop.service;
 
 
+import com.spring.jwt.entity.Status;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.entity.Laptop;
-import com.spring.jwt.laptop.model.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public interface LaptopService {
@@ -29,9 +28,11 @@ public interface LaptopService {
 
     Page<Laptop> getByStatus(Status status, int page, int size, String sortBy);
 
-    void deleteLaptopById(Long laptopId);
+    String deleteLaptopById(Long laptopId);
 
     Long countBySellerIdAndStatus(Long sellerId, Status status);
+
+    Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy);
 
 
 }
