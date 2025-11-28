@@ -113,6 +113,11 @@ public class AppConfig {
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .ignoringRequestMatchers(
                 "/api/**",
+
+                    "api/v1/user/**",
+                    "/api/laptops/**",
+                    "/api/laptopBookings/**",
+                    "/api/colours/**",
                 "api/v1/user/**",
 
                     "api/v1/cars/**",
@@ -128,6 +133,15 @@ public class AppConfig {
                     "api/v1/sellers/**",
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
+
+                    "/Auction/**",
+                    "/Auction",
+                    "/ws/**",
+                    "/websocket/**",
+                    "/sockjs/**",
+                    "/laptop/auctions/live",
+                    "/api/beadingLaptops/**",
+
                     "/api/v1/mobile/requests/**",
                     "/api/v1/auctions/**",
 
@@ -147,7 +161,10 @@ public class AppConfig {
                 .xssProtection(xss -> xss
                     .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                 .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"))
+                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';" +
+                            " connect-src 'self' ws: wss: http://localhost:8087;\n'"))
+//                connect-src 'self'
+
                 .frameOptions(frame -> frame.deny())
                 .referrerPolicy(referrer -> referrer
                     .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
@@ -190,6 +207,15 @@ public class AppConfig {
                 .requestMatchers("/api/v1/sellers/**").permitAll()
 
                 .requestMatchers("/api/v1/auctions/**").permitAll()
+                .requestMatchers("/api/laptopBookings/**").permitAll()
+                .requestMatchers("/api/colours/**").permitAll()
+                .requestMatchers("/Auction/**", "/Auction", "/ws/**", "/websocket/**", "/sockjs/**").permitAll()
+                .requestMatchers("/laptop/auctions/live").permitAll()
+                .requestMatchers("/api/beadingLaptops/**").permitAll()
+
+
+
+
 
 //                .requestMatchers("/ws-auction/**").permitAll()   //  add this
 
@@ -248,6 +274,11 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
 
 
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptopBookings/**"),
+
+
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**"),
@@ -257,10 +288,13 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/webjars/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui.html"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/user/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/beadingLaptops/**"),
+
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getUrl()),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl()),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws-auction/**")
             );
+
 
         log.debug("Configuring security filters");
 
@@ -295,8 +329,12 @@ public class AppConfig {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
+
+                config.setAllowedOriginPatterns(List.of("*"));
+
 //                config.setAllowedOrigins(allowedOrigins); // now includes 63342
                 config.setAllowedOrigins(allowedOrigins);
+
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowCredentials(true);
                 config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));

@@ -2,22 +2,20 @@ package com.spring.jwt.laptop.controller;
 
 import com.cloudinary.Cloudinary;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
-import com.spring.jwt.laptop.entity.LaptopPhotos;
+import com.spring.jwt.laptop.entity.LaptopBooking;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import com.spring.jwt.utils.BaseResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 
 //********************************************************//
@@ -29,7 +27,7 @@ import java.util.Map;
 //*******************************************************//
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/api/laptop-photo")
 public class LaptopPhotoController {
 
@@ -37,6 +35,7 @@ public class LaptopPhotoController {
 
     private final Cloudinary cloudinary;
 
+    LaptopBooking booking;
     private static final long MAX_FILE_SIZE = 400 * 1024;
 
 
@@ -47,7 +46,6 @@ public class LaptopPhotoController {
 
     //To upload images of particular laptop by ID
     @PostMapping("/upload")
-
     public ResponseEntity<LaptopResponseDTO> uploadImages(@RequestParam Long laptopId, @RequestParam("files") List<MultipartFile> files, HttpServletRequest httpServletRequest) {
         List<String> photos = laptopPhotoService.uploadPhoto(laptopId, files);
         String imageUrl = String.join(", ", photos);
@@ -62,8 +60,8 @@ public class LaptopPhotoController {
                 httpServletRequest.getRequestURI(),
                 imageUrl,
                 laptopId
-        );
 
+        );
         return ResponseEntity.ok(laptopResponseDTO);
     }
 
