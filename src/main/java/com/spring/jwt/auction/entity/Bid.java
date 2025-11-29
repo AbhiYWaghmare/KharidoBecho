@@ -3,6 +3,7 @@ package com.spring.jwt.auction.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Entity
@@ -42,9 +43,9 @@ public class Bid {
     private Status status;
 
     @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
+    private LocalDateTime createdAt;
 
     // When we make an offer after end
     @Column(name = "offer_expires_at")
-    private OffsetDateTime offerExpiresAt;
+    private LocalDateTime offerExpiresAt;
 }

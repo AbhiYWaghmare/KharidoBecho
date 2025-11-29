@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -56,7 +57,7 @@ public class AuctionServiceImpl implements AuctionService {
         a.setStartPrice(dto.startPrice());
         a.setCurrentPrice(dto.startPrice());
         a.setMinIncrementInRupees(dto.minIncrementInRupees());
-        a.setStartTime(dto.startTime() != null ? dto.startTime() : OffsetDateTime.now());
+        a.setStartTime(dto.startTime() != null ? dto.startTime() : LocalDateTime.now());
         a.setEndTime(dto.endTime());
         a.setStatus(Auction.Status.SCHEDULED);
         a.setHighestBidderUserId(null);
@@ -76,7 +77,7 @@ public class AuctionServiceImpl implements AuctionService {
             throw new InvalidAuctionStateException("Auction is not RUNNING");
         }
 
-        if (OffsetDateTime.now().isAfter(auction.getEndTime())) {
+        if (LocalDateTime.now().isAfter(auction.getEndTime())) {
             throw new InvalidAuctionStateException("Auction already ended");
         }
 
@@ -91,7 +92,7 @@ public class AuctionServiceImpl implements AuctionService {
                 .bidderUserId(userId)
                 .amount(bidAmount)
                 .status(Bid.Status.PLACED)
-                .createdAt(OffsetDateTime.now())
+                .createdAt(LocalDateTime.now())
                 .build();
         bidRepository.save(bid);
 
@@ -128,7 +129,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     @Transactional
     public void startDueAuctions() {
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         log.info("startDueAuctions at {}", now);
         List<Auction> toStart = auctionRepository.findByStatusAndStartTimeLessThanEqual(
                 Auction.Status.SCHEDULED, now);
@@ -156,7 +157,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     @Transactional
     public void endDueAuctions() {
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         log.info("endDueAuctions at {}", now);
         List<Auction> toEnd = auctionRepository.findExpiredAuctions(Auction.Status.RUNNING, now);
 
@@ -175,11 +176,11 @@ public class AuctionServiceImpl implements AuctionService {
                     .toList();
 
             // mark highest as WINNING_OFFER (if exists)
-            OffsetDateTime offerExpiresAt = null;
+            LocalDateTime offerExpiresAt = null;
             if (!allBids.isEmpty()) {
                 Bid winner = allBids.get(0);
                 winner.setStatus(Bid.Status.WINNING_OFFER);
-                offerExpiresAt = OffsetDateTime.now().plusHours(24); // e.g. 24 hours
+                offerExpiresAt = LocalDateTime.now().plusHours(24); // e.g. 24 hours
                 winner.setOfferExpiresAt(offerExpiresAt);
                 bidRepository.save(winner);
             }
@@ -201,7 +202,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     @Transactional
     public void processExpiredOffers() {
-        OffsetDateTime now = OffsetDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         // find auctions which are ENDED and have some WINNING_OFFER that expired.
         List<Auction> endedAuctions = auctionRepository.findByStatusAndEndTimeLessThanEqual(
@@ -249,7 +250,7 @@ public class AuctionServiceImpl implements AuctionService {
             // next highest candidate becomes WINNING_OFFER
             Bid newWinner = candidates.get(0);
             newWinner.setStatus(Bid.Status.WINNING_OFFER);
-            OffsetDateTime newExpire = OffsetDateTime.now().plusHours(24);
+            LocalDateTime newExpire = LocalDateTime.now().plusHours(24);
             newWinner.setOfferExpiresAt(newExpire);
             bidRepository.save(newWinner);
 
@@ -352,7 +353,7 @@ public class AuctionServiceImpl implements AuctionService {
         // but for simplicity call the logic inline or reuse.
 
         // easiest: mark offerExpiresAt < now and call processExpiredOffers() in single-thread.
-        winner.setOfferExpiresAt(OffsetDateTime.now().minusMinutes(1));
+        winner.setOfferExpiresAt(LocalDateTime.now().minusMinutes(1));
         bidRepository.save(winner);
         processExpiredOffers();  // will pick the next candidate
     }
