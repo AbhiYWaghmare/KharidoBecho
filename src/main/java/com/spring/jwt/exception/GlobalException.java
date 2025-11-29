@@ -2,14 +2,23 @@ package com.spring.jwt.exception;
 
 
 
+
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.exception.bookings.LaptopRequestException;
+import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
+import com.spring.jwt.exception.colour.ColourNotFoundException;
+import com.spring.jwt.laptop.dto.AuctionErrReponse;
+import com.spring.jwt.laptop.dto.LaptopErrorResponse;
+import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
+import com.spring.jwt.exception.laptop.*;
+
+
 //import com.spring.jwt.auction.exception.AuctionException;
 import com.spring.jwt.auction.exception.*;
 //import com.spring.jwt.auction.exception.BidException;
 import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
-import com.spring.jwt.exception.laptop.*;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -39,6 +48,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -369,6 +379,7 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);
     }
 
+    @ExceptionHandler(LaptopNotFoundException.class)
     public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
         LaptopResponseDTO error = new LaptopResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
@@ -381,6 +392,133 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+
+    @ExceptionHandler(LaptopImageException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopImageException(
+            LaptopImageException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        body.put("error", "Laptop Image Upload Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public ResponseEntity<LaptopResponseDTO> handleValidationException(ValidationException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(BlankFieldsException.class)
+    public ResponseEntity<LaptopResponseDTO> handleBlankFieldsException(BlankFieldsException ex, WebRequest webRequest){
+        LaptopResponseDTO error = new LaptopResponseDTO();
+        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+
+
+    @ExceptionHandler(ColourNotFoundException.class)
+    public ResponseEntity<ColourResponseDTO> handleColourNotFoundException(ColourNotFoundException ex,WebRequest request) {
+        ColourResponseDTO error = new ColourResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(LaptopRequestException.class)
+    public ResponseEntity<LaptopErrorResponse> handleLaptopRequestException(LaptopRequestException ex, WebRequest request) {
+        LaptopErrorResponse error = new LaptopErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatus("error");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setApiPath(request.getDescription(false).replace("uri=", ""));
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    @ExceptionHandler(ColourAlreadyExistsException.class)
+    public ResponseEntity<ColourResponseDTO> handleColourAlreadyExistsException(ColourAlreadyExistsException ex,WebRequest request) {
+        ColourResponseDTO error = new ColourResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("CONFLICT");
+        error.setStatusCode(HttpStatus.CONFLICT.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(AuctionException.class)
+    public ResponseEntity<AuctionErrReponse> handleAuctionException(AuctionException ex,WebRequest request){
+        AuctionErrReponse error = new AuctionErrReponse();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT_FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity<Object> handleInvalidDateFormat(HttpMessageNotReadableException ex) {
+//        // Check if Jackson failed to parse a LocalDate
+//        Throwable cause = ex.getCause();
+//        if (cause instanceof InvalidFormatException invalidFormatException &&
+//                invalidFormatException.getTargetType() == LocalDate.class) {
+//
+//            return ResponseEntity
+//                    .status(HttpStatus.BAD_REQUEST)
+//                    .body(Map.of(
+//                            "error", "Invalid date format",
+//                            "message", "Please use date format yyyy-MM-dd (e.g. 2025-11-13)",
+//                            "status", HttpStatus.BAD_REQUEST.value()
+//                    ));
+//        }
+
+//        // Default fallback for other parse issues
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(Map.of(
+//                        "error", "Invalid request",
+//                        "message", "Malformed JSON or invalid data format",
+//                        "status", HttpStatus.BAD_REQUEST.value()
+//                ));
+//    }
+
+
 
     //Mobile Exception Handler
     @ExceptionHandler(MobileNotFoundException.class)

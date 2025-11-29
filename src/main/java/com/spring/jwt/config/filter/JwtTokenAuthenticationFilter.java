@@ -283,4 +283,15 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     public void setauthreq(boolean setauthreq) {
         this.setauthreq = setauthreq;
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        // Completely exclude WebSocket endpoints from this filter
+        return path.startsWith("/Auction")
+                || path.startsWith("/ws")
+                || path.startsWith("/websocket")
+                || path.startsWith("/sockjs");
+    }
 }

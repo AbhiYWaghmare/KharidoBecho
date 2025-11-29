@@ -17,7 +17,7 @@ public class LaptopPhotos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "laptop_photo_id")
+    @Column(name = "photo_id")
     private Long photoId;
 
     @Column(name = "photo_url", nullable = false, length = 1000)

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
+import jakarta.annotation.PostConstruct;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,10 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import java.security.Security;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @SpringBootApplication
 @EnableScheduling
@@ -41,6 +39,7 @@ public class JwtWithSpringSecurityApplication {
 
 	public static void main(String[] args) {
 		Security.addProvider(new BouncyCastleProvider());
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
 
 		SpringApplication.run(JwtWithSpringSecurityApplication.class, args);
 		System.err.println("  *****    *******  *******       *****   *******    *****    ******   *******" );
@@ -58,5 +57,12 @@ public class JwtWithSpringSecurityApplication {
 
 		System.out.println("New changes from sudhir");
 
+
+	}
+
+	@PostConstruct
+	public void init() {
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
+		System.out.println("Timezone set to IST");
 	}
 }
