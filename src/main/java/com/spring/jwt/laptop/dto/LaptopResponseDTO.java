@@ -19,5 +19,6 @@ public class LaptopResponseDTO {
     private String apiPath;
     private String imageUrl;
     private Long laptopId;
+//    private Long bookingId;
 
 }
