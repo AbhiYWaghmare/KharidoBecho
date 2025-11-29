@@ -1,13 +1,19 @@
 package com.spring.jwt.auction.service.impl;
 
+import com.spring.jwt.auction.dto.AuctionDTO;
 import com.spring.jwt.auction.dto.AuctionUpdateMessageDTO;
 import com.spring.jwt.auction.entity.Auction;
 import com.spring.jwt.auction.entity.Bid;
+import com.spring.jwt.auction.exception.AuctionNotFoundException;
+import com.spring.jwt.auction.exception.InvalidAuctionStateException;
+import com.spring.jwt.auction.exception.InvalidBidException;
+import com.spring.jwt.auction.mapper.AuctionMapper;
 import com.spring.jwt.auction.repository.AuctionRepository;
 import com.spring.jwt.auction.repository.BidRepository;
 import com.spring.jwt.auction.service.AuctionService;
 import com.spring.jwt.Mobile.Repository.MobileRepository;
 import com.spring.jwt.Mobile.entity.Mobile;
+import com.spring.jwt.exception.mobile.MobileNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -33,22 +39,50 @@ public class AuctionServiceImpl implements AuctionService {
 
     @Override
     @Transactional
+
+    public AuctionDTO createAuction(AuctionDTO dto) {
+        Long mobileId = dto.mobileId();
+
+        if (mobileId == null) {
+            throw new InvalidAuctionStateException("mobileId is required");
+        }
+
+        Mobile mobile = mobileRepository.findById(mobileId)
+                .orElseThrow(() -> new MobileNotFoundException(mobileId));
+
+
+        Auction a = new Auction();
+        a.setMobile(mobile);
+        a.setStartPrice(dto.startPrice());
+        a.setCurrentPrice(dto.startPrice());
+        a.setMinIncrementInRupees(dto.minIncrementInRupees());
+        a.setStartTime(dto.startTime() != null ? dto.startTime() : OffsetDateTime.now());
+        a.setEndTime(dto.endTime());
+        a.setStatus(Auction.Status.SCHEDULED);
+        a.setHighestBidderUserId(null);
+
+        Auction saved = auctionRepository.save(a);
+        return AuctionMapper.toDTO(saved);
+    }
+
+
+
     public void placeBid(Long auctionId, Long userId, BigDecimal bidAmount) {
         // load auction
         Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + auctionId));
+                .orElseThrow(() -> new AuctionNotFoundException("Auction not found: " + auctionId));
 
         if (auction.getStatus() != Auction.Status.RUNNING) {
-            throw new IllegalStateException("Auction is not RUNNING");
+            throw new InvalidAuctionStateException("Auction is not RUNNING");
         }
 
         if (OffsetDateTime.now().isAfter(auction.getEndTime())) {
-            throw new IllegalStateException("Auction already ended");
+            throw new InvalidAuctionStateException("Auction already ended");
         }
 
         BigDecimal minAllowed = auction.getCurrentPrice().add(auction.getMinIncrementInRupees());
         if (bidAmount.compareTo(minAllowed) < 0) {
-            throw new IllegalArgumentException("Bid must be at least " + minAllowed);
+            throw new InvalidBidException("Bid must be at least " + minAllowed);
         }
 
         // create bid
@@ -246,10 +280,10 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public void winnerAccept(Long auctionId, Long userId) {
         Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + auctionId));
+                .orElseThrow(() -> new AuctionNotFoundException("Auction not found: " + auctionId));
 
         if (auction.getStatus() != Auction.Status.ENDED) {
-            throw new IllegalStateException("Auction is not in ENDED state");
+            throw new InvalidAuctionStateException("Auction is not in ENDED state");
         }
 
         // find current winning offer
@@ -257,10 +291,10 @@ public class AuctionServiceImpl implements AuctionService {
         Bid winner = allBids.stream()
                 .filter(b -> b.getStatus() == Bid.Status.WINNING_OFFER)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No active winning offer"));
+                .orElseThrow(() -> new InvalidAuctionStateException("No active winning offer"));
 
         if (!winner.getBidderUserId().equals(userId)) {
-            throw new IllegalArgumentException("This user is not the current winner");
+            throw new InvalidBidException("This user is not the current winner");
         }
 
         winner.setStatus(Bid.Status.ACCEPTED);
@@ -270,10 +304,14 @@ public class AuctionServiceImpl implements AuctionService {
         auction.setStatus(Auction.Status.COMPLETED);
         auctionRepository.save(auction);
 
-        Mobile mobile = mobileRepository.findById(auction.getMobileId())
-                .orElseThrow(() -> new IllegalArgumentException("Mobile not found: " + auction.getMobileId()));
+        Mobile mobile = auction.getMobile();
+        if (mobile == null) {
+            throw new MobileNotFoundException("Auction has no associated mobile");
+        }
+
         mobile.setStatus(Mobile.Status.SOLD);
         mobileRepository.save(mobile);
+
 
         AuctionUpdateMessageDTO msg = new AuctionUpdateMessageDTO(
                 "WINNER_ACCEPTED",
@@ -290,20 +328,20 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public void winnerReject(Long auctionId, Long userId) {
         Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + auctionId));
+                .orElseThrow(() -> new AuctionNotFoundException("Auction not found: " + auctionId));
 
         if (auction.getStatus() != Auction.Status.ENDED) {
-            throw new IllegalStateException("Auction is not in ENDED state");
+            throw new InvalidAuctionStateException("Auction is not in ENDED state");
         }
 
         List<Bid> allBids = bidRepository.findAllByAuctionOrderByAmountDesc(auctionId);
         Bid winner = allBids.stream()
                 .filter(b -> b.getStatus() == Bid.Status.WINNING_OFFER)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No active winning offer"));
+                .orElseThrow(() -> new InvalidAuctionStateException("No active winning offer"));
 
         if (!winner.getBidderUserId().equals(userId)) {
-            throw new IllegalArgumentException("This user is not the current winner");
+            throw new InvalidBidException("This user is not the current winner");
         }
 
         winner.setStatus(Bid.Status.REJECTED);

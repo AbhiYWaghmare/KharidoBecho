@@ -4,10 +4,8 @@ package com.spring.jwt.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 //import com.spring.jwt.auction.exception.AuctionException;
-import com.spring.jwt.auction.exception.AuctionNotFoundException;
-import com.spring.jwt.auction.exception.BadBidException;
+import com.spring.jwt.auction.exception.*;
 //import com.spring.jwt.auction.exception.BidException;
-import com.spring.jwt.auction.exception.BidNotFoundException;
 import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.exception.mobile.*;
@@ -658,6 +656,36 @@ public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFound
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
+
+    @ExceptionHandler(MobileNotFoundForAuctionException.class)
+    public ResponseEntity<Map<String, Object>> handleMobileNotFoundForAuction(MobileNotFoundForAuctionException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Mobile not found for auction");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InvalidBidException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidBid(InvalidBidException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Invalid Bid");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+
+    @ExceptionHandler(InvalidAuctionStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidAuctionState(InvalidAuctionStateException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Invalid Auction State");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+
 }
 
 
