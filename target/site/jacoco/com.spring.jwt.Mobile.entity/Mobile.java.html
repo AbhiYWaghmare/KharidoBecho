@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Mobile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.Mobile.entity</a> &gt; <span class="el_source">Mobile.java</span></div><h1>Mobile.java</h1><pre class="source lang-java linenums">package com.spring.jwt.Mobile.entity;
+
+import com.spring.jwt.entity.Seller;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = &quot;mobiles&quot;)
+<span class="nc bnc" id="L17" title="All 138 branches missed.">@Data</span>
+<span class="nc" id="L18">@NoArgsConstructor</span>
+<span class="nc" id="L19">@AllArgsConstructor</span>
+<span class="nc" id="L20">@Builder</span>
+public class Mobile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;mobile_id&quot;)
+<span class="nc" id="L26">    private Long mobileId;</span>
+
+    @Column(nullable = false)
+<span class="nc" id="L29">    private String title;</span>
+
+    @Column(length = 65535, columnDefinition = &quot;TEXT&quot;)
+    @Lob
+<span class="nc" id="L33">    private String description;</span>
+
+    @Column(nullable = false, precision = 12, scale = 2)
+<span class="nc" id="L36">    private BigDecimal price;</span>
+
+<span class="nc" id="L38">    @Column(nullable = false)</span>
+<span class="nc" id="L39">    private Boolean negotiable = false;</span>
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;mobile_condition&quot;,nullable = false)
+<span class="nc" id="L43">    private Condition condition;</span>
+
+<span class="nc" id="L45">    private String brand;</span>
+<span class="nc" id="L46">    private String model;</span>
+<span class="nc" id="L47">    private String color;</span>
+<span class="nc" id="L48">    private Integer yearOfPurchase;</span>
+
+<span class="nc" id="L50">    @Enumerated(EnumType.STRING)</span>
+    @Column(nullable = false)
+<span class="nc" id="L52">    private Status status = Status.ACTIVE;</span>
+
+    @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
+<span class="nc" id="L55">    private OffsetDateTime createdAt;</span>
+
+    @Column(name = &quot;updated_at&quot;)
+<span class="nc" id="L58">    private OffsetDateTime updatedAt;</span>
+
+    // Link With Seller
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;seller_id&quot;, nullable = false)
+<span class="nc" id="L63">    private Seller seller;</span>
+
+<span class="nc" id="L65">    @OneToMany(mappedBy = &quot;mobile&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+<span class="nc" id="L66">    private List&lt;MobileImage&gt; images = new ArrayList&lt;&gt;();</span>
+
+    // soft delete
+<span class="nc" id="L69">    private boolean deleted = false;</span>
+    @Column(name = &quot;deleted_at&quot;)
+<span class="nc" id="L71">    private OffsetDateTime deletedAt;</span>
+
+    @PrePersist
+    public void onCreate() {
+<span class="nc" id="L75">        this.createdAt = OffsetDateTime.now();</span>
+<span class="nc" id="L76">    }</span>
+
+    @PreUpdate
+    public void onUpdate() {
+<span class="nc" id="L80">        this.updatedAt = OffsetDateTime.now();</span>
+<span class="nc" id="L81">    }</span>
+
+<span class="nc" id="L83">    public enum Condition { NEW, USED, REFURBISHED }</span>
+<span class="nc" id="L84">    public enum Status { ACTIVE, SOLD, EXPIRED, DELETED }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

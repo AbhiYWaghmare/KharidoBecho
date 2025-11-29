@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuctionMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.auction.mapper</a> &gt; <span class="el_source">AuctionMapper.java</span></div><h1>AuctionMapper.java</h1><pre class="source lang-java linenums">package com.spring.jwt.auction.mapper;
+
+import com.spring.jwt.Mobile.entity.Mobile;
+import com.spring.jwt.auction.dto.AuctionDTO;
+import com.spring.jwt.auction.entity.Auction;
+
+<span class="nc" id="L7">public class AuctionMapper {</span>
+
+    public static AuctionDTO toDTO(Auction a) {
+<span class="nc bnc" id="L10" title="All 2 branches missed.">        if (a == null) return null;</span>
+
+<span class="nc" id="L12">        Long mobileId = null;</span>
+<span class="nc bnc" id="L13" title="All 2 branches missed.">        if (a.getMobile() != null) {</span>
+<span class="nc" id="L14">            mobileId = a.getMobile().getMobileId();   // 👈 IMPORTANT</span>
+        }
+
+<span class="nc" id="L17">        return new AuctionDTO(</span>
+<span class="nc" id="L18">                a.getAuctionId(),</span>
+                mobileId,
+<span class="nc" id="L20">                a.getStartPrice(),</span>
+<span class="nc" id="L21">                a.getCurrentPrice(),</span>
+<span class="nc" id="L22">                a.getMinIncrementInRupees(),</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">                a.getStatus() != null ? a.getStatus().name() : null,</span>
+<span class="nc" id="L24">                a.getStartTime(),</span>
+<span class="nc" id="L25">                a.getEndTime(),</span>
+<span class="nc" id="L26">                a.getHighestBidderUserId()</span>
+        );
+    }
+
+
+    public static Auction toEntity(AuctionDTO dto) {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (dto == null) return null;</span>
+
+<span class="nc" id="L34">        Auction a = new Auction();</span>
+<span class="nc" id="L35">        a.setAuctionId(dto.auctionId());</span>
+
+//        // create a stub Mobile with only ID set
+//        if (dto.mobileId() != null) {
+//            Mobile m = new Mobile();
+//            m.setMobileId(dto.mobileId());
+//            a.setMobile(m);
+//        }
+
+<span class="nc" id="L44">        a.setStartPrice(dto.startPrice());</span>
+<span class="nc" id="L45">        a.setCurrentPrice(dto.currentPrice());</span>
+<span class="nc" id="L46">        a.setMinIncrementInRupees(dto.minIncrementInRupees());</span>
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (dto.status() != null) {</span>
+<span class="nc" id="L49">            a.setStatus(Auction.Status.valueOf(dto.status()));</span>
+        }
+
+<span class="nc" id="L52">        a.setStartTime(dto.startTime());</span>
+<span class="nc" id="L53">        a.setEndTime(dto.endTime());</span>
+<span class="nc" id="L54">        a.setHighestBidderUserId(dto.highestBidderUserId());</span>
+<span class="nc" id="L55">        return a;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

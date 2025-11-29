@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.Bike.Mapper</a> &gt; <span class="el_source">ImageConfig.java</span></div><h1>ImageConfig.java</h1><pre class="source lang-java linenums">package com.spring.jwt.Bike.Mapper;
+
+import com.cloudinary.Cloudinary;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
+@Configuration
+<span class="nc" id="L10">public class ImageConfig {</span>
+    @Bean
+    public Cloudinary getCloudinary(){
+
+<span class="nc" id="L14">      Map config= new HashMap();</span>
+<span class="nc" id="L15">      config.put(&quot;cloud_name&quot;,&quot;djfj8mwri&quot;);</span>
+<span class="nc" id="L16">      config.put(&quot;api_key&quot;,&quot;511134529942189&quot;);</span>
+<span class="nc" id="L17">      config.put(&quot;api_secret&quot;,&quot;4kCCbGN0OLC4JbPy-vyON_ROmR0&quot;);</span>
+<span class="nc" id="L18">      config.put(&quot;secure&quot;,true);</span>
+
+<span class="nc" id="L20">       return new Cloudinary(config);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

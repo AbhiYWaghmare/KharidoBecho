@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CarController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.car.controller</a> &gt; <span class="el_source">CarController.java</span></div><h1>CarController.java</h1><pre class="source lang-java linenums">package com.spring.jwt.car.controller;
+
+import com.spring.jwt.car.dto.CarCreateResponseDTO;
+import com.spring.jwt.car.dto.CarRequestDTO;
+import com.spring.jwt.car.dto.CarResponseDTO;
+import com.spring.jwt.car.service.CarService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+//********************************************************//
+// Author : Abhishek Waghmare
+// Car Controller
+// Date   : 15/10/2025
+//********************************************************//
+
+@RestController
+@RequestMapping(&quot;/api/v1/cars&quot;)
+<span class="nc" id="L24">@RequiredArgsConstructor</span>
+public class CarController {
+
+    private final CarService carService;
+
+    //  Add car for sell
+
+    @PostMapping(&quot;/add&quot;)
+    public ResponseEntity&lt;CarCreateResponseDTO&gt; createCar(@Valid @RequestBody CarRequestDTO request) {
+        // normalize enums to uppercase
+<span class="nc" id="L34">        request.setCondition(request.getCondition().toUpperCase());</span>
+<span class="nc" id="L35">        request.setFuelType(request.getFuelType().toUpperCase());</span>
+<span class="nc" id="L36">        request.setTransmission(request.getTransmission().toUpperCase());</span>
+
+<span class="nc" id="L38">        CarResponseDTO savedCar = carService.createCar(request);</span>
+
+<span class="nc" id="L40">        CarCreateResponseDTO response = CarCreateResponseDTO.builder()</span>
+<span class="nc" id="L41">                .code(&quot;201&quot;)</span>
+<span class="nc" id="L42">                .message(&quot;Car Added Successfully !!&quot;)</span>
+<span class="nc" id="L43">                .carId(savedCar.getCarId())</span>
+<span class="nc" id="L44">                .build();</span>
+
+<span class="nc" id="L46">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+    }
+
+    // Get all cars
+    @GetMapping(&quot;/getAllCars&quot;)
+    public ResponseEntity&lt;Page&lt;CarResponseDTO&gt;&gt; list(
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;10&quot;) int size,
+            @RequestParam(required = false) Long sellerId
+    ) {
+<span class="nc" id="L56">        Page&lt;CarResponseDTO&gt; cars = carService.listCars(page, size, sellerId);</span>
+<span class="nc" id="L57">        return ResponseEntity.ok(cars);</span>
+    }
+
+    // Get car by ID
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;CarResponseDTO&gt; get(@PathVariable Long id) {
+<span class="nc" id="L63">        return ResponseEntity.ok(carService.getCar(id));</span>
+    }
+
+    // Update car by ID
+    @PatchMapping(&quot;/update/{id}&quot;)
+    public ResponseEntity&lt;CarResponseDTO&gt; update(@PathVariable Long id, @Valid @RequestBody CarRequestDTO request) {
+<span class="nc" id="L69">        return ResponseEntity.ok(carService.updateCar(id, request));</span>
+    }
+
+    // Soft delete car by ID
+    @DeleteMapping(&quot;/delete/{id}&quot;)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; delete(@PathVariable Long id) {
+<span class="nc" id="L75">        carService.softDeleteCar(id);</span>
+<span class="nc" id="L76">        return ResponseEntity.ok(Map.of(&quot;status&quot;, &quot;success&quot;, &quot;message&quot;, &quot;Car soft-deleted&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>bikeController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.Bike.Controller</a> &gt; <span class="el_source">bikeController.java</span></div><h1>bikeController.java</h1><pre class="source lang-java linenums">package com.spring.jwt.Bike.Controller;
+
+import com.spring.jwt.Bike.Entity.Bike;
+import com.spring.jwt.Bike.Entity.bikeStatus;
+import com.spring.jwt.Bike.Service.bikeService;
+import com.spring.jwt.Bike.dto.bikeDto;
+import com.spring.jwt.Bike.response.ApiResponse;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/bikes&quot;)
+public class bikeController {
+
+    private final bikeService bikeService;
+
+<span class="nc" id="L22">    public bikeController(bikeService bikeService) {</span>
+<span class="nc" id="L23">        this.bikeService = bikeService;</span>
+<span class="nc" id="L24">    }</span>
+
+    /** CREATE Bike */
+    @PostMapping(value = &quot;/post&quot;, consumes = &quot;application/json&quot;, produces = &quot;application/json&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; createBike( @RequestBody bikeDto bikedto) {
+       // bikeService.createBike(bikedto);
+<span class="nc" id="L30">        bikeDto createdBike = bikeService.createBike(bikedto);</span>
+<span class="nc" id="L31">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L32">                .body(new ApiResponse(&quot;SUCCESS&quot;, &quot;Bike created successfully&quot;, createdBike.getBike_id() ));</span>
+    }
+
+
+    /** GET Bike by ID */
+    @GetMapping(&quot;/get/{id}&quot;)
+    public ResponseEntity&lt;bikeDto&gt; getBikeById(@PathVariable Long id) {
+<span class="nc" id="L39">        bikeDto bike = bikeService.getBikeById(id);</span>
+<span class="nc" id="L40">        return ResponseEntity.ok(bike); // For GET, you can still return DTO</span>
+    }
+
+    /** UPDATE Bike */
+    @PatchMapping(value = &quot;/patch/{id}&quot;,consumes = &quot;application/json&quot;, produces = &quot;application/json&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; updateBike(@PathVariable Long id, @RequestBody bikeDto bikedto) {
+<span class="nc" id="L46">        bikeService.updateBike(id, bikedto);</span>
+<span class="nc" id="L47">        return ResponseEntity.ok(new ApiResponse(&quot;SUCCESS&quot;, &quot;Bike updated successfully&quot;));</span>
+    }
+
+
+    /*
+    soft delete bike
+     */
+    @DeleteMapping(value = &quot;/delete/{id}/soft&quot;, produces = &quot;application/json&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; softDeleteBike(@PathVariable Long id) {
+<span class="nc" id="L56">        bikeService.softDeletebike(id);</span>
+<span class="nc" id="L57">        bikeDto deletedBike = bikeService.softDeletebike(id);</span>
+<span class="nc" id="L58">        return ResponseEntity.ok(new ApiResponse(&quot;SUCCESS&quot;, &quot;Bike soft deleted successfully&quot;));</span>
+    }
+
+
+    /** HARD DELETE Bike */
+    @DeleteMapping(&quot;/delete/{id}&quot;)
+    public ResponseEntity&lt;ApiResponse&gt; hardDeleteBike(@PathVariable Long id) {
+<span class="nc" id="L65">        bikeService.hardDeleteBike(id);</span>
+<span class="nc" id="L66">        return ResponseEntity.ok(new ApiResponse(&quot;SUCCESS&quot;, &quot;Bike permanently deleted&quot;));</span>
+    }
+
+    /** GET all bikes */
+    @GetMapping(&quot;/get&quot;)
+    public ResponseEntity&lt;List&lt;bikeDto&gt;&gt; getAllBikes() {
+<span class="nc" id="L72">        List&lt;bikeDto&gt; bikes = bikeService.getAllBikes();</span>
+<span class="nc" id="L73">        return ResponseEntity.ok(bikes); // For GET, return DTO</span>
+    }
+
+    /** GET Bikes by Seller &amp; Status with Pagination */
+    @GetMapping(&quot;/seller/{sellerId}/status/{status}/page/{page}/size/{size}&quot;)
+    public ResponseEntity&lt;Page&lt;bikeDto&gt;&gt; getBikesBySellerAndStatus(
+            @PathVariable Long sellerId,
+            @PathVariable bikeStatus status,
+            @PathVariable int page,
+            @PathVariable int size
+    ) {
+<span class="nc" id="L84">        Page&lt;bikeDto&gt; bikes = bikeService.getBikesBySellerAndStatus(sellerId, status, page, size);</span>
+<span class="nc" id="L85">        return ResponseEntity.ok(bikes);</span>
+    }
+    @GetMapping(&quot;/seller/{sellerId}/page/{page}/size/{size}&quot;)
+    public ResponseEntity&lt;Page&lt;bikeDto&gt;&gt; getBikesBySeller(
+            @PathVariable Long sellerId,
+            @PathVariable int page,
+            @PathVariable int size
+    ) {
+<span class="nc" id="L93">        Page&lt;bikeDto&gt; bikes = bikeService.getBikesBySeller(sellerId, page, size);</span>
+<span class="nc" id="L94">        return ResponseEntity.ok(bikes);</span>
+    }
+
+    /** GET Bikes by Status with Pagination */
+    @GetMapping(&quot;/status/{status}/page/{page}/size/{size}&quot;)
+    public ResponseEntity&lt;Page&lt;bikeDto&gt;&gt; getBikesByStatus(
+            @PathVariable bikeStatus status,
+            @PathVariable int page,
+            @PathVariable int size
+    ) {
+<span class="nc" id="L104">        Page&lt;bikeDto&gt; bikes = bikeService.getBikesByStatus(status, page, size);</span>
+<span class="nc" id="L105">        return ResponseEntity.ok(bikes);</span>
+    }
+
+    /** COUNT Bikes by Seller &amp; Status */
+    @GetMapping(&quot;/seller/{sellerId}/status/{status}/count&quot;)
+    public ResponseEntity&lt;Long&gt; countBikesBySellerAndStatus(
+            @PathVariable Long sellerId,
+            @PathVariable bikeStatus status
+    ) {
+<span class="nc" id="L114">        Long count = bikeService.countBikesBySellerAndStatus(sellerId, status);</span>
+<span class="nc" id="L115">        return ResponseEntity.ok(count);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

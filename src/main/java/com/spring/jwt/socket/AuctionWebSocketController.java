@@ -42,7 +42,7 @@ public class AuctionWebSocketController {
 //    public void placeBid(@DestinationVariable Long auctionId,
 //                         @Payload BidMessageDTO bidMessage) {
 //
-//        Long userId = bidMessage.userId();  // 👈 from message, not from JWT
+//        Long userId = bidMessage.userId();  //   from message, not from JWT
 //        if (userId == null) {
 //            throw new IllegalArgumentException("userId is required in bidMessage");
 //        }

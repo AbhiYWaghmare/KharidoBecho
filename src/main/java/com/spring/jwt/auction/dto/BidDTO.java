@@ -1,6 +1,7 @@
 package com.spring.jwt.auction.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 public record BidDTO(
@@ -9,5 +10,5 @@ public record BidDTO(
         Long bidderUserId,
         BigDecimal amount,
         String status,
-        OffsetDateTime createdAt
+        LocalDateTime createdAt
 ) {}

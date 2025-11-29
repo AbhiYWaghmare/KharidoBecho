@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LaptopBookingController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.laptop.controller</a> &gt; <span class="el_source">LaptopBookingController.java</span></div><h1>LaptopBookingController.java</h1><pre class="source lang-java linenums">package com.spring.jwt.laptop.controller;
+
+import com.spring.jwt.laptop.dto.BookingResponseDTO;
+import com.spring.jwt.laptop.dto.LaptopRequestCreateDTO;
+import com.spring.jwt.laptop.dto.LaptopRequestResponseDTO;
+import com.spring.jwt.laptop.entity.LaptopBooking;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
+import com.spring.jwt.laptop.service.LaptopRequestService;
+import com.spring.jwt.utils.BaseResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+//********************************************************//
+
+    //Author : Sudhir Lokade
+    //Laptop Booking Controller
+    //Date : 16/10/2025
+
+//*******************************************************//
+
+@RestController
+@RequestMapping(&quot;/api/laptopBookings&quot;)
+<span class="nc" id="L30">@RequiredArgsConstructor</span>
+public class LaptopBookingController {
+    private final LaptopRequestService service;
+
+    /**
+     * Create a new laptop request
+     * Returns 201 CREATED on success
+     */
+    @PostMapping(&quot;/create&quot;)
+    public ResponseEntity&lt;LaptopRequestResponseDTO&gt; create(@Valid @RequestBody LaptopRequestCreateDTO dto) {
+<span class="nc" id="L40">        LaptopRequestResponseDTO response = service.createRequest(dto);</span>
+<span class="nc" id="L41">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+    }
+
+    /**
+     * List all requests for a specific laptop
+     * Returns 200 OK
+     */
+    @GetMapping(&quot;/{laptopId}&quot;)
+    public ResponseEntity&lt;List&lt;LaptopRequestResponseDTO&gt;&gt; listForLaptop(@PathVariable Long laptopId) {
+<span class="nc" id="L50">        return ResponseEntity.ok(service.listRequestsForLaptop(laptopId));</span>
+    }
+
+    /**
+     * List all requests made by a specific buyer
+     * Returns 200 OK
+     */
+    @GetMapping(&quot;/buyer/{buyerId}&quot;)
+    public ResponseEntity&lt;List&lt;LaptopRequestResponseDTO&gt;&gt; listForBuyer(@PathVariable Long buyerId) {
+<span class="nc" id="L59">        return ResponseEntity.ok(service.listRequestsForBuyer(buyerId));</span>
+    }
+
+    /**
+     * Update status (PENDING / ACCEPTED / REJECTED / COMPLETED)
+     * Returns 200 OK
+     */
+    @PatchMapping(&quot;/{laptopBookingId}/status&quot;)
+    public ResponseEntity&lt;LaptopRequestResponseDTO&gt; updateStatus(
+            @PathVariable Long laptopBookingId,
+            @RequestParam String status) {
+<span class="nc" id="L70">        return ResponseEntity.ok(service.updateRequestStatus(laptopBookingId, status));</span>
+    }
+
+    /**
+     * Append a chat message to a laptop request conversation
+     * Returns 200 OK
+     */
+//    @PostMapping(&quot;/{laptopBookingId}/message&quot;)
+//    public ResponseEntity&lt;LaptopRequestResponseDTO&gt; sendMessage(
+//            @PathVariable Long laptopBookingId,
+//            @RequestParam Long senderUserId,
+//            @RequestParam String message) {
+//        return ResponseEntity.ok(service.appendMessage(laptopBookingId, senderUserId, message));
+//    }
+
+    /**
+     * Mark request as completed (sold) and reject others
+     * Returns 200 OK
+     */
+    @PostMapping(&quot;/{laptopBookingId}/complete&quot;)
+    public ResponseEntity&lt;BaseResponseDTO&gt; complete(@PathVariable Long laptopBookingId) {
+<span class="nc" id="L91">        service.markRequestCompletedAndMarkSold(laptopBookingId);</span>
+<span class="nc" id="L92">        return ResponseEntity.ok(</span>
+<span class="nc" id="L93">                BaseResponseDTO.builder()</span>
+<span class="nc" id="L94">                        .code(&quot;200&quot;)</span>
+<span class="nc" id="L95">                        .message(&quot;Marked sold and others rejected&quot;)</span>
+<span class="nc" id="L96">                        .build()</span>
+        );
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>bikeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.Bike.Service</a> &gt; <span class="el_source">bikeServiceImpl.java</span></div><h1>bikeServiceImpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.Bike.Service;
+
+import com.spring.jwt.Bike.Entity.Bike;
+import com.spring.jwt.Bike.Entity.FuelType;
+import com.spring.jwt.Bike.Entity.bikeStatus;
+import com.spring.jwt.Bike.Repository.bikeRepository;
+import com.spring.jwt.Bike.dto.bikeDto;
+import com.spring.jwt.entity.Seller;
+import com.spring.jwt.exception.Bike.InvalidBikeData;
+import com.spring.jwt.exception.Bike.SellerNotFound;
+import com.spring.jwt.exception.Bike.StatusNotFoundException;
+import com.spring.jwt.exception.Bike.bikeNotFoundException;
+import com.spring.jwt.repository.SellerRepository;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class bikeServiceImpl implements bikeService {
+
+    private final bikeRepository bikerepository;
+    private final ModelMapper modelMapper;
+    private final SellerRepository sellerRepository;
+
+<span class="fc" id="L29">    public bikeServiceImpl(bikeRepository bikerepository, ModelMapper modelMapper, SellerRepository sellerRepository) {</span>
+<span class="fc" id="L30">        this.bikerepository = bikerepository;</span>
+<span class="fc" id="L31">        this.modelMapper = modelMapper;</span>
+<span class="fc" id="L32">        this.sellerRepository = sellerRepository;</span>
+
+<span class="fc" id="L34">    }</span>
+
+    private Bike convertToEntity(bikeDto bikedto) {
+<span class="fc" id="L37">        return modelMapper.map(bikedto, Bike.class);</span>
+    }
+
+    private bikeDto convertToDto(Bike bike) {
+<span class="fc" id="L41">        return modelMapper.map(bike, bikeDto.class);</span>
+    }
+
+    /**
+     * CREATE Bike
+     */
+    @Override
+    public bikeDto createBike(bikeDto bikedto) {
+        // Convert DTO to Entity
+<span class="fc" id="L50">        Bike bike = convertToEntity(bikedto);</span>
+
+        // ===== Validate seller ID =====
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (bikedto.getSellerId() == null) {</span>
+<span class="nc" id="L54">            throw new SellerNotFound(&quot;Seller ID is required&quot;);</span>
+        }
+
+        // Fetch seller from DB
+<span class="fc" id="L58">        Seller seller = sellerRepository.findById(bikedto.getSellerId())</span>
+<span class="pc" id="L59">                .orElseThrow(() -&gt; new SellerNotFound(&quot;Seller not found with ID: &quot; + bikedto.getSellerId()));</span>
+<span class="fc" id="L60">        bike.setSeller(seller);</span>
+
+        // ===== Validate status =====
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (bikedto.getStatus() == null) {</span>
+<span class="nc" id="L64">            throw new StatusNotFoundException(&quot;Status is required and must be ACTIVE&quot;);</span>
+        }
+
+        // Only allow ACTIVE status
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (bikedto.getStatus() != bikeStatus.ACTIVE) {</span>
+<span class="nc" id="L69">            throw new StatusNotFoundException(&quot;Only ACTIVE status is allowed while Posting  a bike&quot;);</span>
+        }
+        // Accept year till current year
+
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if (bikedto.getManufactureYear() != null) {</span>
+<span class="fc" id="L74">            int currentYear = java.time.Year.now().getValue();</span>
+
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">            if (bikedto.getManufactureYear() &gt; currentYear) {</span>
+<span class="nc" id="L77">                throw new InvalidBikeData(&quot;Manufacture year cannot be in the future (&quot; + currentYear + &quot;)&quot;);</span>
+            }
+
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">            if (bikedto.getManufactureYear() &lt; 2000) {</span>
+<span class="nc" id="L81">                throw new InvalidBikeData(&quot;Manufacture year must be after 2000.&quot;);</span>
+            }
+        }
+
+
+
+        // Save valid bike
+<span class="fc" id="L88">        Bike savedBike = bikerepository.save(bike);</span>
+<span class="fc" id="L89">        bikedto.setBike_id(savedBike.getBike_id());</span>
+<span class="fc" id="L90">        return convertToDto(savedBike);</span>
+    }
+
+
+
+
+    /**
+     * GET Bike by passing a DTO
+     */
+    @Override
+    public List&lt;bikeDto&gt; getAllBikes() {
+<span class="fc" id="L101">        return bikerepository.findAll() // Fetch all bikes from DB</span>
+<span class="fc" id="L102">                .stream()</span>
+<span class="fc" id="L103">                .map(this::convertToDto) // Convert each Bike entity to bikeDto</span>
+<span class="fc" id="L104">                .toList();</span>
+    }
+
+
+    /**
+     * GET Bike by ID
+     */
+    @Override
+    public bikeDto getBikeById(Long bike_id) {
+<span class="fc" id="L113">        Bike bike = bikerepository.findById(bike_id)</span>
+<span class="pc" id="L114">                .orElseThrow(() -&gt; new bikeNotFoundException(&quot;Bike not found with id: &quot; + bike_id));</span>
+<span class="fc" id="L115">        return convertToDto(bike);</span>
+    }
+
+    /**
+     * UPDATE Bike by ID
+     */
+    @Override
+    @Transactional
+    public bikeDto updateBike(Long id, bikeDto bikedto) {
+
+<span class="nc" id="L125">        Bike existingBike = bikerepository.findById(id)</span>
+<span class="nc" id="L126">                .orElseThrow(() -&gt; new bikeNotFoundException(&quot;Bike not found with id: &quot; + id));</span>
+
+        // ===== Numeric validations =====
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (bikedto.getPrize() != null) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            if (bikedto.getPrize() &lt;= 0) {</span>
+<span class="nc" id="L131">                throw new InvalidBikeData(&quot;Prize must be greater than 0&quot;);</span>
+            }
+<span class="nc" id="L133">            existingBike.setPrize(bikedto.getPrize());</span>
+        }
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (bikedto.getEngineCC() != null) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if (bikedto.getEngineCC() &lt;= 0) {</span>
+<span class="nc" id="L138">                throw new InvalidBikeData(&quot;Engine CC must be greater than 0&quot;);</span>
+            }
+<span class="nc" id="L140">            existingBike.setEngineCC(bikedto.getEngineCC());</span>
+        }
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (bikedto.getKilometersDriven() != null) {</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">            if (bikedto.getKilometersDriven() &lt; 0) {</span>
+<span class="nc" id="L145">                throw new InvalidBikeData(&quot;Kilometers driven must be greater than zero &quot;);</span>
+            }
+<span class="nc" id="L147">            existingBike.setKilometersDriven(bikedto.getKilometersDriven());</span>
+        }
+
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (bikedto.getManufactureYear() != null) {</span>
+<span class="nc" id="L151">            int currentYear = java.time.Year.now().getValue(); // dynamically get current year</span>
+<span class="nc bnc" id="L152" title="All 4 branches missed.">            if (bikedto.getManufactureYear() &lt; 1900 || bikedto.getManufactureYear() &gt; currentYear)  {</span>
+<span class="nc" id="L153">                throw new InvalidBikeData(&quot;Manufacture year must be between 1900 and &quot; + currentYear);</span>
+            }
+<span class="nc" id="L155">            existingBike.setManufactureYear(bikedto.getManufactureYear());</span>
+        }
+
+
+        // ===== String validations =====
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        if (bikedto.getBrand() != null) {</span>
+<span class="nc" id="L161">            String brand = bikedto.getBrand().trim();</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            if (brand.isBlank()) throw new InvalidBikeData(&quot;Brand must not be blank&quot;);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">            if (brand.length() &gt; 50) throw new InvalidBikeData(&quot;Brand must be at most 50 characters&quot;);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">            if (!brand.matches(&quot;^[A-Za-z0-9\\s]+$&quot;)) throw new InvalidBikeData(&quot;Brand must contain only letters and spaces&quot;);</span>
+<span class="nc" id="L165">            existingBike.setBrand(brand);</span>
+        }
+
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (bikedto.getModel() != null) {</span>
+<span class="nc" id="L169">            String model = bikedto.getModel().trim();</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            if (model.isBlank()) throw new InvalidBikeData(&quot;Model must not be blank&quot;);</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            if (model.length() &gt; 50) throw new InvalidBikeData(&quot;Model must be at most 50 characters&quot;);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">            if (!model.matches(&quot;^[A-Za-z0-9\\s-]+$&quot;))</span>
+<span class="nc" id="L173">                throw new InvalidBikeData(&quot;Model must contain only letters, numbers, spaces, or hyphens&quot;);</span>
+<span class="nc" id="L174">            existingBike.setModel(model);</span>
+        }
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (bikedto.getVariant() != null) {</span>
+<span class="nc" id="L178">            String variant = bikedto.getVariant().trim();</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            if (variant.isBlank()) throw new InvalidBikeData(&quot;Variant must not be blank&quot;);</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            if (variant.length() &gt; 50) throw new InvalidBikeData(&quot;Variant must be at most 50 characters&quot;);</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">            if (!variant.matches(&quot;^[A-Za-z0-9\\s-]+$&quot;))</span>
+<span class="nc" id="L182">                throw new InvalidBikeData(&quot;Variant must contain only letters, numbers, spaces, or hyphens&quot;);</span>
+<span class="nc" id="L183">            existingBike.setVariant(variant);</span>
+        }
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (bikedto.getColor() != null) {</span>
+<span class="nc" id="L187">            String color = bikedto.getColor().trim();</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">            if (color.isBlank()) throw new InvalidBikeData(&quot;Color must not be blank&quot;);</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">            if (color.length() &gt; 20) throw new InvalidBikeData(&quot;Color must be at most 20 characters&quot;);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if (!color.matches(&quot;^[A-Za-z\\s]+$&quot;)) throw new InvalidBikeData(&quot;Color must contain only letters and spaces&quot;);</span>
+<span class="nc" id="L191">            existingBike.setColor(color);</span>
+        }
+
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        if (bikedto.getDescription() != null) {</span>
+<span class="nc" id="L195">            String desc = bikedto.getDescription().trim();</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            if (desc.isBlank()) throw new InvalidBikeData(&quot;Description must not be blank&quot;);</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            if (desc.length() &gt; 500) throw new InvalidBikeData(&quot;Description must be at most 500 characters&quot;);</span>
+<span class="nc" id="L198">            existingBike.setDescription(desc);</span>
+        }
+
+        // ===== Enum validations =====
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        if (bikedto.getFuelType() != null) {</span>
+<span class="nc" id="L203">            FuelType fuelType = bikedto.getFuelType();</span>
+<span class="nc bnc" id="L204" title="All 4 branches missed.">            if (fuelType != FuelType.PETROL &amp;&amp; fuelType != FuelType.EV) {</span>
+<span class="nc" id="L205">                throw new InvalidBikeData(&quot;Fuel type must be PETROL or EV&quot;);</span>
+            }
+<span class="nc" id="L207">            existingBike.setFuelType(fuelType);</span>
+        }
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        if (bikedto.getStatus() != null) {</span>
+<span class="nc" id="L211">            bikeStatus status = bikedto.getStatus();</span>
+
+            // Allowed statuses
+<span class="nc bnc" id="L214" title="All 10 branches missed.">            if (status != bikeStatus.NEW &amp;&amp;</span>
+                    status != bikeStatus.AVAILABLE &amp;&amp;
+                    status != bikeStatus.INACTIVE &amp;&amp;
+                    status != bikeStatus.DELETED &amp;&amp;
+                    status != bikeStatus.ACTIVE) {
+
+<span class="nc" id="L220">                throw new InvalidBikeData(&quot;Status must be one of: NEW, AVAILABLE, INACTIVE, DELETED, ACTIVE&quot;);</span>
+            }
+
+<span class="nc" id="L223">            existingBike.setStatus(status);</span>
+        }
+
+
+        // ===== Registration number  =====
+<span class="nc bnc" id="L228" title="All 4 branches missed.">        if (bikedto.getRegistrationNumber() != null &amp;&amp; !bikedto.getRegistrationNumber().isBlank()) {</span>
+<span class="nc" id="L229">            String regNo = bikedto.getRegistrationNumber().trim().toUpperCase();</span>
+
+<span class="nc bnc" id="L231" title="All 4 branches missed.">            if (regNo.length() &lt; 6 || regNo.length() &gt; 10) {</span>
+<span class="nc" id="L232">                throw new InvalidBikeData(&quot;Registration number must be between 6 and 10 characters&quot;);</span>
+            }
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            if (!regNo.matches(&quot;^[A-Z]{2}[0-9]{1,2}[A-Z]{1,2}[0-9]{1,4}$&quot;)) {</span>
+<span class="nc" id="L236">                throw new InvalidBikeData(&quot;Invalid registration number format (e.g., MH12AB1234)&quot;);</span>
+            }
+
+<span class="nc" id="L239">            existingBike.setRegistrationNumber(regNo);</span>
+        }
+
+
+        // ===== Seller update =====
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (bikedto.getSellerId() != null) {</span>
+<span class="nc" id="L245">            Seller seller = sellerRepository.findById(bikedto.getSellerId())</span>
+<span class="nc" id="L246">                    .orElseThrow(() -&gt; new SellerNotFound(&quot;Seller not found with ID &quot; + bikedto.getSellerId()));</span>
+<span class="nc" id="L247">            existingBike.setSeller(seller);</span>
+        }
+
+        // ===== Save  =====
+
+<span class="nc" id="L252">            Bike savedBike = bikerepository.save(existingBike);</span>
+<span class="nc" id="L253">            return convertToDto(savedBike);</span>
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+         * SOFT DELETE Bike
+         * Instead of deleting the record,  update its status to DELETED
+         */
+    @Override
+    public bikeDto softDeletebike(Long bike_id) {
+<span class="fc" id="L274">        Bike bike = bikerepository.findById(bike_id)</span>
+<span class="pc" id="L275">                .orElseThrow(() -&gt; new bikeNotFoundException(&quot;Bike not found with id: &quot; + bike_id));</span>
+
+<span class="fc" id="L277">        bike.setStatus(bikeStatus.DELETED);</span>
+
+<span class="fc" id="L279">        Bike softDeletedBike = bikerepository.save(bike);</span>
+<span class="fc" id="L280">        return convertToDto(softDeletedBike);</span>
+    }
+
+
+    /**
+     * HARD DELETE Bike
+     * Permanently remove record from the database
+     */
+    @Override
+    public void hardDeleteBike(Long bike_id) {
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">        if (!bikerepository.existsById(bike_id)) {</span>
+<span class="nc" id="L291">            throw new bikeNotFoundException(&quot;Bike not found with id: &quot; + bike_id);</span>
+        }
+<span class="fc" id="L293">        bikerepository.deleteById(bike_id);</span>
+<span class="fc" id="L294">    }</span>
+
+
+    /** Fetch Bikes by Seller &amp; Status (with Pagination) */
+    @Override
+    public Page&lt;bikeDto&gt; getBikesBySellerAndStatus(Long sellerId, bikeStatus status, int page, int size) {
+<span class="fc" id="L300">        Page&lt;Bike&gt; bikes = bikerepository.findBySeller_SellerIdAndStatus(sellerId, status, PageRequest.of(page, size));</span>
+
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if (bikes.isEmpty()) {</span>
+<span class="nc" id="L303">            throw new bikeNotFoundException(&quot;No bikes found for sellerId: &quot; + sellerId + &quot; with status: &quot; + status);</span>
+        }
+
+<span class="fc" id="L306">        return bikes.map(this::convertToDto);</span>
+    }
+    @Override
+    public Page&lt;bikeDto&gt; getBikesBySeller(Long sellerId, int page, int size) {
+<span class="nc" id="L310">        Page&lt;Bike&gt; bikes = bikerepository.findBySeller_SellerId(</span>
+<span class="nc" id="L311">                sellerId, PageRequest.of(page, size)</span>
+        );
+
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        if (bikes.isEmpty()) {</span>
+<span class="nc" id="L315">            throw new bikeNotFoundException(&quot;No bikes found for sellerId: &quot; + sellerId);</span>
+        }
+
+<span class="nc" id="L318">        return bikes.map(this::convertToDto);</span>
+    }
+
+
+    /** Fetch Bikes by Status (with Pagination) */
+    @Override
+    public Page&lt;bikeDto&gt; getBikesByStatus(bikeStatus status, int page, int size) {
+<span class="nc" id="L325">        Page&lt;Bike&gt; bikesPage = bikerepository.findByStatus(status, PageRequest.of(page, size));</span>
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">        if (bikesPage.isEmpty()) {</span>
+<span class="nc" id="L328">            throw new StatusNotFoundException(&quot;No bikes found with status: &quot; + status);</span>
+        }
+
+<span class="nc" id="L331">        return bikesPage.map(this::convertToDto);</span>
+    }
+
+
+    /* Count Bikes by Seller &amp; Status */
+    @Override
+    public Long countBikesBySellerAndStatus(Long sellerId, bikeStatus status) {
+<span class="fc" id="L338">        Long count = bikerepository.countBySeller_SellerIdAndStatus(sellerId, status);</span>
+
+<span class="pc bpc" id="L340" title="2 of 4 branches missed.">        if (count == null || count == 0) {</span>
+<span class="nc" id="L341">            throw new bikeNotFoundException(&quot;No bikes found for sellerId: &quot; + sellerId + &quot; with status: &quot; + status);</span>
+        }
+
+<span class="fc" id="L344">        return count;</span>
+    }
+
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
