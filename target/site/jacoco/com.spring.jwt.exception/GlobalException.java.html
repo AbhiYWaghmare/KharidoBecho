@@ -1,0 +1,833 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalException.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.exception</a> &gt; <span class="el_source">GlobalException.java</span></div><h1>GlobalException.java</h1><pre class="source lang-java linenums">package com.spring.jwt.exception;
+
+
+
+
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.exception.bookings.LaptopRequestException;
+import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
+import com.spring.jwt.exception.colour.ColourNotFoundException;
+import com.spring.jwt.laptop.dto.AuctionErrReponse;
+import com.spring.jwt.laptop.dto.LaptopErrorResponse;
+import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
+import com.spring.jwt.exception.laptop.*;
+
+
+//import com.spring.jwt.auction.exception.AuctionException;
+import com.spring.jwt.auction.exception.*;
+//import com.spring.jwt.auction.exception.BidException;
+import com.spring.jwt.exception.Bike.*;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import com.spring.jwt.exception.mobile.*;
+import com.spring.jwt.laptop.dto.LaptopResponseDTO;
+
+import com.spring.jwt.utils.BaseResponseDTO;
+import com.spring.jwt.utils.ErrorResponseDTO1;
+import com.spring.jwt.utils.ErrorResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+<span class="nc" id="L61">@Slf4j</span>
+<span class="nc" id="L62">public class  GlobalException extends ResponseEntityExceptionHandler {</span>
+
+    @Override
+    protected ResponseEntity&lt;Object&gt; handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+<span class="nc" id="L71">        String message = &quot;Invalid request payload.&quot;;</span>
+
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (ex.getCause() instanceof UnrecognizedPropertyException cause) {</span>
+<span class="nc" id="L74">            message = &quot;Unknown field: &quot; + cause.getPropertyName();</span>
+        }
+
+<span class="nc" id="L77">        ErrorResponseDTO1 response = new ErrorResponseDTO1(</span>
+<span class="nc" id="L78">                LocalDateTime.now(),</span>
+<span class="nc" id="L79">                HttpStatus.BAD_REQUEST.value(),</span>
+                &quot;Invalid Field&quot;,
+                message,
+<span class="nc" id="L82">                request.getDescription(false)</span>
+        );
+
+<span class="nc" id="L85">        return new ResponseEntity&lt;&gt;(response, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity&lt;BaseResponseDTO&gt; handleBaseException(BaseException e) {
+<span class="nc" id="L90">        log.error(&quot;Base exception occurred: {}&quot;, e.getMessage());</span>
+
+<span class="nc" id="L92">        BaseResponseDTO response = BaseResponseDTO.builder()</span>
+<span class="nc" id="L93">                .code(e.getCode())</span>
+<span class="nc" id="L94">                .message(e.getMessage())</span>
+<span class="nc" id="L95">                .build();</span>
+
+        HttpStatus status;
+        try {
+<span class="nc" id="L99">            status = HttpStatus.valueOf(Integer.parseInt(e.getCode()));</span>
+<span class="nc" id="L100">        } catch (Exception ex) {</span>
+<span class="nc" id="L101">            status = HttpStatus.INTERNAL_SERVER_ERROR;</span>
+<span class="nc" id="L102">        }</span>
+
+<span class="nc" id="L104">        return new ResponseEntity&lt;&gt;(response, status);</span>
+    }
+
+    @ExceptionHandler(UserNotFoundExceptions.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleUserNotFoundException(UserNotFoundExceptions exception, WebRequest webRequest){
+<span class="nc" id="L109">        log.error(&quot;User not found: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L110">        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(</span>
+<span class="nc" id="L111">                webRequest.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+<span class="nc" id="L113">                exception.getMessage(),</span>
+<span class="nc" id="L114">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L116">        return new ResponseEntity&lt;&gt;(errorResponseDTO, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(PageNotFoundException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handlePageNotFoundException(PageNotFoundException exception, WebRequest webRequest){
+<span class="nc" id="L121">        log.error(&quot;Page not found: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L122">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L123">                webRequest.getDescription(false),</span>
+                HttpStatus.NOT_FOUND,
+<span class="nc" id="L125">                exception.getMessage(),</span>
+<span class="nc" id="L126">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L128">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.NOT_FOUND);</span>
+    }
+
+    @ExceptionHandler({EmptyFieldException.class, UserAlreadyExistException.class})
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleCommonExceptions(RuntimeException exception, WebRequest webRequest) {
+<span class="nc" id="L133">        log.error(&quot;Validation error: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L134">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L135">                webRequest.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+<span class="nc" id="L137">                exception.getMessage(),</span>
+<span class="nc" id="L138">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L140">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleInvalidOtpException(InvalidOtpException exception, WebRequest webRequest){
+<span class="nc" id="L145">        log.error(&quot;Invalid OTP: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L146">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L147">                webRequest.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+<span class="nc" id="L149">                exception.getMessage(),</span>
+<span class="nc" id="L150">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L152">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(OtpExpiredException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleOtpExpiredException(OtpExpiredException exception, WebRequest webRequest){
+<span class="nc" id="L157">        log.error(&quot;OTP expired: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L158">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L159">                webRequest.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+<span class="nc" id="L161">                exception.getMessage(),</span>
+<span class="nc" id="L162">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L164">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleEmailNotVerifiedException(EmailNotVerifiedException exception, WebRequest webRequest){
+<span class="nc" id="L169">        log.error(&quot;Email not verified: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L170">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L171">                webRequest.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+<span class="nc" id="L173">                exception.getMessage(),</span>
+<span class="nc" id="L174">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L176">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleAuthenticationException(AuthenticationException exception, WebRequest webRequest) {
+<span class="nc" id="L181">        log.error(&quot;Authentication error: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L182">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L183">                webRequest.getDescription(false),</span>
+                HttpStatus.UNAUTHORIZED,
+<span class="nc" id="L185">                &quot;Authentication failed: &quot; + exception.getMessage(),</span>
+<span class="nc" id="L186">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L188">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.UNAUTHORIZED);</span>
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleBadCredentialsException(BadCredentialsException exception, WebRequest webRequest) {
+<span class="nc" id="L193">        log.error(&quot;Bad credentials: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L194">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L195">                webRequest.getDescription(false),</span>
+                HttpStatus.UNAUTHORIZED,
+                &quot;Invalid username or password&quot;,
+<span class="nc" id="L198">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L200">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.UNAUTHORIZED);</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleAccessDeniedException(AccessDeniedException exception, WebRequest webRequest) {
+<span class="nc" id="L205">        log.error(&quot;Access denied: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L206">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L207">                webRequest.getDescription(false),</span>
+                HttpStatus.FORBIDDEN,
+                &quot;Access denied: You don't have permission to access this resource&quot;,
+<span class="nc" id="L210">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L212">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.FORBIDDEN);</span>
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleDataAccessException(DataAccessException exception, WebRequest webRequest) {
+<span class="nc" id="L217">        log.error(&quot;Database error: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L218">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L219">                webRequest.getDescription(false),</span>
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                &quot;Database error occurred&quot;,
+<span class="nc" id="L222">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L224">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+    }
+
+    // KEEP ONLY ONE handler for MethodArgumentTypeMismatchException!
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException exception, WebRequest request) {
+<span class="nc" id="L230">        log.error(&quot;Type mismatch: {}&quot;, exception.getMessage());</span>
+        String error;
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (exception.getRequiredType() != null) {</span>
+<span class="nc" id="L233">            error = exception.getName() + &quot; should be of type &quot; + exception.getRequiredType().getName();</span>
+        } else {
+<span class="nc" id="L235">            error = exception.getName() + &quot; has an invalid type&quot;;</span>
+        }
+<span class="nc" id="L237">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L238">                request.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+                error,
+<span class="nc" id="L241">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L243">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @Override
+    protected ResponseEntity&lt;Object&gt; handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+<span class="nc" id="L249">        log.error(&quot;Missing parameter: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L250">        String error = ex.getParameterName() + &quot; parameter is missing&quot;;</span>
+
+<span class="nc" id="L252">        Map&lt;String, String&gt; errors = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L253">        errors.put(ex.getParameterName(), error);</span>
+
+<span class="nc" id="L255">        return new ResponseEntity&lt;&gt;(errors, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @Override
+    protected ResponseEntity&lt;Object&gt; handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+<span class="nc" id="L261">        log.error(&quot;Validation error: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L262">        Map&lt;String, String&gt; validationErrors = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L263">        List&lt;ObjectError&gt; validationErrorList = ex.getBindingResult().getAllErrors();</span>
+
+<span class="nc" id="L265">        validationErrorList.forEach((error) -&gt; {</span>
+<span class="nc" id="L266">            String fieldName = ((FieldError) error).getField();</span>
+<span class="nc" id="L267">            String validationMsg = error.getDefaultMessage();</span>
+<span class="nc" id="L268">            validationErrors.put(fieldName, validationMsg);</span>
+<span class="nc" id="L269">        });</span>
+<span class="nc" id="L270">        return new ResponseEntity&lt;&gt;(validationErrors, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Map&lt;String, String&gt; handleConstraintViolation(ConstraintViolationException ex) {
+<span class="nc" id="L276">        log.error(&quot;Constraint violation: {}&quot;, ex.getMessage());</span>
+<span class="nc" id="L277">        return ex.getConstraintViolations().stream()</span>
+<span class="nc" id="L278">                .collect(Collectors.toMap(</span>
+<span class="nc" id="L279">                        violation -&gt; violation.getPropertyPath().toString(),</span>
+<span class="nc" id="L280">                        violation -&gt; violation.getMessage(),</span>
+<span class="nc" id="L281">                        (existingMessage, newMessage) -&gt; existingMessage + &quot;; &quot; + newMessage</span>
+                ));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity&lt;Object&gt; handleResourceNotFound(ResourceNotFoundException ex) {
+<span class="nc" id="L287">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L288">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L289">        body.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L290">        body.put(&quot;error&quot;, &quot;Resource Not Found&quot;);</span>
+<span class="nc" id="L291">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L292">        return new ResponseEntity&lt;&gt;(body, HttpStatus.NOT_FOUND);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleAllUncaughtException(Exception exception, WebRequest webRequest) {
+<span class="nc" id="L297">        log.error(&quot;Uncaught error occurred: &quot;, exception);</span>
+<span class="nc" id="L298">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L299">                webRequest.getDescription(false),</span>
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                &quot;An unexpected error occurred&quot;,
+<span class="nc" id="L302">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L304">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+    }
+
+    @ExceptionHandler(ExamTimeWindowException.class)
+    public ResponseEntity&lt;ErrorResponseDto&gt; handleExamTimeWindowException(ExamTimeWindowException exception, WebRequest webRequest){
+<span class="nc" id="L309">        log.error(&quot;Exam time window error: {}&quot;, exception.getMessage());</span>
+<span class="nc" id="L310">        ErrorResponseDto errorResponseDto = new ErrorResponseDto(</span>
+<span class="nc" id="L311">                webRequest.getDescription(false),</span>
+                HttpStatus.BAD_REQUEST,
+<span class="nc" id="L313">                exception.getMessage(),</span>
+<span class="nc" id="L314">                LocalDateTime.now()</span>
+        );
+<span class="nc" id="L316">        return new ResponseEntity&lt;&gt;(errorResponseDto, HttpStatus.BAD_REQUEST);</span>
+    }
+
+    @ExceptionHandler(InvalidPaginationParameterException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleInvalidPagination(InvalidPaginationParameterException ex) {
+<span class="nc" id="L321">        Map&lt;String, Object&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L322">        error.put(&quot;error&quot;, &quot;Invalid pagination parameters&quot;);</span>
+<span class="nc" id="L323">        error.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L324">        error.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L325">        return new ResponseEntity&lt;&gt;(error, HttpStatus.BAD_REQUEST);</span>
+    }
+
+
+    @ExceptionHandler(NotesNotCreatedException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleNotesNotCreatedException(NotesNotCreatedException ex) {
+<span class="nc" id="L331">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L332">        body.put(&quot;timestamp&quot;, new Date());</span>
+<span class="nc" id="L333">        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L334">        body.put(&quot;error&quot;, &quot;Notes Not Created&quot;);</span>
+<span class="nc" id="L335">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L336">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+    }
+
+
+    @ExceptionHandler(LaptopAlreadyExistsException.class)
+    public ResponseEntity&lt;LaptopResponseDTO&gt; handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
+                                                                      WebRequest request) {
+<span class="nc" id="L343">        LaptopResponseDTO error = new LaptopResponseDTO();</span>
+<span class="nc" id="L344">        error.setApiPath(request.getDescription(false).replace(&quot;uri=&quot;, &quot;&quot;));</span>
+<span class="nc" id="L345">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L346">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L347">        error.setCode(&quot;ALREADY EXISTS&quot;);</span>
+<span class="nc" id="L348">        error.setStatusCode(HttpStatus.CONFLICT.value());</span>
+<span class="nc" id="L349">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L350">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L352">        return new ResponseEntity&lt;&gt;(error, HttpStatus.CONFLICT);</span>
+    }
+
+    @ExceptionHandler(PhotoNotFoundException.class)
+    public ResponseEntity&lt;LaptopResponseDTO&gt; handlePhotoNotFoundException(
+            PhotoNotFoundException ex, WebRequest request) {
+
+<span class="nc" id="L359">        LaptopResponseDTO error = new LaptopResponseDTO();</span>
+
+<span class="nc" id="L361">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L362">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L363">        error.setCode(&quot;NOT FOUND&quot;);</span>
+<span class="nc" id="L364">        error.setStatusCode(HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L365">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L366">        error.setException(ex.toString());</span>
+<span class="nc" id="L367">        error.setApiPath(error.getApiPath());</span>
+
+<span class="nc" id="L369">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</span>
+    }
+
+    @ExceptionHandler(CloudinaryDeleteException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleCloudinaryDelete(CloudinaryDeleteException ex, HttpServletRequest request) {
+<span class="nc" id="L374">        Map&lt;String, Object&gt; error = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L375">        error.put(&quot;apiPath&quot;, &quot;uri=&quot; + request.getRequestURI());</span>
+<span class="nc" id="L376">        error.put(&quot;errorCode&quot;, &quot;CLOUDINARY_ERROR&quot;);</span>
+<span class="nc" id="L377">        error.put(&quot;errorMessage&quot;, ex.getMessage());</span>
+<span class="nc" id="L378">        error.put(&quot;errorTime&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L379">        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(error);</span>
+    }
+
+    @ExceptionHandler(LaptopNotFoundException.class)
+    public ResponseEntity&lt;LaptopResponseDTO&gt; handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
+<span class="nc" id="L384">        LaptopResponseDTO error = new LaptopResponseDTO();</span>
+<span class="nc" id="L385">        error.setApiPath(webRequest.getDescription(false).replace(&quot;uri=&quot;, &quot;&quot;));</span>
+<span class="nc" id="L386">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L387">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L388">        error.setCode(&quot;NOT FOUND&quot;);</span>
+<span class="nc" id="L389">        error.setStatusCode(HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L390">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L391">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L393">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</span>
+    }
+
+
+    @ExceptionHandler(LaptopImageException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleLaptopImageException(
+            LaptopImageException ex, WebRequest request) {
+
+<span class="nc" id="L401">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L402">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L403">        body.put(&quot;status&quot;, HttpStatus.INTERNAL_SERVER_ERROR.value());</span>
+<span class="nc" id="L404">        body.put(&quot;error&quot;, &quot;Laptop Image Upload Failed&quot;);</span>
+<span class="nc" id="L405">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L406">        body.put(&quot;path&quot;, request.getDescription(false));</span>
+
+<span class="nc" id="L408">        return new ResponseEntity&lt;&gt;(body, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+    }
+
+    public ResponseEntity&lt;LaptopResponseDTO&gt; handleValidationException(ValidationException ex, WebRequest webRequest){
+<span class="nc" id="L412">        LaptopResponseDTO error = new LaptopResponseDTO();</span>
+<span class="nc" id="L413">        error.setApiPath(webRequest.getDescription(false).replace(&quot;uri=&quot;, &quot;&quot;));</span>
+<span class="nc" id="L414">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L415">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L416">        error.setCode(&quot;BAD REQUEST&quot;);</span>
+<span class="nc" id="L417">        error.setStatusCode(HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L418">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L419">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L421">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);</span>
+    }
+
+    @ExceptionHandler(BlankFieldsException.class)
+    public ResponseEntity&lt;LaptopResponseDTO&gt; handleBlankFieldsException(BlankFieldsException ex, WebRequest webRequest){
+<span class="nc" id="L426">        LaptopResponseDTO error = new LaptopResponseDTO();</span>
+<span class="nc" id="L427">        error.setApiPath(webRequest.getDescription(false).replace(&quot;uri&quot;,&quot;&quot;));</span>
+<span class="nc" id="L428">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L429">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L430">        error.setCode(&quot;BAD REQUEST&quot;);</span>
+<span class="nc" id="L431">        error.setStatusCode(HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L432">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L433">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L435">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);</span>
+    }
+
+
+
+    @ExceptionHandler(ColourNotFoundException.class)
+    public ResponseEntity&lt;ColourResponseDTO&gt; handleColourNotFoundException(ColourNotFoundException ex,WebRequest request) {
+<span class="nc" id="L442">        ColourResponseDTO error = new ColourResponseDTO();</span>
+<span class="nc" id="L443">        error.setApiPath(request.getDescription(false).replace(&quot;uri&quot;,&quot;&quot;));</span>
+<span class="nc" id="L444">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L445">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L446">        error.setCode(&quot;NOT FOUND&quot;);</span>
+<span class="nc" id="L447">        error.setStatusCode(HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L448">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L449">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L451">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</span>
+    }
+
+    @ExceptionHandler(LaptopRequestException.class)
+    public ResponseEntity&lt;LaptopErrorResponse&gt; handleLaptopRequestException(LaptopRequestException ex, WebRequest request) {
+<span class="nc" id="L456">        LaptopErrorResponse error = new LaptopErrorResponse();</span>
+<span class="nc" id="L457">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L458">        error.setCode(&quot;BAD REQUEST&quot;);</span>
+<span class="nc" id="L459">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L460">        error.setStatusCode(HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L461">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L462">        error.setApiPath(request.getDescription(false).replace(&quot;uri=&quot;, &quot;&quot;));</span>
+<span class="nc" id="L463">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L465">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);</span>
+    }
+    @ExceptionHandler(ColourAlreadyExistsException.class)
+    public ResponseEntity&lt;ColourResponseDTO&gt; handleColourAlreadyExistsException(ColourAlreadyExistsException ex,WebRequest request) {
+<span class="nc" id="L469">        ColourResponseDTO error = new ColourResponseDTO();</span>
+<span class="nc" id="L470">        error.setApiPath(request.getDescription(false).replace(&quot;uri&quot;,&quot;&quot;));</span>
+<span class="nc" id="L471">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L472">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L473">        error.setCode(&quot;CONFLICT&quot;);</span>
+<span class="nc" id="L474">        error.setStatusCode(HttpStatus.CONFLICT.value());</span>
+<span class="nc" id="L475">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L476">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L478">        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);</span>
+    }
+
+    @ExceptionHandler(AuctionException.class)
+    public ResponseEntity&lt;AuctionErrReponse&gt; handleAuctionException(AuctionException ex,WebRequest request){
+<span class="nc" id="L483">        AuctionErrReponse error = new AuctionErrReponse();</span>
+<span class="nc" id="L484">        error.setApiPath(request.getDescription(false).replace(&quot;uri&quot;,&quot;&quot;));</span>
+<span class="nc" id="L485">        error.setStatus(&quot;error&quot;);</span>
+<span class="nc" id="L486">        error.setMessage(ex.getMessage());</span>
+<span class="nc" id="L487">        error.setCode(&quot;NOT_FOUND&quot;);</span>
+<span class="nc" id="L488">        error.setStatusCode(HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L489">        error.setTimeStamp(LocalDateTime.now());</span>
+<span class="nc" id="L490">        error.setException(ex.toString());</span>
+
+<span class="nc" id="L492">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);</span>
+    }
+
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity&lt;Object&gt; handleInvalidDateFormat(HttpMessageNotReadableException ex) {
+//        // Check if Jackson failed to parse a LocalDate
+//        Throwable cause = ex.getCause();
+//        if (cause instanceof InvalidFormatException invalidFormatException &amp;&amp;
+//                invalidFormatException.getTargetType() == LocalDate.class) {
+//
+//            return ResponseEntity
+//                    .status(HttpStatus.BAD_REQUEST)
+//                    .body(Map.of(
+//                            &quot;error&quot;, &quot;Invalid date format&quot;,
+//                            &quot;message&quot;, &quot;Please use date format yyyy-MM-dd (e.g. 2025-11-13)&quot;,
+//                            &quot;status&quot;, HttpStatus.BAD_REQUEST.value()
+//                    ));
+//        }
+
+//        // Default fallback for other parse issues
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(Map.of(
+//                        &quot;error&quot;, &quot;Invalid request&quot;,
+//                        &quot;message&quot;, &quot;Malformed JSON or invalid data format&quot;,
+//                        &quot;status&quot;, HttpStatus.BAD_REQUEST.value()
+//                ));
+//    }
+
+
+
+    //Mobile Exception Handler
+    @ExceptionHandler(MobileNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleMobileNotFound(
+            MobileNotFoundException ex, WebRequest request) {
+
+<span class="nc" id="L528">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L529">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L530">        body.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L531">        body.put(&quot;error&quot;, &quot;Mobile Not Found&quot;);</span>
+<span class="nc" id="L532">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L533">        body.put(&quot;path&quot;, request.getDescription(false));</span>
+
+<span class="nc" id="L535">        return new ResponseEntity&lt;&gt;(body, HttpStatus.NOT_FOUND);</span>
+    }
+
+    @ExceptionHandler(MobileImageException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleMobileImageException(
+            MobileImageException ex, WebRequest request) {
+
+<span class="nc" id="L542">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L543">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L544">        body.put(&quot;status&quot;, HttpStatus.INTERNAL_SERVER_ERROR.value());</span>
+<span class="nc" id="L545">        body.put(&quot;error&quot;, &quot;Mobile Image Upload Failed&quot;);</span>
+<span class="nc" id="L546">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L547">        body.put(&quot;path&quot;, request.getDescription(false));</span>
+
+<span class="nc" id="L549">        return new ResponseEntity&lt;&gt;(body, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+    }
+
+    @ExceptionHandler(SellerNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleSellerNotFound(
+            SellerNotFoundException ex, WebRequest request) {
+
+<span class="nc" id="L556">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L557">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L558">        body.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L559">        body.put(&quot;error&quot;, &quot;Seller Not Found&quot;);</span>
+<span class="nc" id="L560">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L561">        body.put(&quot;path&quot;, request.getDescription(false));</span>
+
+<span class="nc" id="L563">        return new ResponseEntity&lt;&gt;(body, HttpStatus.NOT_FOUND);</span>
+    }
+
+    @ExceptionHandler(BuyerNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBuyerNotFound(
+            BuyerNotFoundException ex, WebRequest request) {
+
+<span class="nc" id="L570">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L571">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L572">        body.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L573">        body.put(&quot;error&quot;, &quot;Buyer Not Found&quot;);</span>
+<span class="nc" id="L574">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L575">        body.put(&quot;path&quot;, request.getDescription(false));</span>
+
+<span class="nc" id="L577">        return new ResponseEntity&lt;&gt;(body, HttpStatus.NOT_FOUND);</span>
+    }
+
+
+    @ExceptionHandler(MobileValidationException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleMobileValidationException(
+            MobileValidationException ex, WebRequest request) {
+
+<span class="nc" id="L585">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L586">        body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L587">        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());</span>
+<span class="nc" id="L588">        body.put(&quot;error&quot;, &quot;Validation Error&quot;);</span>
+<span class="nc" id="L589">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L590">        body.put(&quot;path&quot;, request.getDescription(false));</span>
+
+<span class="nc" id="L592">        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);</span>
+
+    }
+
+
+
+
+// ========================= BIKE EXCEPTIONS =========================
+
+    @ExceptionHandler(bikeNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBikeNotFound(
+            bikeNotFoundException ex,
+            HttpServletRequest request) {
+
+<span class="nc" id="L606">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L607">        errorResponse.put(&quot;apiPath&quot;, &quot;uri=&quot; + request.getRequestURI());</span>
+<span class="nc" id="L608">        errorResponse.put(&quot;errorCode&quot;, &quot;BIKE_NOT_FOUND&quot;);</span>
+<span class="nc" id="L609">        errorResponse.put(&quot;errorMessage&quot;, ex.getMessage());</span>
+<span class="nc" id="L610">        errorResponse.put(&quot;errorTime&quot;, LocalDateTime.now());</span>
+
+<span class="nc" id="L612">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(StatusNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBikeStatusNotFound(
+            StatusNotFoundException ex,
+            HttpServletRequest request) {
+
+<span class="nc" id="L620">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L621">        errorResponse.put(&quot;apiPath&quot;, &quot;uri=&quot; + request.getRequestURI());</span>
+<span class="nc" id="L622">        errorResponse.put(&quot;errorCode&quot;, &quot;BIKE_STATUS_NOT_FOUND&quot;);</span>
+<span class="nc" id="L623">        errorResponse.put(&quot;errorMessage&quot;, ex.getMessage());</span>
+<span class="nc" id="L624">        errorResponse.put(&quot;errorTime&quot;, LocalDateTime.now());</span>
+
+<span class="nc" id="L626">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(BikeImageNotFound.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBikeImageNotFound(
+            BikeImageNotFound ex,
+            HttpServletRequest request) {
+
+<span class="nc" id="L634">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L635">        errorResponse.put(&quot;apiPath&quot;, &quot;uri=&quot; + request.getRequestURI());</span>
+<span class="nc" id="L636">        errorResponse.put(&quot;errorCode&quot;, &quot;BIKE_IMAGE_NOT_FOUND&quot;);</span>
+<span class="nc" id="L637">        errorResponse.put(&quot;errorMessage&quot;, &quot;Bike Image Issue&quot;);</span>
+<span class="nc" id="L638">        errorResponse.put(&quot;errorTime&quot;, LocalDateTime.now());</span>
+
+<span class="nc" id="L640">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(InvalidBikeData.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleInvalidBikeData(
+            InvalidBikeData ex,
+            HttpServletRequest request) {
+
+<span class="nc" id="L648">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L649">        errorResponse.put(&quot;apiPath&quot;, request.getRequestURI());</span>
+<span class="nc" id="L650">        errorResponse.put(&quot;errorCode&quot;, &quot;INVALID_BIKE_DATA&quot;);</span>
+<span class="nc" id="L651">        errorResponse.put(&quot;errorMessage&quot;, ex.getLocalizedMessage());</span>
+<span class="nc" id="L652">        errorResponse.put(&quot;errorTime&quot;, LocalDateTime.now());</span>
+
+<span class="nc" id="L654">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);</span>
+    }
+
+
+
+    @ExceptionHandler(ResourceNotFound.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleResourceNotFound(
+            ResourceNotFound ex,
+            HttpServletRequest request) {
+
+<span class="nc" id="L664">        Map&lt;String, Object&gt; errorResponse = Map.of(</span>
+<span class="nc" id="L665">                &quot;apiPath&quot;, request.getRequestURI(),</span>
+                &quot;errorCode&quot;, &quot;RESOURCE_NOT_FOUND&quot;,
+<span class="nc" id="L667">                &quot;errorMessage&quot;, ex.getMessage(),</span>
+<span class="nc" id="L668">                &quot;errorTime&quot;, LocalDateTime.now()</span>
+        );
+
+<span class="nc" id="L671">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);</span>
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleRuntimeException(
+            RuntimeException ex,
+            HttpServletRequest request) {
+
+<span class="nc" id="L678">        Map&lt;String, Object&gt; errorResponse = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L679">        String message = ex.getLocalizedMessage();</span>
+
+<span class="nc bnc" id="L681" title="All 4 branches missed.">        if (message != null &amp;&amp; message.contains(&quot;registration_number&quot;)) {</span>
+<span class="nc" id="L682">            message = &quot;Registration number already exists. Please provide a unique registration number.&quot;;</span>
+        } else {
+<span class="nc" id="L684">            message = &quot;An unexpected error occurred: &quot; + message;</span>
+        }
+
+<span class="nc" id="L687">        errorResponse.put(&quot;apiPath&quot;, &quot;uri=&quot; + request.getRequestURI());</span>
+<span class="nc" id="L688">        errorResponse.put(&quot;errorCode&quot;, &quot;BIKE_OPERATION_FAILED&quot;);</span>
+<span class="nc" id="L689">        errorResponse.put(&quot;errorMessage&quot;, message);</span>
+<span class="nc" id="L690">        errorResponse.put(&quot;errorTime&quot;, LocalDateTime.now());</span>
+
+<span class="nc" id="L692">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);</span>
+    }
+
+
+
+
+
+
+
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleHttpMessageNotReadable(
+//            HttpMessageNotReadableException ex, WebRequest req) {
+//
+//        String message = &quot;Invalid request payload.&quot;;
+//
+//        // Check if the cause is UnrecognizedPropertyException
+//        if (ex.getCause() instanceof UnrecognizedPropertyException) {
+//            UnrecognizedPropertyException cause = (UnrecognizedPropertyException) ex.getCause();
+//            message = &quot;Unknown field: &quot; + cause.getPropertyName();
+//        }
+//
+//        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();
+//        body.put(&quot;timestamp&quot;, LocalDateTime.now());
+//        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());
+//        body.put(&quot;error&quot;, &quot;Invalid Field&quot;);
+//        body.put(&quot;message&quot;, message);
+//        body.put(&quot;path&quot;, req.getDescription(false));
+//
+//        return new ResponseEntity&lt;&gt;(body, HttpStatus.BAD_REQUEST);
+//    }
+
+
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleDataIntegrity(
+                DataIntegrityViolationException ex, WebRequest req) {
+
+<span class="nc" id="L728">            Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L729">            body.put(&quot;timestamp&quot;, LocalDateTime.now());</span>
+<span class="nc" id="L730">            body.put(&quot;status&quot;, HttpStatus.CONFLICT.value());</span>
+<span class="nc" id="L731">            body.put(&quot;error&quot;, &quot;Conflict&quot;);</span>
+<span class="nc" id="L732">            body.put(&quot;message&quot;, &quot;Duplicate or invalid database entry.&quot;);</span>
+<span class="nc" id="L733">            body.put(&quot;path&quot;, req.getDescription(false));</span>
+
+<span class="nc" id="L735">            return new ResponseEntity&lt;&gt;(body, HttpStatus.CONFLICT);</span>
+        }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBookingNotFound(BookingNotFoundException ex) {
+<span class="nc" id="L740">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L741">        response.put(&quot;error&quot;, &quot;Booking Not Found&quot;);</span>
+<span class="nc" id="L742">        response.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L743">        response.put(&quot;status&quot;, HttpStatus.NOT_FOUND.value());</span>
+<span class="nc" id="L744">        return new ResponseEntity&lt;&gt;(response, HttpStatus.NOT_FOUND);</span>
+
+
+    }
+
+
+//    @ExceptionHandler(com.spring.jwt.auction.exception.AuctionException.class)
+//    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleAuctionException(AuctionException ex, WebRequest request) {
+//        Map&lt;String,Object&gt; body = new HashMap&lt;&gt;();
+//        body.put(&quot;timestamp&quot;, LocalDateTime.now());
+//        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());
+//        body.put(&quot;error&quot;, &quot;Auction Error&quot;);
+//        body.put(&quot;message&quot;, ex.getMessage());
+//        body.put(&quot;path&quot;, request.getDescription(false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+//    }
+//
+//    @ExceptionHandler(com.spring.jwt.auction.exception.BidException.class)
+//    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBidException(BidException ex, WebRequest request) {
+//        Map&lt;String,Object&gt; body = new HashMap&lt;&gt;();
+//        body.put(&quot;timestamp&quot;, LocalDateTime.now());
+//        body.put(&quot;status&quot;, HttpStatus.BAD_REQUEST.value());
+//        body.put(&quot;error&quot;, &quot;Bid Error&quot;);
+//        body.put(&quot;message&quot;, ex.getMessage());
+//        body.put(&quot;path&quot;, request.getDescription(false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+//    }
+@ExceptionHandler(AuctionNotFoundException.class)
+public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleAuctionNotFound(AuctionNotFoundException ex) {
+<span class="nc" id="L773">    Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L774">    body.put(&quot;timestamp&quot;, OffsetDateTime.now());</span>
+<span class="nc" id="L775">    body.put(&quot;error&quot;, &quot;Auction not found&quot;);</span>
+<span class="nc" id="L776">    body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L777">    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);</span>
+}
+
+    @ExceptionHandler(BidNotFoundException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBidNotFound(BidNotFoundException ex) {
+<span class="nc" id="L782">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L783">        body.put(&quot;timestamp&quot;, OffsetDateTime.now());</span>
+<span class="nc" id="L784">        body.put(&quot;error&quot;, &quot;Bid not found&quot;);</span>
+<span class="nc" id="L785">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L786">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);</span>
+    }
+
+    @ExceptionHandler(BadBidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleBadBid(BadBidException ex) {
+<span class="nc" id="L791">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L792">        body.put(&quot;timestamp&quot;, OffsetDateTime.now());</span>
+<span class="nc" id="L793">        body.put(&quot;error&quot;, &quot;Invalid bid&quot;);</span>
+<span class="nc" id="L794">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L795">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);</span>
+    }
+
+    @ExceptionHandler(MobileNotFoundForAuctionException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleMobileNotFoundForAuction(MobileNotFoundForAuctionException ex) {
+<span class="nc" id="L800">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L801">        body.put(&quot;timestamp&quot;, OffsetDateTime.now());</span>
+<span class="nc" id="L802">        body.put(&quot;error&quot;, &quot;Mobile not found for auction&quot;);</span>
+<span class="nc" id="L803">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L804">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);</span>
+    }
+
+    @ExceptionHandler(InvalidBidException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleInvalidBid(InvalidBidException ex) {
+<span class="nc" id="L809">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L810">        body.put(&quot;timestamp&quot;, OffsetDateTime.now());</span>
+<span class="nc" id="L811">        body.put(&quot;error&quot;, &quot;Invalid Bid&quot;);</span>
+<span class="nc" id="L812">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L813">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);</span>
+    }
+
+
+    @ExceptionHandler(InvalidAuctionStateException.class)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; handleInvalidAuctionState(InvalidAuctionStateException ex) {
+<span class="nc" id="L819">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L820">        body.put(&quot;timestamp&quot;, OffsetDateTime.now());</span>
+<span class="nc" id="L821">        body.put(&quot;error&quot;, &quot;Invalid Auction State&quot;);</span>
+<span class="nc" id="L822">        body.put(&quot;message&quot;, ex.getMessage());</span>
+<span class="nc" id="L823">        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);</span>
+    }
+
+
+}
+
+
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CarImageServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.car.services.impl</a> &gt; <span class="el_source">CarImageServiceImpl.java</span></div><h1>CarImageServiceImpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.car.services.impl;
+
+import com.spring.jwt.car.entity.Car;
+import com.spring.jwt.car.dto.CarImageResponseDTO;
+import com.spring.jwt.car.entity.CarImage;
+import com.spring.jwt.exception.car.CarImageException;
+import com.spring.jwt.car.repository.CarImageRepository;
+import com.spring.jwt.car.services.CarImageService;
+import com.spring.jwt.car.repository.CarRepository;
+import com.spring.jwt.exception.car.CarNotFoundException;
+import com.spring.jwt.utils.CloudinaryService;
+import com.spring.jwt.utils.ByteArrayMultipartFile;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.*;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.*;
+import java.util.List;
+
+@Service
+<span class="nc" id="L27">@RequiredArgsConstructor</span>
+public class CarImageServiceImpl implements CarImageService {
+
+    private final CarRepository carRepository;
+    private final CarImageRepository carImageRepository;
+    private final CloudinaryService cloudinaryService;
+
+    // 400 KB max per image
+    private static final long MAX_IMAGE_BYTES = 400 * 1024;
+
+    @Override
+    @Transactional
+    public List&lt;String&gt; uploadCarImages(Long carId, List&lt;MultipartFile&gt; files) {
+<span class="nc" id="L40">        Car car = carRepository.findById(carId)</span>
+<span class="nc" id="L41">                .orElseThrow(() -&gt; new CarNotFoundException(carId));</span>
+
+<span class="nc" id="L43">        List&lt;String&gt; urls = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (MultipartFile file : files) {</span>
+            // ===== Basic validation =====
+<span class="nc bnc" id="L47" title="All 4 branches missed.">            if (file == null || file.isEmpty()) {</span>
+<span class="nc" id="L48">                throw new CarImageException(&quot;One of the uploaded files is empty&quot;);</span>
+            }
+
+<span class="nc" id="L51">            String contentType = file.getContentType();</span>
+<span class="nc bnc" id="L52" title="All 4 branches missed.">            if (contentType == null || !contentType.startsWith(&quot;image/&quot;)) {</span>
+<span class="nc" id="L53">                throw new CarImageException(&quot;Invalid file type: &quot; + contentType);</span>
+            }
+
+            try {
+<span class="nc" id="L57">                MultipartFile toUpload = file;</span>
+
+                // If larger than max, compress
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                if (file.getSize() &gt; MAX_IMAGE_BYTES) {</span>
+<span class="nc" id="L61">                    byte[] compressed = compressImageToMaxSize(file, MAX_IMAGE_BYTES);</span>
+<span class="nc bnc" id="L62" title="All 4 branches missed.">                    if (compressed == null || compressed.length == 0) {</span>
+<span class="nc" id="L63">                        throw new CarImageException(&quot;Failed to compress image: &quot; + file.getOriginalFilename());</span>
+                    }
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                    if (compressed.length &gt; MAX_IMAGE_BYTES) {</span>
+<span class="nc" id="L66">                        throw new CarImageException(&quot;Cannot reduce image below 400KB: &quot; + file.getOriginalFilename());</span>
+                    }
+
+<span class="nc" id="L69">                    toUpload = new ByteArrayMultipartFile(</span>
+                            compressed,
+<span class="nc" id="L71">                            file.getOriginalFilename(),</span>
+<span class="nc" id="L72">                            file.getContentType()</span>
+                    );
+                }
+
+                // ===== Upload to Cloudinary =====
+<span class="nc" id="L77">                Map&lt;String, Object&gt; uploadResult = cloudinaryService.uploadFileWithResult(toUpload, &quot;cars&quot;);</span>
+<span class="nc" id="L78">                String imageUrl = Objects.toString(uploadResult.get(&quot;secure_url&quot;), null);</span>
+<span class="nc" id="L79">                String publicId = Objects.toString(uploadResult.get(&quot;public_id&quot;), null);</span>
+
+                // ===== Save in DB =====
+<span class="nc" id="L82">                CarImage carImage = CarImage.builder()</span>
+<span class="nc" id="L83">                        .imageUrl(imageUrl)</span>
+<span class="nc" id="L84">                        .publicId(publicId)</span>
+<span class="nc" id="L85">                        .car(car)</span>
+<span class="nc" id="L86">                        .build();</span>
+<span class="nc" id="L87">                carImageRepository.save(carImage);</span>
+
+<span class="nc" id="L89">                urls.add(imageUrl);</span>
+
+<span class="nc" id="L91">            } catch (IOException e) {</span>
+<span class="nc" id="L92">                throw new CarImageException(&quot;Failed to upload image: &quot; + file.getOriginalFilename(), e);</span>
+<span class="nc" id="L93">            }</span>
+<span class="nc" id="L94">        }</span>
+
+<span class="nc" id="L96">        return urls;</span>
+    }
+
+    @Override
+    @Transactional
+    public void deleteCarImage(Long imageId) {
+<span class="nc" id="L102">        CarImage image = carImageRepository.findById(imageId)</span>
+<span class="nc" id="L103">                .orElseThrow(() -&gt; new CarImageException(&quot;Car image not found with ID: &quot; + imageId));</span>
+
+        try {
+            // Delete from Cloudinary first
+<span class="nc" id="L107">            boolean deleted = cloudinaryService.deleteByPublicId(image.getPublicId());</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (!deleted) {</span>
+<span class="nc" id="L109">                throw new CarImageException(&quot;Failed to delete image from Cloudinary: &quot; + image.getPublicId());</span>
+            }
+
+            // Then delete from DB
+<span class="nc" id="L113">            carImageRepository.delete(image);</span>
+
+<span class="nc" id="L115">        } catch (IOException e) {</span>
+<span class="nc" id="L116">            throw new CarImageException(&quot;Error deleting image from Cloudinary: &quot; + image.getPublicId(), e);</span>
+<span class="nc" id="L117">        }</span>
+<span class="nc" id="L118">    }</span>
+
+    // ===== Helper method for compression =====
+    private byte[] compressImageToMaxSize(MultipartFile file, long maxBytes) throws IOException {
+<span class="nc" id="L122">        BufferedImage inputImage = ImageIO.read(file.getInputStream());</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (inputImage == null) return null;</span>
+
+<span class="nc" id="L125">        String formatName = &quot;jpg&quot;;</span>
+<span class="nc" id="L126">        int width = inputImage.getWidth();</span>
+<span class="nc" id="L127">        int height = inputImage.getHeight();</span>
+<span class="nc" id="L128">        float quality = 0.90f;</span>
+
+<span class="nc" id="L130">        ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        for (int attempt = 0; attempt &lt; 10; attempt++) {</span>
+<span class="nc" id="L133">            baos.reset();</span>
+
+<span class="nc" id="L135">            BufferedImage outputImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);</span>
+<span class="nc" id="L136">            Graphics2D g2d = outputImage.createGraphics();</span>
+<span class="nc" id="L137">            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);</span>
+<span class="nc" id="L138">            g2d.drawImage(inputImage, 0, 0, width, height, null);</span>
+<span class="nc" id="L139">            g2d.dispose();</span>
+
+<span class="nc" id="L141">            Iterator&lt;ImageWriter&gt; writers = ImageIO.getImageWritersByFormatName(formatName);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">            if (!writers.hasNext()) break;</span>
+<span class="nc" id="L143">            ImageWriter writer = writers.next();</span>
+<span class="nc" id="L144">            ImageWriteParam param = writer.getDefaultWriteParam();</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            if (param.canWriteCompressed()) {</span>
+<span class="nc" id="L146">                param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);</span>
+<span class="nc" id="L147">                param.setCompressionQuality(Math.max(0.10f, quality));</span>
+            }
+
+<span class="nc" id="L150">            try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {</span>
+<span class="nc" id="L151">                writer.setOutput(ios);</span>
+<span class="nc" id="L152">                writer.write(null, new IIOImage(outputImage, null, null), param);</span>
+<span class="nc" id="L153">                writer.dispose();</span>
+            }
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (baos.size() &lt;= maxBytes) return baos.toByteArray();</span>
+
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            if (quality &gt; 0.35f) {</span>
+<span class="nc" id="L159">                quality -= 0.15f;</span>
+            } else {
+<span class="nc" id="L161">                width = Math.max(100, (int) (width * 0.9));</span>
+<span class="nc" id="L162">                height = Math.max(100, (int) (height * 0.9));</span>
+            }
+        }
+
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        return baos.size() &gt; 0 ? baos.toByteArray() : null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
