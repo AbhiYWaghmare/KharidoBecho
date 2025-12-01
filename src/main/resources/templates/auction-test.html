@@ -256,6 +256,13 @@
     <legend>WebSocket Connection</legend>
     WebSocket URL:
     <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction" style="width:300px;">
+    <legend>1. Connect</legend>
+<!--    <div>-->
+<!--        <label>WS Endpoint:</label>-->
+<!--        <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">-->
+<!--        <span>(SockJS URL)</span>-->
+<!--    </div>-->
+    <!--  removed JWT token field completely -->
     <button onclick="connect()">Connect</button>
     <button onclick="disconnect()">Disconnect</button>
 </fieldset>
@@ -320,7 +327,21 @@
 
     // CONNECT --------------------------------------------------------------
     function connect() {
+
         const socket = new SockJS(document.getElementById("wsUrl").value);
+        const baseUrl = document.getElementById('wsUrl').value.trim();
+
+        if (!baseUrl) {
+            alert('Please enter WebSocket URL');
+            return;
+        }
+
+        //  No token, just plain SockJS URL
+        const fullUrl = baseUrl;
+
+        log('Connecting to: ' + fullUrl);
+
+        const socket = new SockJS(fullUrl);
         stompClient = Stomp.over(socket);
         stompClient.debug = null;
 
@@ -406,6 +427,8 @@
 
         const payload = {
             userId: Number(userId),
+
+            userId: Number(userId),      //  send userId
             auctionId: Number(auctionId),
             bidAmount: Number(amount)
         };

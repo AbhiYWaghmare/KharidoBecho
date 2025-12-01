@@ -42,7 +42,7 @@ public class AuctionWebSocketController {
 //    public void placeBid(@DestinationVariable Long auctionId,
 //                         @Payload BidMessageDTO bidMessage) {
 //
-//        Long userId = bidMessage.userId();  // 👈 from message, not from JWT
+//        Long userId = bidMessage.userId();  //   from message, not from JWT
 //        if (userId == null) {
 //            throw new IllegalArgumentException("userId is required in bidMessage");
 //        }
@@ -57,6 +57,12 @@ public class AuctionWebSocketController {
     @MessageMapping("/auction/{auctionId}/bid")
     public void placeBid(@DestinationVariable Long auctionId,
                          @Payload BidMessageDTO bidMessage) {
+
+        System.out.println("🔥 Received WS bid: auctionId=" + auctionId +
+                ", userId=" + bidMessage.userId() +
+                ", amount=" + bidMessage.bidAmount());
+
+
         // In current no-auth WS mode we take userId from payload
         Long userId = bidMessage.userId();
         BigDecimal amount = bidMessage.bidAmount();
