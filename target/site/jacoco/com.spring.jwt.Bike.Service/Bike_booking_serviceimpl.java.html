@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bike_booking_serviceimpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.Bike.Service</a> &gt; <span class="el_source">Bike_booking_serviceimpl.java</span></div><h1>Bike_booking_serviceimpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.Bike.Service;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.jwt.Bike.Entity.Bike;
+
+import com.spring.jwt.Bike.Entity.Bike_booking;
+import com.spring.jwt.Bike.Entity.bikeStatus;
+import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.exception.Bike.BookingNotFoundException;
+import com.spring.jwt.exception.Bike.InvalidBikeData;
+import com.spring.jwt.exception.Bike.bikeNotFoundException;
+import com.spring.jwt.Bike.Repository.Bike_booking_repository;
+import com.spring.jwt.Bike.Repository.bikeRepository;
+import com.spring.jwt.Bike.dto.Bike_booking_dto;
+import com.spring.jwt.exception.ResourceNotFoundException;
+import com.spring.jwt.repository.BuyerRepository;
+import jakarta.transaction.Transactional;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+
+@Service
+<span class="nc" id="L32">public class Bike_booking_serviceimpl implements Bike_booking_service {</span>
+
+    @Autowired
+    private Bike_booking_repository bikeBookingRepository;
+
+    @Autowired
+    private bikeRepository bikeRepository;
+    @Autowired
+    private BuyerRepository buyerRepository;
+
+
+
+    @Override
+    public List&lt;Bike_booking&gt; getBookings() {
+        //return bikeBookingRepository.findByStatus(Bike_booking.BookingStatus.PENDING);
+<span class="nc" id="L47">    return  bikeBookingRepository.findAll();</span>
+    }
+
+    public Bike_booking getBookingById(Long bookingid) {
+<span class="nc" id="L51">        return bikeBookingRepository.findById(bookingid)</span>
+<span class="nc" id="L52">                .orElseThrow(() -&gt; new BookingNotFoundException(&quot;Booking not found with id: &quot; + bookingid));</span>
+    }
+
+    @Override
+    @Transactional
+    public Bike_booking createBooking(Bike_booking_dto bikeBookingDto) {
+<span class="nc" id="L58">        Bike bike = bikeRepository.findById(bikeBookingDto.getBikeId())</span>
+<span class="nc" id="L59">                .orElseThrow(() -&gt; new bikeNotFoundException(&quot;Bike not found with ID: &quot; + bikeBookingDto.getBikeId()));</span>
+
+<span class="nc" id="L61">        Buyer buyer = buyerRepository.findById(bikeBookingDto.getBuyerId())</span>
+<span class="nc" id="L62">                .orElseThrow(() -&gt; new ResourceNotFoundException(&quot;Buyer not found with ID: &quot; + bikeBookingDto.getBuyerId()));</span>
+         // this is cheak the status if the bike that is available or not
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (!(bike.getStatus() == bikeStatus.ACTIVE ||</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                bike.getStatus() == bikeStatus.AVAILABLE ||</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                bike.getStatus() == bikeStatus.NEW)) {</span>
+<span class="nc" id="L67">            throw new InvalidBikeData(&quot;Bike with ID &quot; + bikeBookingDto.getBikeId() +</span>
+                    &quot; cannot be booked because it is not active, available, or new.&quot;);
+        }
+
+
+
+        // this is method for cheak if one booking is present with same bike and same buyer then throw error
+<span class="nc" id="L74">        List&lt;Bike_booking&gt; existingBookings = bikeBookingRepository.findByBikeAndBuyer(bike, buyer);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (!existingBookings.isEmpty()) {</span>
+<span class="nc" id="L76">            throw new ResourceNotFoundException(&quot;You already created a booking for this bike.&quot;);</span>
+        }
+<span class="nc" id="L78">        Bike_booking booking = new Bike_booking();</span>
+<span class="nc" id="L79">        booking.setBike(bike);</span>
+<span class="nc" id="L80">        booking.setBuyer(buyer);</span>
+<span class="nc" id="L81">        booking.setOnDate(LocalDate.now());</span>
+<span class="nc" id="L82">        booking.setStatus(Bike_booking.BookingStatus.PENDING);</span>
+<span class="nc" id="L83">        booking.setCreatedAt(LocalDateTime.now());</span>
+
+
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (bikeBookingDto.getMessage() != null &amp;&amp; !bikeBookingDto.getMessage().isEmpty()) {</span>
+<span class="nc" id="L87">            String conversationJson = String.format(</span>
+                    &quot;[{\&quot;userId\&quot;: %d, \&quot;message\&quot;: \&quot;%s\&quot;, \&quot;timestamp\&quot;: \&quot;%s\&quot;, \&quot;senderType\&quot;: \&quot;BUYER\&quot;}]&quot;,
+<span class="nc" id="L89">                    buyer.getBuyerId(),</span>
+<span class="nc" id="L90">                    bikeBookingDto.getMessage().replace(&quot;\&quot;&quot;, &quot;\\\&quot;&quot;),</span>
+<span class="nc" id="L91">                    java.time.OffsetDateTime.now()</span>
+            );
+<span class="nc" id="L93">            booking.setConversation(conversationJson);</span>
+<span class="nc" id="L94">        } else {</span>
+<span class="nc" id="L95">            booking.setConversation(&quot;[]&quot;);</span>
+        }
+
+<span class="nc" id="L98">        return bikeBookingRepository.save(booking);</span>
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @Override
+    public Bike_booking completeBooking(Long bookingId) {
+        //  Find the booking by ID
+<span class="nc" id="L116">        Bike_booking booking = bikeBookingRepository.findById(bookingId)</span>
+<span class="nc" id="L117">                .orElseThrow(() -&gt; new BookingNotFoundException(&quot;Booking not found with ID: &quot; + bookingId));</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">        if (booking.getStatus() != Bike_booking.BookingStatus.ACCEPTED &amp;&amp;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                booking.getStatus() != Bike_booking.BookingStatus.IN_NEGOTIATION) {</span>
+<span class="nc" id="L121">            throw new ResourceNotFoundException(&quot;Only ACCEPTED and IN_NEGOTIATION bookings can be Sold.&quot;);</span>
+        }
+
+        // Mark the booking as completed
+<span class="nc" id="L125">        booking.setStatus(Bike_booking.BookingStatus.SOLD);</span>
+
+<span class="nc" id="L127">        Bike bike = booking.getBike();</span>
+
+        // Update bike status as deleted
+<span class="nc" id="L130">        bike.setStatus(bikeStatus.DELETED);</span>
+
+<span class="nc" id="L132">        bikeRepository.save(bike);</span>
+
+
+        //  Save and return updated booking
+<span class="nc" id="L136">        return bikeBookingRepository.save(booking);</span>
+    }
+
+
+@Override
+public Bike_booking rejectBooking(Long bookingId) {
+<span class="nc" id="L142">    Bike_booking booking = bikeBookingRepository.findById(bookingId)</span>
+<span class="nc" id="L143">            .orElseThrow(() -&gt; new BookingNotFoundException(&quot;Booking not found with ID: &quot; + bookingId));</span>
+
+    // Allow rejection only if the booking is APPROVED
+<span class="nc bnc" id="L146" title="All 2 branches missed.">    if (booking.getStatus() != Bike_booking.BookingStatus.ACCEPTED&amp;&amp;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            booking.getStatus() != Bike_booking.BookingStatus.IN_NEGOTIATION) {</span>
+<span class="nc" id="L148">        throw new ResourceNotFoundException(&quot;Only ACCEPTED &amp; IN_NEGOTIATION bookings can be rejected.&quot;);</span>
+    }
+
+    // Set status
+<span class="nc" id="L152">    booking.setStatus(Bike_booking.BookingStatus.PENDING);</span>
+
+<span class="nc" id="L154">    return bikeBookingRepository.save(booking);</span>
+}
+
+    @Override
+    public Bike_booking deleteBooking(Long bookingId) {
+        // First, check if booking exists
+<span class="nc" id="L160">        Bike_booking booking = bikeBookingRepository.findById(bookingId)</span>
+<span class="nc" id="L161">                .orElseThrow(() -&gt; new BookingNotFoundException(&quot;Booking not found with ID: &quot; + bookingId));</span>
+
+        // Then delete it
+<span class="nc" id="L164">        bikeBookingRepository.delete(booking);</span>
+
+        // Optionally, return deleted booking info
+<span class="nc" id="L167">        return booking;</span>
+    }
+
+
+@Override
+@Transactional
+public Bike_booking addMessage(Long bookingId, Bike_booking_dto newMessage) {
+<span class="nc" id="L174">    Bike_booking booking = bikeBookingRepository.findById(bookingId)</span>
+<span class="nc" id="L175">            .orElseThrow(() -&gt; new BookingNotFoundException(&quot;Booking not found with id: &quot; + bookingId));</span>
+
+    try {
+<span class="nc" id="L178">        ObjectMapper mapper = new ObjectMapper();</span>
+        List&lt;Map&lt;String, Object&gt;&gt; conversationList;
+
+<span class="nc bnc" id="L181" title="All 4 branches missed.">        if (booking.getConversation() == null || booking.getConversation().isEmpty()) {</span>
+<span class="nc" id="L182">            conversationList = new ArrayList&lt;&gt;();</span>
+        } else {
+<span class="nc" id="L184">            conversationList = mapper.readValue(</span>
+<span class="nc" id="L185">                    booking.getConversation(),</span>
+<span class="nc" id="L186">                    new TypeReference&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt;() {}</span>
+            );
+        }
+
+        //  Automatically determine sender type based on userId
+<span class="nc" id="L191">        String senderType = determineSenderType(newMessage.getUserId(), booking);</span>
+
+<span class="nc" id="L193">        Map&lt;String, Object&gt; msg = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L194">        msg.put(&quot;userId&quot;, newMessage.getUserId());</span>
+<span class="nc" id="L195">        msg.put(&quot;senderType&quot;, senderType);</span>
+<span class="nc" id="L196">        msg.put(&quot;message&quot;, newMessage.getMessage());</span>
+<span class="nc" id="L197">        msg.put(&quot;timestamp&quot;, OffsetDateTime.now().toString());</span>
+
+<span class="nc" id="L199">        conversationList.add(msg);</span>
+<span class="nc" id="L200">        booking.setConversation(mapper.writeValueAsString(conversationList));</span>
+
+<span class="nc" id="L202">        return bikeBookingRepository.save(booking);</span>
+
+<span class="nc" id="L204">    } catch (Exception e) {</span>
+<span class="nc" id="L205">        throw new RuntimeException(&quot;Error while adding message: &quot; + e.getMessage());</span>
+    }
+}
+
+
+
+
+
+// helper method to determine the message sender
+private String determineSenderType(Long senderUserId, Bike_booking booking) {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">    if (booking.getBuyer() != null &amp;&amp;</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">            booking.getBuyer().getUser() != null &amp;&amp;</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            booking.getBuyer().getUser().getId().equals(senderUserId)) {</span>
+<span class="nc" id="L218">        return &quot;BUYER&quot;;</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">    } else if (booking.getBike() != null &amp;&amp;</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">            booking.getBike().getSeller() != null &amp;&amp;</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            booking.getBike().getSeller().getUser() != null &amp;&amp;</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">            booking.getBike().getSeller().getUser().getId().equals(senderUserId)) {</span>
+<span class="nc" id="L223">        return &quot;SELLER&quot;;</span>
+    } else {
+<span class="nc" id="L225">        return &quot;UNKNOWN&quot;;</span>
+    }
+}
+
+    @Override
+    public Bike_booking updateBookingStatus(Long bookingId, Bike_booking.BookingStatus newStatus) {
+<span class="nc" id="L231">        Bike_booking booking = bikeBookingRepository.findById(bookingId)</span>
+<span class="nc" id="L232">                .orElseThrow(() -&gt; new BookingNotFoundException(&quot;Booking not found with ID: &quot; + bookingId));</span>
+
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (booking.getStatus() != Bike_booking.BookingStatus.PENDING) {</span>
+<span class="nc" id="L235">            throw new ResourceNotFoundException(&quot;Only Pending bookings can be updated.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L238" title="All 4 branches missed.">        if (newStatus != Bike_booking.BookingStatus.ACCEPTED</span>
+                &amp;&amp; newStatus != Bike_booking.BookingStatus.IN_NEGOTIATION
+               // &amp;&amp; newStatus != Bike_booking.BookingStatus.SOLD
+        ) {
+<span class="nc" id="L242">            throw new IllegalArgumentException(&quot;Invalid status update. Allowed: ACCEPTED or IN_NEGOTIATION.&quot;);</span>
+        }
+
+
+<span class="nc" id="L246">        booking.setStatus(newStatus);</span>
+<span class="nc" id="L247">        return bikeBookingRepository.save(booking);</span>
+    }
+
+
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Auction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.auction.entity</a> &gt; <span class="el_source">Auction.java</span></div><h1>Auction.java</h1><pre class="source lang-java linenums">package com.spring.jwt.auction.entity;
+
+import com.spring.jwt.Mobile.entity.Mobile;
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+@Entity
+@Table(name = &quot;auctions&quot;)
+@Getter
+<span class="nc" id="L12">@Setter</span>
+<span class="nc" id="L13">@NoArgsConstructor</span>
+<span class="nc" id="L14">@AllArgsConstructor</span>
+<span class="nc" id="L15">@Builder</span>
+public class Auction {
+
+<span class="nc" id="L18">    public enum Status {</span>
+<span class="nc" id="L19">        SCHEDULED,</span>
+<span class="nc" id="L20">        RUNNING,</span>
+<span class="nc" id="L21">        ENDED,      // bidding time over, waiting for winner to accept</span>
+<span class="nc" id="L22">        COMPLETED,  // sold or closed</span>
+<span class="nc" id="L23">        CANCELLED</span>
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;auction_id&quot;)
+<span class="nc" id="L29">    private Long auctionId;</span>
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;mobile_id&quot;, nullable = false)
+<span class="nc" id="L33">    private Mobile mobile;</span>
+
+    @Column(name = &quot;start_price&quot;, nullable = false)
+<span class="nc" id="L36">    private BigDecimal startPrice;</span>
+
+    @Column(name = &quot;current_price&quot;, nullable = false)
+<span class="nc" id="L39">    private BigDecimal currentPrice;</span>
+
+    @Column(name = &quot;min_increment_in_rupees&quot;, nullable = false)
+<span class="nc" id="L42">    private BigDecimal minIncrementInRupees;</span>
+
+    @Column(name = &quot;start_time&quot;, nullable = false)
+<span class="nc" id="L45">    private OffsetDateTime startTime;</span>
+
+    @Column(name = &quot;end_time&quot;, nullable = false)
+<span class="nc" id="L48">    private OffsetDateTime endTime;</span>
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;status&quot;, nullable = false)
+<span class="nc" id="L52">    private Status status;</span>
+
+    // highest current bidder while RUNNING
+    @Column(name = &quot;highest_bidder_user_id&quot;)
+<span class="nc" id="L56">    private Long highestBidderUserId;</span>
+
+    // optimistic locking to avoid race conditions
+    @Version
+<span class="nc" id="L60">    private Long version;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

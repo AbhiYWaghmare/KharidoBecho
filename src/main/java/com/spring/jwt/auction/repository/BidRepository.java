@@ -6,6 +6,7 @@ import com.spring.jwt.auction.entity.Bid.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +26,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
           and b.status = :status
           and b.offerExpiresAt < :now
         """)
-    List<Bid> findExpiredOffers(Auction auction, Status status, OffsetDateTime now);
+    List<Bid> findExpiredOffers(Auction auction, Status status, LocalDateTime now);
 
     @Query("""
         select b from Bid b

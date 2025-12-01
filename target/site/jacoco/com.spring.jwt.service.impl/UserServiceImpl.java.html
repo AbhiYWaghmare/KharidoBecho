@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.service.impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.service.impl;
+
+import com.spring.jwt.dto.*;
+import com.spring.jwt.entity.*;
+import com.spring.jwt.exception.BaseException;
+import com.spring.jwt.exception.UserNotFoundExceptions;
+import com.spring.jwt.mapper.UserMapper;
+import com.spring.jwt.repository.*;
+import com.spring.jwt.service.UserService;
+import com.spring.jwt.utils.BaseResponseDTO;
+import com.spring.jwt.utils.DataMaskingUtils;
+import com.spring.jwt.utils.EmailService;
+import com.spring.jwt.utils.EmailVerificationService.EmailVerification;
+import com.spring.jwt.utils.EmailVerificationService.EmailVerificationRepo;
+import com.spring.jwt.utils.ResponseDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+<span class="nc" id="L38">@RequiredArgsConstructor</span>
+<span class="nc" id="L39">@Slf4j</span>
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;
+    private final BuyerRepository buyerRepository;
+    private final SellerRepository sellerRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final EmailVerificationRepo emailVerificationRepo;
+    private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
+    private final JavaMailSender mailSender;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+
+    @Value(&quot;${app.url.password-reset}&quot;)
+    private String passwordResetUrl;
+
+    // =======================
+    // ACCOUNT REGISTRATION
+    // =======================
+
+    @Override
+    @Transactional
+    public BaseResponseDTO registerAccount(UserDTO userDTO) {
+<span class="nc" id="L63">        BaseResponseDTO response = new BaseResponseDTO();</span>
+
+<span class="nc" id="L65">        validateAccount(userDTO);</span>
+
+<span class="nc" id="L67">        User user = insertUser(userDTO);</span>
+
+<span class="nc" id="L69">        response.setCode(String.valueOf(HttpStatus.CREATED.value()));</span>
+<span class="nc" id="L70">        response.setMessage(&quot;Account Created Successfully !!&quot;);</span>
+
+<span class="nc" id="L72">        return response;</span>
+    }
+
+    @Transactional
+    private User insertUser(UserDTO userDTO) {
+<span class="nc" id="L77">        User user = new User();</span>
+<span class="nc" id="L78">        user.setEmail(userDTO.getEmail());</span>
+<span class="nc" id="L79">        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));</span>
+<span class="nc" id="L80">        user.setFirstName(userDTO.getFirstName());</span>
+<span class="nc" id="L81">        user.setLastName(userDTO.getLastName());</span>
+<span class="nc" id="L82">        user.setMobileNumber(userDTO.getMobileNumber());</span>
+<span class="nc" id="L83">        user.setAddress(userDTO.getAddress());</span>
+<span class="nc" id="L84">        user.setEmailVerified(true);</span>
+
+<span class="nc" id="L86">        Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L87">        Role role = roleRepository.findByName(userDTO.getRole());</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (role != null) roles.add(role);</span>
+
+<span class="nc" id="L90">        user.setRoles(roles);</span>
+<span class="nc" id="L91">        user = userRepository.save(user);</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (role != null) {</span>
+<span class="nc bnc" id="L94" title="All 4 branches missed.">            switch (role.getName()) {</span>
+                case &quot;USER&quot;:
+<span class="nc" id="L96">                    createUserProfile(user, userDTO);</span>
+<span class="nc" id="L97">                    break;</span>
+                case &quot;BUYER&quot;:
+<span class="nc" id="L99">                    createBuyer(user);</span>
+<span class="nc" id="L100">                    break;</span>
+                case &quot;SELLER&quot;:
+<span class="nc" id="L102">                    createSeller(user);</span>
+                    break;
+            }
+        }
+
+<span class="nc" id="L107">        return user;</span>
+    }
+
+    private void createUserProfile(User user, UserDTO userDTO) {
+<span class="nc" id="L111">        UserProfile profile = new UserProfile();</span>
+<span class="nc" id="L112">        profile.setName(userDTO.getFirstName());</span>
+<span class="nc" id="L113">        profile.setLastName(userDTO.getLastName());</span>
+<span class="nc" id="L114">        profile.setDateOfBirth(userDTO.getDateOfBirth());</span>
+<span class="nc" id="L115">        profile.setAddress(userDTO.getAddress());</span>
+//        profile.setStudentcol(userDTO.getStudentcol());
+//        profile.setStudentcol1(userDTO.getStudentcol1());
+//        profile.setStudentClass(userDTO.getStudentClass());
+<span class="nc" id="L119">        profile.setUser(user);</span>
+<span class="nc" id="L120">        userProfileRepository.save(profile);</span>
+<span class="nc" id="L121">        log.info(&quot;Created profile for user ID: {}&quot;, user.getId());</span>
+<span class="nc" id="L122">    }</span>
+
+    private void createBuyer(User user) {
+<span class="nc" id="L125">        Buyer buyer = new Buyer();</span>
+<span class="nc" id="L126">        buyer.setUser(user);</span>
+<span class="nc" id="L127">        buyerRepository.save(buyer);</span>
+<span class="nc" id="L128">        log.info(&quot;Created buyer profile for user ID: {}&quot;, user.getId());</span>
+<span class="nc" id="L129">    }</span>
+
+    private void createSeller(User user) {
+<span class="nc" id="L132">        Seller seller = new Seller();</span>
+<span class="nc" id="L133">        seller.setUser(user);</span>
+<span class="nc" id="L134">        sellerRepository.save(seller);</span>
+<span class="nc" id="L135">        log.info(&quot;Created seller profile for user ID: {}&quot;, user.getId());</span>
+<span class="nc" id="L136">    }</span>
+
+    private void validateAccount(UserDTO userDTO) {
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (ObjectUtils.isEmpty(userDTO)) {</span>
+<span class="nc" id="L140">            throw new BaseException(String.valueOf(HttpStatus.BAD_REQUEST.value()), &quot;Data must not be empty&quot;);</span>
+        }
+
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (userRepository.findByEmail(userDTO.getEmail()) != null) {</span>
+<span class="nc" id="L144">            throw new BaseException(String.valueOf(HttpStatus.BAD_REQUEST.value()), &quot;Email is already registered !!&quot;);</span>
+        }
+
+<span class="nc" id="L147">        Optional&lt;User&gt; mobileNumber = userRepository.findByMobileNumber(userDTO.getMobileNumber());</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (mobileNumber.isPresent()) {</span>
+<span class="nc" id="L149">            throw new BaseException(String.valueOf(HttpStatus.BAD_REQUEST.value()), &quot;Mobile Number is already registered !!&quot;);</span>
+        }
+
+<span class="nc" id="L152">        List&lt;String&gt; roles = roleRepository.findAll().stream().map(Role::getName).toList();</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (!roles.contains(userDTO.getRole())) {</span>
+<span class="nc" id="L154">            throw new BaseException(String.valueOf(HttpStatus.BAD_REQUEST.value()), &quot;Invalid role&quot;);</span>
+        }
+<span class="nc" id="L156">    }</span>
+
+    // =======================
+    // PASSWORD RESET
+    // =======================
+
+    @Override
+    public ResponseDto forgotPass(String email, String resetPasswordLink, String domain) {
+<span class="nc" id="L164">        User user = userRepository.findByEmail(email);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (user == null) throw new UserNotFoundExceptions(&quot;User not found&quot;);</span>
+<span class="nc" id="L166">        emailService.sendResetPasswordEmail(email, resetPasswordLink, domain);</span>
+<span class="nc" id="L167">        return new ResponseDto(HttpStatus.OK.toString(), &quot;Email sent&quot;);</span>
+    }
+
+    @Override
+    @Transactional
+    public ResponseDto handleForgotPassword(String email, String domain) {
+<span class="nc bnc" id="L173" title="All 4 branches missed.">        if (email == null || email.isEmpty()) return new ResponseDto(&quot;Unsuccessful&quot;, &quot;Email is required&quot;);</span>
+<span class="nc" id="L174">        User user = userRepository.findByEmail(email);</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (user == null) throw new UserNotFoundExceptions(&quot;User not found with email: &quot; + email);</span>
+
+<span class="nc" id="L177">        String token = RandomStringUtils.randomAlphanumeric(64);</span>
+<span class="nc" id="L178">        updateResetPassword(token, email);</span>
+
+<span class="nc" id="L180">        String resetPasswordLink = passwordResetUrl + &quot;?token=&quot; + token;</span>
+<span class="nc" id="L181">        emailService.sendResetPasswordEmail(email, resetPasswordLink, domain);</span>
+
+<span class="nc" id="L183">        return new ResponseDto(&quot;Successful&quot;, &quot;Password reset instructions sent to your email&quot;);</span>
+    }
+
+    @Override
+    @Transactional
+    public void updateResetPassword(String token, String email) {
+<span class="nc" id="L189">        User user = userRepository.findByEmail(email);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (user == null) throw new UserNotFoundExceptions(&quot;User not found with email: &quot; + email);</span>
+
+<span class="nc" id="L192">        user.setResetPasswordToken(token);</span>
+<span class="nc" id="L193">        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(30));</span>
+<span class="nc" id="L194">        userRepository.save(user);</span>
+<span class="nc" id="L195">    }</span>
+
+    @Override
+    @Transactional
+    public ResponseDto updatePassword(String token, String newPassword) {
+<span class="nc" id="L200">        User user = userRepository.findByResetPasswordToken(token);</span>
+<span class="nc bnc" id="L201" title="All 4 branches missed.">        if (user == null || user.getResetPasswordTokenExpiry() == null ||</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                LocalDateTime.now().isAfter(user.getResetPasswordTokenExpiry())) {</span>
+<span class="nc" id="L203">            throw new UserNotFoundExceptions(&quot;Invalid or expired token&quot;);</span>
+        }
+
+<span class="nc" id="L206">        user.setPassword(passwordEncoder.encode(newPassword));</span>
+<span class="nc" id="L207">        user.setResetPasswordToken(null);</span>
+<span class="nc" id="L208">        user.setResetPasswordTokenExpiry(null);</span>
+<span class="nc" id="L209">        userRepository.save(user);</span>
+
+<span class="nc" id="L211">        return new ResponseDto(HttpStatus.OK.toString(), &quot;Password reset successful&quot;);</span>
+    }
+
+    @Override
+    public ResponseDto processPasswordUpdate(ResetPassword resetRequest) {
+<span class="nc" id="L216">        return null;</span>
+    }
+
+    @Override
+    public boolean validateResetToken(String token) {
+<span class="nc" id="L221">        User user = userRepository.findByResetPasswordToken(token);</span>
+<span class="nc bnc" id="L222" title="All 4 branches missed.">        return user != null &amp;&amp; user.getResetPasswordTokenExpiry() != null</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">                &amp;&amp; LocalDateTime.now().isBefore(user.getResetPasswordTokenExpiry());</span>
+    }
+
+    @Override
+    public boolean isSameAsOldPassword(String token, String newPassword) {
+<span class="nc" id="L228">        User user = userRepository.findByResetPasswordToken(token);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (user == null) throw new UserNotFoundExceptions(&quot;Invalid or expired token&quot;);</span>
+<span class="nc" id="L230">        return passwordEncoder.matches(newPassword, user.getPassword());</span>
+    }
+
+    // =======================
+    // USER CRUD &amp; PROFILE
+    // =======================
+
+    @Override
+    public Page&lt;UserDTO&gt; getAllUsers(int pageNo, int pageSize, String role) {
+<span class="nc" id="L239">        Pageable pageable = PageRequest.of(pageNo, pageSize);</span>
+<span class="nc bnc" id="L240" title="All 4 branches missed.">        Page&lt;User&gt; users = (role != null &amp;&amp; !role.isBlank()) ?</span>
+<span class="nc" id="L241">                userRepository.findByRoleNameAndDeletedFalse(role, pageable) :</span>
+<span class="nc" id="L242">                userRepository.findByDeletedFalse(pageable);</span>
+<span class="nc" id="L243">        return users.map(user -&gt; populateRoleSpecificData(user, userMapper.toDTO(user)));</span>
+    }
+
+    @Override
+    public UserDTO getUserById(Long id) {
+<span class="nc" id="L248">        User user = userRepository.findById(id)</span>
+<span class="nc" id="L249">                .orElseThrow(() -&gt; new UserNotFoundExceptions(&quot;User not found with id: &quot; + id));</span>
+<span class="nc" id="L250">        return populateRoleSpecificData(user, userMapper.toDTO(user));</span>
+    }
+
+    private UserDTO populateRoleSpecificData(User user, UserDTO userDTO) {
+<span class="nc" id="L254">        Set&lt;String&gt; roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());</span>
+<span class="nc" id="L255">        userDTO.setRoles(roles);</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (roles.contains(&quot;USER&quot;)) {</span>
+<span class="nc" id="L258">            UserProfile profile = userProfileRepository.findByUserId(user.getId());</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            if (profile != null) {</span>
+<span class="nc" id="L260">                userDTO.setRole(&quot;USER&quot;);</span>
+<span class="nc" id="L261">                userDTO.setDateOfBirth(profile.getDateOfBirth());</span>
+//                userDTO.setStudentcol(profile.getStudentcol());
+//                userDTO.setStudentcol1(profile.getStudentcol1());
+//                userDTO.setStudentClass(profile.getStudentClass());
+            }
+        }
+<span class="nc bnc" id="L267" title="All 2 branches missed.">        if (roles.contains(&quot;BUYER&quot;)) {</span>
+<span class="nc" id="L268">            Buyer buyer = buyerRepository.findByUser_Id(user.getId());</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">            if (buyer != null) userDTO.setRole(&quot;BUYER&quot;);</span>
+        }
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        if (roles.contains(&quot;SELLER&quot;)) {</span>
+<span class="nc" id="L272">            Seller seller = sellerRepository.findByUser_Id(user.getId());</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">            if (seller != null) userDTO.setRole(&quot;SELLER&quot;);</span>
+        }
+<span class="nc" id="L275">        return userDTO;</span>
+    }
+
+    @Override
+    public UserDTO updateUser(Long id, UserUpdateRequest request) {
+<span class="nc" id="L280">        User user = userRepository.findById(id)</span>
+<span class="nc" id="L281">                .orElseThrow(() -&gt; new UserNotFoundExceptions(&quot;User not found with id: &quot; + id));</span>
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if (request.getFirstName() != null) user.setFirstName(request.getFirstName().trim());</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        if (request.getLastName() != null) user.setLastName(request.getLastName().trim());</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (request.getAddress() != null) user.setAddress(request.getAddress().trim());</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (request.getMobileNumber() != null) user.setMobileNumber(Long.valueOf(request.getMobileNumber()));</span>
+
+<span class="nc" id="L288">        return userMapper.toDTO(userRepository.save(user));</span>
+    }
+
+    @Override
+    public UserProfileDTO getUserProfileById(Long id) {
+<span class="nc" id="L293">        User user = userRepository.findById(id)</span>
+<span class="nc" id="L294">                .orElseThrow(() -&gt; new UserNotFoundExceptions(&quot;User not found with id: &quot; + id));</span>
+<span class="nc" id="L295">        return buildUserProfileDTO(user);</span>
+    }
+
+    @Override
+    public UserProfileDTO getCurrentUserProfile() {
+<span class="nc" id="L300">        Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="nc bnc" id="L301" title="All 4 branches missed.">        if (auth == null || !auth.isAuthenticated()) throw new BaseException(&quot;401&quot;, &quot;User not authenticated&quot;);</span>
+<span class="nc" id="L302">        String email = auth.getName();</span>
+<span class="nc" id="L303">        User user = userRepository.findByEmail(email);</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">        if (user == null) throw new UserNotFoundExceptions(&quot;User not found with email: &quot; + email);</span>
+<span class="nc" id="L305">        return buildUserProfileDTO(user);</span>
+    }
+
+    private UserProfileDTO buildUserProfileDTO(User user) {
+<span class="nc" id="L309">        UserProfileDTO profileDTO = new UserProfileDTO();</span>
+<span class="nc" id="L310">        profileDTO.setUser(userMapper.toDTO(user));</span>
+<span class="nc" id="L311">        Set&lt;String&gt; roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());</span>
+<span class="nc" id="L312">        profileDTO.setRoles(roles);</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">        if (roles.contains(&quot;USER&quot;)) {</span>
+<span class="nc" id="L314">            UserProfile profile = userProfileRepository.findByUserId(user.getId());</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if (profile != null) profileDTO.setUserProfileDTO1(UserProfileDTO1.fromEntity(profile));</span>
+        }
+<span class="nc" id="L317">        return profileDTO;</span>
+    }
+
+
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+<span class="nc" id="L325">        User user = userRepository.findById(id)</span>
+<span class="nc" id="L326">                .orElseThrow(() -&gt; new UserNotFoundExceptions(&quot;User not found with id: &quot; + id));</span>
+
+<span class="nc" id="L328">        LocalDateTime now = LocalDateTime.now(ZoneId.of(&quot;Asia/Kolkata&quot;));</span>
+
+<span class="nc" id="L330">        System.err.println(&quot;Local time &quot; + now);</span>
+
+        // Soft delete User
+
+<span class="nc" id="L334">        user.setDeleted(true);</span>
+<span class="nc" id="L335">        user.setDeletedAt(now);</span>
+<span class="nc" id="L336">        userRepository.save(user);</span>
+
+
+        // Soft delete Buyer if exists
+
+<span class="nc" id="L341">        Buyer buyer = buyerRepository.findByUser_Id(user.getId());</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">        if (buyer != null) {</span>
+<span class="nc" id="L343">            buyer.setDeleted(true);</span>
+<span class="nc" id="L344">            buyer.setDeletedAt(now);</span>
+<span class="nc" id="L345">            buyerRepository.save(buyer);</span>
+        }
+
+        // Soft delete Seller if exists
+
+
+<span class="nc" id="L351">        Seller seller = sellerRepository.findByUser_Id(user.getId());</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        if (seller != null) {</span>
+<span class="nc" id="L353">            seller.setDeleted(true);</span>
+<span class="nc" id="L354">            seller.setDeletedAt(now);</span>
+<span class="nc" id="L355">            sellerRepository.save(seller);</span>
+        }
+<span class="nc" id="L357">        log.info(&quot;Soft deleted user and related buyer/seller with ID: {}&quot;, id);</span>
+
+<span class="nc" id="L359">    }</span>
+
+
+
+
+
+/// ////////////////////////////////////////////////////
+
+    // Use this in Future if We want hard Delete
+
+////////////////////////////////////////////////////////
+
+//    @Override
+//    @Transactional
+//    public void deleteUser(Long id) {
+//        User user = userRepository.findById(id)
+//                .orElseThrow(() -&gt; new UserNotFoundExceptions(&quot;User not found with id: &quot; + id));
+//
+//        user.setDeleted(true);
+//        user.setDeletedAt(LocalDateTime.now());
+//        userRepository.save(user);
+//    }
+
+
+
+//    private void deleteBuyer(User user) {
+//        Buyer buyer = buyerRepository.findByUser_Id(user.getId());
+//        if (buyer != null) {
+//            buyerRepository.delete(buyer);
+//            log.info(&quot;Deleted buyer profile for user ID: {}&quot;, user.getId());
+//        }
+//    }
+//
+//    private void deleteSeller(User user) {
+//        Seller seller = sellerRepository.findByUser_Id(user.getId());
+//        if (seller != null) {
+//            sellerRepository.delete(seller);
+//            log.info(&quot;Deleted seller profile for user ID: {}&quot;, user.getId());
+//        }
+//    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
