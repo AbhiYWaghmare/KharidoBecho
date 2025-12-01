@@ -217,6 +217,28 @@ public class CarBookingServiceImpl implements CarBookingService {
             return "UNKNOWN";
         }
     }
+    @Override
+    public List<CarBooking> getBookingsByBuyerId(Long buyerId) {
+        Buyer buyer = buyerRepository.findById(buyerId)
+                .orElseThrow(() -> new BuyerNotFoundException("Buyer not found with id " + buyerId));
+
+        List<CarBooking> bookings = carBookingRepository.findByBuyer_BuyerId(buyer.getBuyerId());
+
+        if (bookings.isEmpty()) {
+            throw new ResourceNotFoundException("No car requests found for this buyer");
+        }
+
+        return bookings;
+
+    }
+
+    @Override
+    public CarBooking getBookingDetails(Long bookingId) {
+        return carBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Booking not found with id: " + bookingId));
+    }
+
 
 
 

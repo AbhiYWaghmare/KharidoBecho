@@ -1,3 +1,4 @@
+
 package com.spring.jwt.socket;
 
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic", "/queue");
@@ -19,11 +22,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setUserDestinationPrefix("/user");
     }
 
+
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-
         registry.addEndpoint("/ws-auction")
                 .setAllowedOriginPatterns("*")
-                .withSockJS();   // important withSockJS()
+                .withSockJS();  //  no interceptor
     }
+
 }

@@ -1,6 +1,7 @@
 package com.spring.jwt.car.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -68,6 +69,11 @@ public class Car {
     // PRICE
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
+    @ManyToOne
+    @JoinColumn(name = "buyer_id")
+    private Buyer buyer;
+
 
     // NEGOTIABLE
     private Boolean negotiable;

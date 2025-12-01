@@ -12,5 +12,9 @@ public interface CarBookingService {
     CarBooking approveBooking(Long bookingId);
     CarBooking rejectBooking(Long bookingId);
     CarBooking addMessage(Long id, CarBookingDTO conversation);
+    List<CarBooking> getBookingsByBuyerId(Long buyerId);
+
+    CarBooking getBookingDetails(Long bookingId);
+
 
 }

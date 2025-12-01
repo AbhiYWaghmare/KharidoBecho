@@ -1,3 +1,4 @@
+
 package com.spring.jwt.socket.dto;
 
 import lombok.AllArgsConstructor;
