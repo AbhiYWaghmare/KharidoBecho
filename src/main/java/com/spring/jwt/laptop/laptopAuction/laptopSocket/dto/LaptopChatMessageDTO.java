@@ -1,14 +1,11 @@
-package com.spring.jwt.socket.dto;
+package com.spring.jwt.laptop.laptopAuction.laptopSocket.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageDTO {
+public class LaptopChatMessageDTO{
     private Long userId;
     private String message;
-
 }
