@@ -117,13 +117,14 @@ public class AppConfig {
                     "api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
-                    "/api/colours/**",
-                "api/v1/user/**",
-
-                    "api/v1/cars/**",
-                    "/api/v1/car-images",
                     "/api/laptops/**",
                     "/api/laptop-photo/**",
+                    "/api/v1/laptop-auctions/**",
+                    "/api/colours/**",
+                    "api/v1/user/**",
+                    "api/v1/cars/**",
+                    "/api/v1/car-images",
+
 
                     "/bikes/**",
 
@@ -208,6 +209,7 @@ public class AppConfig {
 
                 .requestMatchers("/api/v1/auctions/**").permitAll()
                 .requestMatchers("/api/laptopBookings/**").permitAll()
+                .requestMatchers("/api/v1/laptop-auctions/**").permitAll()
                 .requestMatchers("/api/colours/**").permitAll()
                 .requestMatchers("/Auction/**", "/Auction", "/ws/**", "/websocket/**", "/sockjs/**").permitAll()
                 .requestMatchers("/laptop/auctions/live").permitAll()
@@ -255,6 +257,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),

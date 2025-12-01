@@ -33,11 +33,17 @@ public class DecryptionResponseProcessor implements ResponseBodyAdvice<Object> {
         return true;
     }
 
+
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                  ServerHttpRequest request, ServerHttpResponse response) {
-        
+
+        // FIX: Avoid NPE when controller returns no body (204 No Content)
+        if (body == null) {
+            return null;  // nothing to decrypt
+        }
+
         try {
             log.debug("Processing response for decryption: {}", body.getClass().getName());
             return processResponse(body);
