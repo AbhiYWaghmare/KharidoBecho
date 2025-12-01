@@ -10,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/carBookings")
@@ -94,5 +96,26 @@ public class CarBookingController {
         carBookingService.addMessage(bookingId, newMessage);
         return ResponseEntity.ok("Message added successfully");
     }
+    // 🔵 Get all bookings by buyerId (Chat List)
+    @GetMapping("/buyer/{buyerId}")
+    public ResponseEntity<?> getBookingsByBuyer(@PathVariable Long buyerId) {
+
+        List<CarBooking> bookings = carBookingService.getBookingsByBuyerId(buyerId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "All Car Requests Fetched Successfully");
+        response.put("count", bookings.size());
+        response.put("data", bookings);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    // 🔵 Get single booking + conversation (Chat Thread)
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<CarBooking> getBookingDetails(@PathVariable Long bookingId) {
+        return ResponseEntity.ok(carBookingService.getBookingDetails(bookingId));
+    }
+
 
 }

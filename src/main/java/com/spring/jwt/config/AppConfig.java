@@ -21,6 +21,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -77,7 +78,10 @@ public class AppConfig {
     @Value("${app.url.frontend:http://localhost:5173}")
     private String frontendUrl;
 
-    @Value("#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/}'.split(',')}")
+//    @Value("#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/}'.split(',')}")
+//    private List<String> allowedOrigins;
+
+    @Value("#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/,http://localhost:63342}'.split(',')}")
     private List<String> allowedOrigins;
 
     @Bean
@@ -103,7 +107,13 @@ public class AppConfig {
     @Bean
     public ForwardedHeaderFilter forwardedHeaderFilter() {
         return new ForwardedHeaderFilter();
+
     }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/ws-auction/**");
+    }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -129,6 +139,7 @@ public class AppConfig {
                         "api/v1/mobiles/**",
                         "/api/v1/mobile-images/**",
                         "/api/v1/mobile/requests/**",
+                        "/api/carBookings/**",
                         "/api/v1/auctions/**",
 
 
@@ -180,6 +191,7 @@ public class AppConfig {
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/laptop-photo/**").permitAll()
 
+
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
                 // existing rules...
@@ -191,7 +203,9 @@ public class AppConfig {
 
                 .requestMatchers("/api/v1/auctions/**").permitAll()
 
-                .requestMatchers("/ws-auction/**").permitAll()   //  add this
+                .requestMatchers("/api/carBookings/**").permitAll()
+                .requestMatchers("/auction-endpoint/**").permitAll()
+//  add this
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
@@ -211,7 +225,12 @@ public class AppConfig {
 
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/user/**").permitAll()
-                .requestMatchers("/ws-auction/**").permitAll()
+//                .requestMatchers("/ws-auction/**").permitAll()
+                .requestMatchers(
+                        "/ws-auction/**",
+                        "/ws/**",
+                        "/ws-info/**"
+                ).permitAll()
 
 
 //                .anyRequest().authenticated());
@@ -239,6 +258,7 @@ public class AppConfig {
 
                         new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
                         new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
+                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/carBookings/**"),
 
                         new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
 
