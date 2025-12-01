@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LaptopPhotoServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.laptop.service.impl</a> &gt; <span class="el_source">LaptopPhotoServiceImpl.java</span></div><h1>LaptopPhotoServiceImpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.laptop.service.impl;
+
+import com.cloudinary.Cloudinary;
+import com.spring.jwt.exception.laptop.LaptopImageException;
+import com.spring.jwt.laptop.entity.Laptop;
+import com.spring.jwt.exception.laptop.LaptopNotFoundException;
+import com.spring.jwt.laptop.entity.LaptopPhotos;
+import com.spring.jwt.laptop.repository.LaptopRepository;
+import com.spring.jwt.laptop.service.LaptopPhotoService;
+import com.spring.jwt.utils.CloudinaryService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.stereotype.Service;
+import com.spring.jwt.laptop.repository.LaptopPhotoRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.*;
+import java.util.List;
+
+@Service
+<span class="nc" id="L30">@AllArgsConstructor</span>
+<span class="nc bnc" id="L31" title="All 30 branches missed.">@Data</span>
+public class LaptopPhotoServiceImpl implements LaptopPhotoService {
+
+<span class="nc" id="L34">    public final LaptopPhotoRepository laptopPhotoRepository;</span>
+<span class="nc" id="L35">    public final CloudinaryService cloudinaryService;</span>
+<span class="nc" id="L36">    public final LaptopRepository laptopRepository;</span>
+    private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
+
+
+    @Override
+    @Transactional
+    public List&lt;String&gt; uploadPhoto(Long laptopId, List&lt;MultipartFile&gt; files) {
+<span class="nc" id="L43">        Laptop laptop = laptopRepository.findById(laptopId)</span>
+<span class="nc" id="L44">                .orElseThrow(() -&gt; new LaptopNotFoundException(laptopId));</span>
+
+<span class="nc" id="L46">        List&lt;String&gt; urls = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        for (MultipartFile file : files) {</span>
+            // Basic validation
+<span class="nc bnc" id="L49" title="All 4 branches missed.">            if (file == null || file.isEmpty()) {</span>
+<span class="nc" id="L50">                throw new LaptopImageException(&quot;One of the uploaded files is empty&quot;);</span>
+            }
+<span class="nc" id="L52">            String contentType = file.getContentType();</span>
+<span class="nc bnc" id="L53" title="All 4 branches missed.">            if (contentType == null || !contentType.startsWith(&quot;image/&quot;)) {</span>
+<span class="nc" id="L54">                throw new LaptopImageException(&quot;Invalid file type: &quot; + contentType);</span>
+            }
+
+            try {
+<span class="nc" id="L58">                MultipartFile toUpload = file;</span>
+
+                // If file is bigger than max allowed, try to compress
+<span class="nc bnc" id="L61" title="All 2 branches missed.">                if (file.getSize() &gt; MAX_IMAGE_BYTES) {</span>
+<span class="nc" id="L62">                    byte[] compressed = compressImageToMaxSize(file, MAX_IMAGE_BYTES);</span>
+<span class="nc bnc" id="L63" title="All 4 branches missed.">                    if (compressed == null || compressed.length == 0) {</span>
+<span class="nc" id="L64">                        throw new LaptopImageException(&quot;Failed to compress image: &quot; + file.getOriginalFilename());</span>
+                    }
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                    if (compressed.length &gt; MAX_IMAGE_BYTES) {</span>
+<span class="nc" id="L67">                        throw new LaptopImageException(&quot;Cannot reduce image below 400KB: &quot; + file.getOriginalFilename());</span>
+                    }
+                    // wrap bytes into MultipartFile so it can be passed to CloudinaryService
+<span class="nc" id="L70">                    toUpload = new ByteArrayMultipartFile(</span>
+                            compressed,
+<span class="nc" id="L72">                            file.getOriginalFilename(),</span>
+<span class="nc" id="L73">                            file.getContentType()</span>
+                    );
+                }
+
+                // Upload to Cloudinary and get full result (secure_url + public_id)
+<span class="nc" id="L78">                Map&lt;String, Object&gt; uploadResult = cloudinaryService.uploadFileWithResult(toUpload, &quot;laptop_photo&quot;);</span>
+<span class="nc" id="L79">                String imageUrl = Objects.toString(uploadResult.get(&quot;secure_url&quot;), null);</span>
+<span class="nc" id="L80">                String publicId = Objects.toString(uploadResult.get(&quot;public_id&quot;), null);</span>
+
+                //  LaptopImage with both URL and publicId
+<span class="nc" id="L83">                LaptopPhotos laptopPhotos = LaptopPhotos.builder()</span>
+<span class="nc" id="L84">                        .photo_link(imageUrl)</span>
+<span class="nc" id="L85">                        .publicId(publicId)</span>
+<span class="nc" id="L86">                        .laptop(laptop)</span>
+<span class="nc" id="L87">                        .build();</span>
+<span class="nc" id="L88">                laptopPhotoRepository.save(laptopPhotos);</span>
+
+<span class="nc" id="L90">                urls.add(imageUrl);</span>
+
+<span class="nc" id="L92">            } catch (IOException e) {</span>
+<span class="nc" id="L93">                throw new LaptopImageException(&quot;Failed to upload image: &quot; + file.getOriginalFilename(), e);</span>
+<span class="nc" id="L94">            }</span>
+<span class="nc" id="L95">        }</span>
+
+<span class="nc" id="L97">        return urls;</span>
+    }
+
+
+    //  compress image to fit under maxBytes (tries lowering JPEG quality)(Helper)
+    private byte[] compressImageToMaxSize(MultipartFile file, long maxBytes) throws IOException {
+
+<span class="nc" id="L104">        BufferedImage inputImage = ImageIO.read(file.getInputStream());</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (inputImage == null) return null;</span>
+
+        // We provide output in JPEG. This may strip transparency if source was PNG.
+<span class="nc" id="L108">        String formatName = &quot;jpg&quot;;</span>
+
+<span class="nc" id="L110">        int width = inputImage.getWidth();</span>
+<span class="nc" id="L111">        int height = inputImage.getHeight();</span>
+
+<span class="nc" id="L113">        float quality = 0.90f; // start quality</span>
+<span class="nc" id="L114">        ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+        // Iteratively try reducing quality and then size until under maxBytes
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        for (int attempt = 0; attempt &lt; 10; attempt++) {</span>
+<span class="nc" id="L118">            baos.reset();</span>
+
+            // create a scaled copy if we shrank dimensions
+<span class="nc" id="L121">            BufferedImage outputImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);</span>
+<span class="nc" id="L122">            Graphics2D g2d = outputImage.createGraphics();</span>
+<span class="nc" id="L123">            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);</span>
+<span class="nc" id="L124">            g2d.drawImage(inputImage, 0, 0, width, height, null);</span>
+<span class="nc" id="L125">            g2d.dispose();</span>
+
+<span class="nc" id="L127">            Iterator&lt;ImageWriter&gt; writers = ImageIO.getImageWritersByFormatName(formatName);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            if (!writers.hasNext()) {</span>
+<span class="nc" id="L129">                break;</span>
+            }
+<span class="nc" id="L131">            ImageWriter writer = writers.next();</span>
+<span class="nc" id="L132">            ImageWriteParam param = writer.getDefaultWriteParam();</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">            if (param.canWriteCompressed()) {</span>
+<span class="nc" id="L134">                param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);</span>
+<span class="nc" id="L135">                param.setCompressionQuality(Math.max(0.10f, quality)); // limit lower bound</span>
+            }
+
+<span class="nc" id="L138">            try (ImageOutputStream ios = ImageIO.createImageOutputStream(baos)) {</span>
+<span class="nc" id="L139">                writer.setOutput(ios);</span>
+<span class="nc" id="L140">                writer.write(null, new IIOImage(outputImage, null, null), param);</span>
+<span class="nc" id="L141">                writer.dispose();</span>
+            }
+
+            // If under max, return bytes
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            if (baos.size() &lt;= maxBytes) {</span>
+<span class="nc" id="L146">                return baos.toByteArray();</span>
+            }
+
+            // otherwise reduce quality first, then dimensions
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            if (quality &gt; 0.35f) {</span>
+<span class="nc" id="L151">                quality -= 0.15f; // reduce compression quality</span>
+            } else {
+                // reduce dimensions by 90% to try further reduction
+<span class="nc" id="L154">                width = Math.max(100, (int) (width * 0.9));</span>
+<span class="nc" id="L155">                height = Math.max(100, (int) (height * 0.9));</span>
+            }
+        }
+
+        // final attempt: return whatever we have (may exceed maxBytes) or null
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        return baos.size() &gt; 0 ? baos.toByteArray() : null;</span>
+    }
+
+    // Small adapter class to wrap compressed bytes into a MultipartFile
+    private static class ByteArrayMultipartFile implements MultipartFile {
+        private final byte[] bytes;
+        private final String originalFilename;
+        private final String contentType;
+
+<span class="nc" id="L169">        public ByteArrayMultipartFile(byte[] bytes, String originalFilename, String contentType) {</span>
+<span class="nc" id="L170">            this.bytes = bytes;</span>
+<span class="nc" id="L171">            this.originalFilename = originalFilename;</span>
+<span class="nc" id="L172">            this.contentType = contentType;</span>
+<span class="nc" id="L173">        }</span>
+
+        @Override
+        public String getName() {
+<span class="nc" id="L177">            return originalFilename;</span>
+        }
+
+        @Override
+        public String getOriginalFilename() {
+<span class="nc" id="L182">            return originalFilename;</span>
+        }
+
+        @Override
+        public String getContentType() {
+<span class="nc" id="L187">            return contentType;</span>
+        }
+
+        @Override
+        public boolean isEmpty() {
+<span class="nc bnc" id="L192" title="All 4 branches missed.">            return bytes == null || bytes.length == 0;</span>
+        }
+
+        @Override
+        public long getSize() {
+<span class="nc" id="L197">            return bytes.length;</span>
+        }
+
+        @Override
+        public byte[] getBytes() {
+<span class="nc" id="L202">            return bytes;</span>
+        }
+
+        @Override
+        public InputStream getInputStream() {
+<span class="nc" id="L207">            return new ByteArrayInputStream(bytes);</span>
+        }
+
+        @Override
+        public void transferTo(File dest) throws IOException {
+<span class="nc" id="L212">            try (FileOutputStream fos = new FileOutputStream(dest)) {</span>
+<span class="nc" id="L213">                fos.write(bytes);</span>
+            }
+<span class="nc" id="L215">        }</span>
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Long imageId) {
+<span class="nc" id="L221">        LaptopPhotos laptopPhotos = laptopPhotoRepository.findById(imageId)</span>
+<span class="nc" id="L222">                .orElseThrow(() -&gt; new LaptopNotFoundException(&quot;Laptop image not found with ID: &quot; + imageId));</span>
+
+        try {
+            //  first image will delete from cloudnairy then DB
+<span class="nc" id="L226">            boolean deleted = cloudinaryService.deleteByPublicId(laptopPhotos.getPublicId());</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            if (!deleted) {</span>
+<span class="nc" id="L228">                throw new LaptopImageException(&quot;Failed to delete image from Cloudinary: &quot; + laptopPhotos.getPublicId());</span>
+            }
+
+            //  Then delete from DB
+<span class="nc" id="L232">            laptopPhotoRepository.delete(laptopPhotos);</span>
+
+<span class="nc" id="L234">        } catch (IOException e) {</span>
+<span class="nc" id="L235">            throw new LaptopImageException(&quot;Error deleting image from Cloudinary: &quot; + laptopPhotos.getPublicId(), e);</span>
+<span class="nc" id="L236">        }</span>
+<span class="nc" id="L237">    }</span>
+
+
+    public LaptopPhotos uploadLaptopImage(Long laptopId, MultipartFile file) {
+<span class="nc" id="L241">        Laptop laptop = laptopPhotoRepository.findById(laptopId)</span>
+<span class="nc" id="L242">                .orElseThrow(() -&gt; new LaptopNotFoundException(laptopId)).getLaptop();</span>
+
+        try {
+<span class="nc" id="L245">            String imageUrl = cloudinaryService.uploadFile(file, &quot;laptop_photo&quot;);</span>
+<span class="nc" id="L246">            LaptopPhotos image = new LaptopPhotos();</span>
+<span class="nc" id="L247">            image.setLaptop(laptop);</span>
+<span class="nc" id="L248">            image.setPhoto_link(imageUrl);</span>
+<span class="nc" id="L249">            return laptopPhotoRepository.save(image);</span>
+<span class="nc" id="L250">        } catch (IOException e) {</span>
+<span class="nc" id="L251">            throw new LaptopImageException(&quot;Failed to upload image: &quot; + file.getOriginalFilename(), e);</span>
+        }
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

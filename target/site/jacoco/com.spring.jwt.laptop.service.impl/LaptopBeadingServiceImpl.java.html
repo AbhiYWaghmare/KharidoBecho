@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LaptopBeadingServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.laptop.service.impl</a> &gt; <span class="el_source">LaptopBeadingServiceImpl.java</span></div><h1>LaptopBeadingServiceImpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.laptop.service.impl;
+
+import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.entity.Seller;
+import com.spring.jwt.exception.laptop.AuctionException;
+import com.spring.jwt.exception.laptop.LaptopNotFoundException;
+import com.spring.jwt.exception.mobile.BuyerNotFoundException;
+import com.spring.jwt.exception.mobile.SellerNotFoundException;
+import com.spring.jwt.laptop.dto.*;
+import com.spring.jwt.laptop.entity.BeadingLaptop;
+import com.spring.jwt.laptop.entity.BidLaptops;
+import com.spring.jwt.laptop.entity.Laptop;
+import com.spring.jwt.laptop.model.AuctionStatus;
+import com.spring.jwt.laptop.repository.BeadingLaptopRepository;
+import com.spring.jwt.laptop.repository.BidLaptopRepository;
+import com.spring.jwt.laptop.repository.LaptopRepository;
+import com.spring.jwt.laptop.service.LaptopBeadingService;
+import com.spring.jwt.repository.BuyerRepository;
+import com.spring.jwt.repository.SellerRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+<span class="nc" id="L30">@RequiredArgsConstructor</span>
+public class LaptopBeadingServiceImpl implements LaptopBeadingService {
+
+    private final BeadingLaptopRepository beadingLaptopRepo;
+    private final LaptopRepository laptopRepo;
+    private final BidLaptopRepository bidRepo;
+    private final SellerRepository sellerRepo;
+    private final BuyerRepository buyerRepo;
+//    private final SimpMessagingTemplate messagingTemplate;
+
+
+    @Override
+    public BeadingLaptop addLaptopForAuction(BeadingLaptopDTO dto) {
+<span class="nc" id="L43">        Laptop laptop = laptopRepo.findByIdAndDeletedFalse(dto.getLaptopId())</span>
+<span class="nc" id="L44">                .orElseThrow(() -&gt; new LaptopNotFoundException(&quot;Laptop not found with id &quot; +dto.getLaptopId()));</span>
+
+<span class="nc" id="L46">        Seller seller = sellerRepo.findById(dto.getSellerId())</span>
+<span class="nc" id="L47">                .orElseThrow(()-&gt; new SellerNotFoundException(dto.getSellerId()));</span>
+
+<span class="nc" id="L49">        BeadingLaptop auction = new BeadingLaptop();</span>
+
+<span class="nc" id="L51">        auction.setLaptopId(dto.getLaptopId());</span>
+<span class="nc" id="L52">        auction.setBasePrice(dto.getBasePrice());</span>
+<span class="nc" id="L53">        auction.setMinIncrement(dto.getMinIncrement());</span>
+<span class="nc" id="L54">        auction.setSellerId(dto.getSellerId());</span>
+<span class="nc" id="L55">        auction.setDealerId(laptop.getSeller().getSellerId());</span>
+<span class="nc" id="L56">        auction.setAuctionStatus(dto.getAuctionStatus());</span>
+
+<span class="nc" id="L58">        auction.setCreatedAt(LocalDateTime.now());</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        auction.setClosingTime(dto.getClosingTime() != null ? dto.getClosingTime() :</span>
+<span class="nc" id="L60">                LocalDateTime.now().plusHours(1));</span>
+
+<span class="nc" id="L62">        auction.setAuctionStatus(auction.getAuctionStatus());</span>
+<span class="nc" id="L63">        auction.setHighestBid(auction.getBasePrice());</span>
+<span class="nc" id="L64">        auction.setHighestBidderId(null);</span>
+
+<span class="nc" id="L66">        auction.setUniqueBeadingLaptopId(UUID.randomUUID().toString());</span>
+
+<span class="nc" id="L68">        return beadingLaptopRepo.save(auction);</span>
+
+    }
+
+    @Override
+    public BeadingLaptopWithInsDTO getLaptopAuctionById(Long beadingLaptopId) {
+<span class="nc" id="L74">        BeadingLaptop auction = beadingLaptopRepo.findById(beadingLaptopId)</span>
+<span class="nc" id="L75">                .orElseThrow(() -&gt; new AuctionException(&quot;Auction not found&quot;));</span>
+
+<span class="nc" id="L77">        Laptop laptop = laptopRepo.findByIdAndDeletedFalse(auction.getLaptopId())</span>
+<span class="nc" id="L78">                .orElseThrow(() -&gt; new LaptopNotFoundException(&quot;Laptop not found with id &quot; +auction.getLaptopId()));</span>
+
+<span class="nc" id="L80">        return new BeadingLaptopWithInsDTO(auction,laptop);</span>
+    }
+
+    @Override
+    public List&lt;BeadingLaptopWithInsDTO&gt; getAllLiveLaptopAuctions() {
+
+        // current IST time (automatically correct if timezone is set properly)
+<span class="nc" id="L87">        LocalDateTime now = LocalDateTime.now();</span>
+
+        // Fetch only ACTIVE auctions
+<span class="nc" id="L90">        List&lt;BeadingLaptop&gt; auctions = beadingLaptopRepo.findByAuctionStatus(AuctionStatus.LIVE)</span>
+<span class="nc" id="L91">                .stream()</span>
+<span class="nc" id="L92">                .filter(a -&gt; a.getClosingTime().isAfter(now))   // Closing time not expired</span>
+<span class="nc" id="L93">                .toList();  </span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (auctions.isEmpty()) {</span>
+<span class="nc" id="L96">            throw new AuctionException(&quot;No active laptop auctions found&quot;);</span>
+        }
+
+<span class="nc" id="L99">        return auctions.stream()</span>
+<span class="nc" id="L100">                .map(a -&gt; new BeadingLaptopWithInsDTO(</span>
+                        a,
+<span class="nc" id="L102">                        laptopRepo.findByIdAndDeletedFalse(a.getLaptopId())</span>
+<span class="nc" id="L103">                                .orElseThrow(() -&gt; new LaptopNotFoundException(</span>
+<span class="nc" id="L104">                                        &quot;Laptop not found for auction: &quot; + a.getBeadingLaptopId()))</span>
+                ))
+<span class="nc" id="L106">                .toList();</span>
+    }
+
+    @Override
+    public List&lt;BeadingLaptopWithInsDTO&gt; getLaptopAuctionsBySeller(Long sellerId) {
+<span class="nc" id="L111">        List&lt;BeadingLaptop&gt; auctions = beadingLaptopRepo.findAll()</span>
+<span class="nc" id="L112">                .stream()</span>
+<span class="nc" id="L113">                .filter(a -&gt; a.getSellerId().equals(sellerId))</span>
+<span class="nc" id="L114">                .toList();</span>
+
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (auctions.isEmpty()) {</span>
+<span class="nc" id="L117">            throw new SellerNotFoundException(sellerId);</span>
+        }
+
+<span class="nc" id="L120">        return auctions.stream()</span>
+<span class="nc" id="L121">                .map(a -&gt; new BeadingLaptopWithInsDTO(</span>
+                        a,
+<span class="nc" id="L123">                        laptopRepo.findByIdAndDeletedFalse(a.getLaptopId())</span>
+<span class="nc" id="L124">                                .orElseThrow(() -&gt; new LaptopNotFoundException(</span>
+<span class="nc" id="L125">                                        &quot;Laptop not found for auction: &quot; + a.getBeadingLaptopId()))</span>
+                ))
+<span class="nc" id="L127">                .toList();</span>
+    }
+
+    @Override
+    @Transactional
+    public BidResponseDTO placeBid(BidLaptopDTO dto) {
+
+        // fetch auction
+<span class="nc" id="L135">        BeadingLaptop auction = beadingLaptopRepo.findById(dto.getBeadingLaptopId())</span>
+<span class="nc" id="L136">                .orElseThrow(() -&gt; new AuctionException(&quot;Auction not found&quot;));</span>
+
+<span class="nc" id="L138">        Buyer buyer = buyerRepo.findById(dto.getBuyerId())</span>
+<span class="nc" id="L139">                .orElseThrow(()-&gt;new BuyerNotFoundException(dto.getBuyerId()));</span>
+
+        // Check status + expiry
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (auction.getAuctionStatus() != AuctionStatus.LIVE ||</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">                auction.getClosingTime().isBefore(LocalDateTime.now())) {</span>
+<span class="nc" id="L144">            throw new AuctionException(&quot;Auction has already expired or closed&quot;);</span>
+        }
+
+        // Minimum allowed bid
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        double current = (auction.getHighestBid() == null)</span>
+<span class="nc" id="L149">                ? auction.getBasePrice()</span>
+<span class="nc" id="L150">                : auction.getHighestBid();</span>
+
+<span class="nc" id="L152">        double minAllowed = current + auction.getMinIncrement();</span>
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (dto.getBidAmount() &lt; minAllowed) {</span>
+<span class="nc" id="L155">            throw new AuctionException(&quot;Bid too low&quot;);</span>
+        }
+
+        // Create bid object
+<span class="nc" id="L159">        BidLaptops bid = new BidLaptops();</span>
+<span class="nc" id="L160">        bid.setBeadingLaptop(auction);</span>
+<span class="nc" id="L161">        bid.setBidderId(dto.getBuyerId());</span>
+<span class="nc" id="L162">        bid.setBidAmount(dto.getBidAmount());</span>
+<span class="nc" id="L163">        bid.setCreatedAt(LocalDateTime.now());</span>
+<span class="nc" id="L164">        bid.setClosingAt(auction.getClosingTime());</span>
+
+        // Save bid (DB insert)
+<span class="nc" id="L167">        bidRepo.save(bid);</span>
+
+        // Link bid to auction list (so JSON will show bids)
+<span class="nc" id="L170">        auction.getBids().add(bid);</span>
+
+        // Update auction highest bid
+<span class="nc" id="L173">        auction.setHighestBid(dto.getBidAmount());</span>
+<span class="nc" id="L174">        auction.setHighestBidderId(dto.getBuyerId());</span>
+<span class="nc" id="L175">        beadingLaptopRepo.save(auction);</span>
+
+<span class="nc" id="L177">        return new BidResponseDTO(</span>
+<span class="nc" id="L178">                auction.getBeadingLaptopId(),</span>
+<span class="nc" id="L179">                auction.getHighestBid(),</span>
+<span class="nc" id="L180">                auction.getHighestBidderId(),</span>
+                &quot;NEW_HIGHEST_BID&quot;
+        );
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

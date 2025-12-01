@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuctionServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.auction.service.impl</a> &gt; <span class="el_source">AuctionServiceImpl.java</span></div><h1>AuctionServiceImpl.java</h1><pre class="source lang-java linenums">package com.spring.jwt.auction.service.impl;
+
+import com.spring.jwt.auction.dto.AuctionDTO;
+import com.spring.jwt.auction.dto.AuctionUpdateMessageDTO;
+import com.spring.jwt.auction.entity.Auction;
+import com.spring.jwt.auction.entity.Bid;
+import com.spring.jwt.auction.exception.AuctionNotFoundException;
+import com.spring.jwt.auction.exception.InvalidAuctionStateException;
+import com.spring.jwt.auction.exception.InvalidBidException;
+import com.spring.jwt.auction.mapper.AuctionMapper;
+import com.spring.jwt.auction.repository.AuctionRepository;
+import com.spring.jwt.auction.repository.BidRepository;
+import com.spring.jwt.auction.service.AuctionService;
+import com.spring.jwt.Mobile.Repository.MobileRepository;
+import com.spring.jwt.Mobile.entity.Mobile;
+import com.spring.jwt.exception.mobile.MobileNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.stream.IntStream;
+
+<span class="nc" id="L28">@Slf4j</span>
+@Service
+<span class="nc" id="L30">@RequiredArgsConstructor</span>
+public class AuctionServiceImpl implements AuctionService {
+
+    private final AuctionRepository auctionRepository;
+    private final BidRepository bidRepository;
+    private final MobileRepository mobileRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    // =============== BIDDING (called by WebSocket) ==================
+
+    @Override
+    @Transactional
+
+    public AuctionDTO createAuction(AuctionDTO dto) {
+<span class="nc" id="L44">        Long mobileId = dto.mobileId();</span>
+
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (mobileId == null) {</span>
+<span class="nc" id="L47">            throw new InvalidAuctionStateException(&quot;mobileId is required&quot;);</span>
+        }
+
+<span class="nc" id="L50">        Mobile mobile = mobileRepository.findById(mobileId)</span>
+<span class="nc" id="L51">                .orElseThrow(() -&gt; new MobileNotFoundException(mobileId));</span>
+
+
+<span class="nc" id="L54">        Auction a = new Auction();</span>
+<span class="nc" id="L55">        a.setMobile(mobile);</span>
+<span class="nc" id="L56">        a.setStartPrice(dto.startPrice());</span>
+<span class="nc" id="L57">        a.setCurrentPrice(dto.startPrice());</span>
+<span class="nc" id="L58">        a.setMinIncrementInRupees(dto.minIncrementInRupees());</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        a.setStartTime(dto.startTime() != null ? dto.startTime() : OffsetDateTime.now());</span>
+<span class="nc" id="L60">        a.setEndTime(dto.endTime());</span>
+<span class="nc" id="L61">        a.setStatus(Auction.Status.SCHEDULED);</span>
+<span class="nc" id="L62">        a.setHighestBidderUserId(null);</span>
+
+<span class="nc" id="L64">        Auction saved = auctionRepository.save(a);</span>
+<span class="nc" id="L65">        return AuctionMapper.toDTO(saved);</span>
+    }
+
+
+
+    public void placeBid(Long auctionId, Long userId, BigDecimal bidAmount) {
+        // load auction
+<span class="nc" id="L72">        Auction auction = auctionRepository.findById(auctionId)</span>
+<span class="nc" id="L73">                .orElseThrow(() -&gt; new AuctionNotFoundException(&quot;Auction not found: &quot; + auctionId));</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (auction.getStatus() != Auction.Status.RUNNING) {</span>
+<span class="nc" id="L76">            throw new InvalidAuctionStateException(&quot;Auction is not RUNNING&quot;);</span>
+        }
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (OffsetDateTime.now().isAfter(auction.getEndTime())) {</span>
+<span class="nc" id="L80">            throw new InvalidAuctionStateException(&quot;Auction already ended&quot;);</span>
+        }
+
+<span class="nc" id="L83">        BigDecimal minAllowed = auction.getCurrentPrice().add(auction.getMinIncrementInRupees());</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (bidAmount.compareTo(minAllowed) &lt; 0) {</span>
+<span class="nc" id="L85">            throw new InvalidBidException(&quot;Bid must be at least &quot; + minAllowed);</span>
+        }
+
+        // create bid
+<span class="nc" id="L89">        Bid bid = Bid.builder()</span>
+<span class="nc" id="L90">                .auction(auction)</span>
+<span class="nc" id="L91">                .bidderUserId(userId)</span>
+<span class="nc" id="L92">                .amount(bidAmount)</span>
+<span class="nc" id="L93">                .status(Bid.Status.PLACED)</span>
+<span class="nc" id="L94">                .createdAt(OffsetDateTime.now())</span>
+<span class="nc" id="L95">                .build();</span>
+<span class="nc" id="L96">        bidRepository.save(bid);</span>
+
+        // update auction
+<span class="nc" id="L99">        auction.setCurrentPrice(bidAmount);</span>
+<span class="nc" id="L100">        auction.setHighestBidderUserId(userId);</span>
+<span class="nc" id="L101">        auctionRepository.save(auction);</span>
+
+        // rebuild top 3
+<span class="nc" id="L104">        List&lt;Bid&gt; allBids = bidRepository.findAllByAuctionOrderByAmountDesc(auctionId);</span>
+<span class="nc" id="L105">        List&lt;AuctionUpdateMessageDTO.TopBidDTO&gt; top3 = IntStream.range(0, Math.min(3, allBids.size()))</span>
+<span class="nc" id="L106">                .mapToObj(i -&gt; new AuctionUpdateMessageDTO.TopBidDTO(</span>
+                        i + 1,
+<span class="nc" id="L108">                        allBids.get(i).getBidderUserId(),</span>
+<span class="nc" id="L109">                        allBids.get(i).getAmount()</span>
+                ))
+<span class="nc" id="L111">                .toList();</span>
+
+<span class="nc" id="L113">        AuctionUpdateMessageDTO message = new AuctionUpdateMessageDTO(</span>
+                &quot;BID_PLACED&quot;,
+                auctionId,
+<span class="nc" id="L116">                auction.getCurrentPrice(),</span>
+<span class="nc" id="L117">                auction.getHighestBidderUserId(),</span>
+                top3,
+                null
+        );
+
+        // broadcast to /topic/auction/{auctionId}
+<span class="nc" id="L123">        messagingTemplate.convertAndSend(&quot;/topic/auction/&quot; + auctionId, message);</span>
+<span class="nc" id="L124">    }</span>
+
+    // ============ START / END SCHEDULING ============================
+
+    @Override
+    @Transactional
+    public void startDueAuctions() {
+<span class="nc" id="L131">        OffsetDateTime now = OffsetDateTime.now();</span>
+<span class="nc" id="L132">        log.info(&quot;startDueAuctions at {}&quot;, now);</span>
+<span class="nc" id="L133">        List&lt;Auction&gt; toStart = auctionRepository.findByStatusAndStartTimeLessThanEqual(</span>
+                Auction.Status.SCHEDULED, now);
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (Auction a : toStart) {</span>
+<span class="nc" id="L137">            a.setStatus(Auction.Status.RUNNING);</span>
+            // ensure currentPrice initialized
+<span class="nc bnc" id="L139" title="All 2 branches missed.">            if (a.getCurrentPrice() == null) {</span>
+<span class="nc" id="L140">                a.setCurrentPrice(a.getStartPrice());</span>
+            }
+<span class="nc" id="L142">            auctionRepository.save(a);</span>
+
+<span class="nc" id="L144">            AuctionUpdateMessageDTO msg = new AuctionUpdateMessageDTO(</span>
+                    &quot;AUCTION_STARTED&quot;,
+<span class="nc" id="L146">                    a.getAuctionId(),</span>
+<span class="nc" id="L147">                    a.getCurrentPrice(),</span>
+<span class="nc" id="L148">                    a.getHighestBidderUserId(),</span>
+<span class="nc" id="L149">                    List.of(),</span>
+                    null
+            );
+<span class="nc" id="L152">            messagingTemplate.convertAndSend(&quot;/topic/auction/&quot; + a.getAuctionId(), msg);</span>
+<span class="nc" id="L153">        }</span>
+<span class="nc" id="L154">    }</span>
+
+    @Override
+    @Transactional
+    public void endDueAuctions() {
+<span class="nc" id="L159">        OffsetDateTime now = OffsetDateTime.now();</span>
+<span class="nc" id="L160">        log.info(&quot;endDueAuctions at {}&quot;, now);</span>
+<span class="nc" id="L161">        List&lt;Auction&gt; toEnd = auctionRepository.findExpiredAuctions(Auction.Status.RUNNING, now);</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        for (Auction a : toEnd) {</span>
+<span class="nc" id="L164">            a.setStatus(Auction.Status.ENDED);</span>
+<span class="nc" id="L165">            auctionRepository.save(a);</span>
+
+            // determine top3
+<span class="nc" id="L168">            List&lt;Bid&gt; allBids = bidRepository.findAllByAuctionOrderByAmountDesc(a.getAuctionId());</span>
+<span class="nc" id="L169">            List&lt;AuctionUpdateMessageDTO.TopBidDTO&gt; top3 = IntStream.range(0, Math.min(3, allBids.size()))</span>
+<span class="nc" id="L170">                    .mapToObj(i -&gt; new AuctionUpdateMessageDTO.TopBidDTO(</span>
+                            i + 1,
+<span class="nc" id="L172">                            allBids.get(i).getBidderUserId(),</span>
+<span class="nc" id="L173">                            allBids.get(i).getAmount()</span>
+                    ))
+<span class="nc" id="L175">                    .toList();</span>
+
+            // mark highest as WINNING_OFFER (if exists)
+<span class="nc" id="L178">            OffsetDateTime offerExpiresAt = null;</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            if (!allBids.isEmpty()) {</span>
+<span class="nc" id="L180">                Bid winner = allBids.get(0);</span>
+<span class="nc" id="L181">                winner.setStatus(Bid.Status.WINNING_OFFER);</span>
+<span class="nc" id="L182">                offerExpiresAt = OffsetDateTime.now().plusHours(24); // e.g. 24 hours</span>
+<span class="nc" id="L183">                winner.setOfferExpiresAt(offerExpiresAt);</span>
+<span class="nc" id="L184">                bidRepository.save(winner);</span>
+            }
+
+<span class="nc" id="L187">            AuctionUpdateMessageDTO msg = new AuctionUpdateMessageDTO(</span>
+                    &quot;AUCTION_ENDED&quot;,
+<span class="nc" id="L189">                    a.getAuctionId(),</span>
+<span class="nc" id="L190">                    a.getCurrentPrice(),</span>
+<span class="nc" id="L191">                    a.getHighestBidderUserId(),</span>
+                    top3,
+                    offerExpiresAt
+            );
+<span class="nc" id="L195">            messagingTemplate.convertAndSend(&quot;/topic/auction/&quot; + a.getAuctionId(), msg);</span>
+<span class="nc" id="L196">        }</span>
+<span class="nc" id="L197">    }</span>
+
+    // ============ PROCESS EXPIRED OFFERS (top3 fallback) ============
+
+    @Override
+    @Transactional
+    public void processExpiredOffers() {
+<span class="nc" id="L204">        OffsetDateTime now = OffsetDateTime.now();</span>
+
+        // find auctions which are ENDED and have some WINNING_OFFER that expired.
+<span class="nc" id="L207">        List&lt;Auction&gt; endedAuctions = auctionRepository.findByStatusAndEndTimeLessThanEqual(</span>
+                Auction.Status.ENDED, now);
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        for (Auction a : endedAuctions) {</span>
+            // expired current winning offer
+<span class="nc" id="L212">            List&lt;Bid&gt; expiredWinners = bidRepository.findExpiredOffers(</span>
+                    a, Bid.Status.WINNING_OFFER, now);
+
+<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (expiredWinners.isEmpty()) continue;</span>
+
+            // mark the existing winning offers as EXPIRED
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            for (Bid b : expiredWinners) {</span>
+<span class="nc" id="L219">                b.setStatus(Bid.Status.EXPIRED);</span>
+<span class="nc" id="L220">                bidRepository.save(b);</span>
+<span class="nc" id="L221">            }</span>
+
+            // find top bids again
+<span class="nc" id="L224">            List&lt;Bid&gt; allBids = bidRepository.findAllByAuctionOrderByAmountDesc(a.getAuctionId());</span>
+
+            // skip ones that are REJECTED/EXPIRED/ACCEPTED
+<span class="nc" id="L227">            List&lt;Bid&gt; candidates = allBids.stream()</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                    .filter(b -&gt; b.getStatus() == Bid.Status.PLACED)</span>
+<span class="nc" id="L229">                    .toList();</span>
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            if (candidates.isEmpty()) {</span>
+                // nobody left → mark auction COMPLETED unsold
+<span class="nc" id="L233">                a.setStatus(Auction.Status.COMPLETED);</span>
+<span class="nc" id="L234">                auctionRepository.save(a);</span>
+
+<span class="nc" id="L236">                AuctionUpdateMessageDTO msg = new AuctionUpdateMessageDTO(</span>
+                        &quot;UNSOLD&quot;,
+<span class="nc" id="L238">                        a.getAuctionId(),</span>
+<span class="nc" id="L239">                        a.getCurrentPrice(),</span>
+<span class="nc" id="L240">                        a.getHighestBidderUserId(),</span>
+<span class="nc" id="L241">                        List.of(),</span>
+                        null
+                );
+<span class="nc" id="L244">                messagingTemplate.convertAndSend(&quot;/topic/auction/&quot; + a.getAuctionId(), msg);</span>
+
+<span class="nc" id="L246">                continue;</span>
+            }
+
+            // next highest candidate becomes WINNING_OFFER
+<span class="nc" id="L250">            Bid newWinner = candidates.get(0);</span>
+<span class="nc" id="L251">            newWinner.setStatus(Bid.Status.WINNING_OFFER);</span>
+<span class="nc" id="L252">            OffsetDateTime newExpire = OffsetDateTime.now().plusHours(24);</span>
+<span class="nc" id="L253">            newWinner.setOfferExpiresAt(newExpire);</span>
+<span class="nc" id="L254">            bidRepository.save(newWinner);</span>
+
+            // top3 again
+<span class="nc" id="L257">            List&lt;AuctionUpdateMessageDTO.TopBidDTO&gt; top3 = IntStream.range(0, Math.min(3, allBids.size()))</span>
+<span class="nc" id="L258">                    .mapToObj(i -&gt; new AuctionUpdateMessageDTO.TopBidDTO(</span>
+                            i + 1,
+<span class="nc" id="L260">                            allBids.get(i).getBidderUserId(),</span>
+<span class="nc" id="L261">                            allBids.get(i).getAmount()</span>
+                    ))
+<span class="nc" id="L263">                    .toList();</span>
+
+<span class="nc" id="L265">            AuctionUpdateMessageDTO msg = new AuctionUpdateMessageDTO(</span>
+                    &quot;WINNER_CHANGED&quot;,
+<span class="nc" id="L267">                    a.getAuctionId(),</span>
+<span class="nc" id="L268">                    a.getCurrentPrice(),</span>
+<span class="nc" id="L269">                    newWinner.getBidderUserId(),</span>
+                    top3,
+                    newExpire
+            );
+<span class="nc" id="L273">            messagingTemplate.convertAndSend(&quot;/topic/auction/&quot; + a.getAuctionId(), msg);</span>
+<span class="nc" id="L274">        }</span>
+<span class="nc" id="L275">    }</span>
+
+    // ============ WINNER ACCEPT / REJECT ============================
+
+    @Override
+    @Transactional
+    public void winnerAccept(Long auctionId, Long userId) {
+<span class="nc" id="L282">        Auction auction = auctionRepository.findById(auctionId)</span>
+<span class="nc" id="L283">                .orElseThrow(() -&gt; new AuctionNotFoundException(&quot;Auction not found: &quot; + auctionId));</span>
+
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (auction.getStatus() != Auction.Status.ENDED) {</span>
+<span class="nc" id="L286">            throw new InvalidAuctionStateException(&quot;Auction is not in ENDED state&quot;);</span>
+        }
+
+        // find current winning offer
+<span class="nc" id="L290">        List&lt;Bid&gt; allBids = bidRepository.findAllByAuctionOrderByAmountDesc(auctionId);</span>
+<span class="nc" id="L291">        Bid winner = allBids.stream()</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                .filter(b -&gt; b.getStatus() == Bid.Status.WINNING_OFFER)</span>
+<span class="nc" id="L293">                .findFirst()</span>
+<span class="nc" id="L294">                .orElseThrow(() -&gt; new InvalidAuctionStateException(&quot;No active winning offer&quot;));</span>
+
+<span class="nc bnc" id="L296" title="All 2 branches missed.">        if (!winner.getBidderUserId().equals(userId)) {</span>
+<span class="nc" id="L297">            throw new InvalidBidException(&quot;This user is not the current winner&quot;);</span>
+        }
+
+<span class="nc" id="L300">        winner.setStatus(Bid.Status.ACCEPTED);</span>
+<span class="nc" id="L301">        bidRepository.save(winner);</span>
+
+        // mark auction as completed &amp; mark mobile SOLD
+<span class="nc" id="L304">        auction.setStatus(Auction.Status.COMPLETED);</span>
+<span class="nc" id="L305">        auctionRepository.save(auction);</span>
+
+<span class="nc" id="L307">        Mobile mobile = auction.getMobile();</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (mobile == null) {</span>
+<span class="nc" id="L309">            throw new MobileNotFoundException(&quot;Auction has no associated mobile&quot;);</span>
+        }
+
+<span class="nc" id="L312">        mobile.setStatus(Mobile.Status.SOLD);</span>
+<span class="nc" id="L313">        mobileRepository.save(mobile);</span>
+
+
+<span class="nc" id="L316">        AuctionUpdateMessageDTO msg = new AuctionUpdateMessageDTO(</span>
+                &quot;WINNER_ACCEPTED&quot;,
+                auctionId,
+<span class="nc" id="L319">                auction.getCurrentPrice(),</span>
+                userId,
+<span class="nc" id="L321">                List.of(),</span>
+                null
+        );
+<span class="nc" id="L324">        messagingTemplate.convertAndSend(&quot;/topic/auction/&quot; + auctionId, msg);</span>
+<span class="nc" id="L325">    }</span>
+
+    @Override
+    @Transactional
+    public void winnerReject(Long auctionId, Long userId) {
+<span class="nc" id="L330">        Auction auction = auctionRepository.findById(auctionId)</span>
+<span class="nc" id="L331">                .orElseThrow(() -&gt; new AuctionNotFoundException(&quot;Auction not found: &quot; + auctionId));</span>
+
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        if (auction.getStatus() != Auction.Status.ENDED) {</span>
+<span class="nc" id="L334">            throw new InvalidAuctionStateException(&quot;Auction is not in ENDED state&quot;);</span>
+        }
+
+<span class="nc" id="L337">        List&lt;Bid&gt; allBids = bidRepository.findAllByAuctionOrderByAmountDesc(auctionId);</span>
+<span class="nc" id="L338">        Bid winner = allBids.stream()</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                .filter(b -&gt; b.getStatus() == Bid.Status.WINNING_OFFER)</span>
+<span class="nc" id="L340">                .findFirst()</span>
+<span class="nc" id="L341">                .orElseThrow(() -&gt; new InvalidAuctionStateException(&quot;No active winning offer&quot;));</span>
+
+<span class="nc bnc" id="L343" title="All 2 branches missed.">        if (!winner.getBidderUserId().equals(userId)) {</span>
+<span class="nc" id="L344">            throw new InvalidBidException(&quot;This user is not the current winner&quot;);</span>
+        }
+
+<span class="nc" id="L347">        winner.setStatus(Bid.Status.REJECTED);</span>
+<span class="nc" id="L348">        bidRepository.save(winner);</span>
+
+        // now treat same as expired offer: try second highest
+        // you can just call processExpiredOffers() for this auction logic,
+        // but for simplicity call the logic inline or reuse.
+
+        // easiest: mark offerExpiresAt &lt; now and call processExpiredOffers() in single-thread.
+<span class="nc" id="L355">        winner.setOfferExpiresAt(OffsetDateTime.now().minusMinutes(1));</span>
+<span class="nc" id="L356">        bidRepository.save(winner);</span>
+<span class="nc" id="L357">        processExpiredOffers();  // will pick the next candidate</span>
+<span class="nc" id="L358">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

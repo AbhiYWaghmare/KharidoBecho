@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bike.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.Bike.Entity</a> &gt; <span class="el_source">Bike.java</span></div><h1>Bike.java</h1><pre class="source lang-java linenums">package com.spring.jwt.Bike.Entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.spring.jwt.entity.Seller;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(
+        name = &quot;bikes&quot;,
+        uniqueConstraints = {@UniqueConstraint(columnNames = &quot;registration_number&quot;)
+        }
+)
+<span class="pc bnc" id="L20" title="All 126 branches missed.">@Data</span>
+<span class="fc" id="L21">@NoArgsConstructor</span>
+<span class="nc" id="L22">@AllArgsConstructor</span>
+<span class="nc" id="L23">@Builder</span>
+@JsonIgnoreProperties(ignoreUnknown = false)
+public class Bike {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true)
+<span class="fc" id="L30">    private Long bike_id;  // Primary key</span>
+
+    @NotNull(message = &quot;Prize must not be null&quot;)
+    @Min(value = 100, message = &quot;Prize must be at least 100&quot;)
+<span class="fc" id="L34">    private Long prize;  // Price of the bike</span>
+
+    @NotBlank(message = &quot;Brand must not be blank&quot;)
+    @Size(max = 50, message = &quot;Brand must be at most 50 characters&quot;)
+    @Size(min = 3, message = &quot;Brand has minimum 3 letter &quot;)
+    @Pattern(regexp = &quot;^[A-Za-z0-9\\s]+$&quot;, message = &quot;Brand must contain only letters and spaces&quot;)
+<span class="fc" id="L40">    private String brand;</span>
+
+    @NotBlank(message = &quot;Model must not be blank&quot;)
+    @Size(max = 50, message = &quot;Model must be at most 50 characters&quot;)
+    @Pattern(regexp = &quot;^[A-Za-z0-9\\s-]+$&quot;, message = &quot;Model must contain only letters, numbers, spaces, or hyphens&quot;)
+<span class="fc" id="L45">    private String model;</span>
+
+    @NotBlank(message = &quot;Varient must not be blank&quot;)
+    @Size(max = 50, message = &quot;Variant must be at most 50 characters&quot;)
+    @Pattern(regexp = &quot;^[A-Za-z0-9\\s-]*$&quot;, message = &quot;Variant must contain only letters, numbers, spaces, or hyphens&quot;)
+<span class="fc" id="L50">    private String variant;</span>
+
+    @NotNull(message = &quot;Manufacture year is required&quot;)
+    @Digits(integer = 4, fraction = 0, message = &quot;Manufacture year must be a whole number (no decimals)&quot;)
+    @Min(value = 1900, message = &quot;Manufacture year must be after 1900&quot;)
+<span class="fc" id="L55">    private Integer manufactureYear;</span>
+
+    @Min(value = 50, message = &quot;Engine CC must be at least 50&quot;)
+    @Max(value = 3000, message = &quot;Engine CC must be at most 3000&quot;)
+<span class="fc" id="L59">    private Integer engineCC;</span>
+
+    @Min(value = 0, message = &quot;Kilometers driven must be greater than zero&quot;)
+<span class="fc" id="L62">    private Integer kilometersDriven;</span>
+
+    @NotNull(message = &quot;Fuel type must not be blank&quot;)
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;fuel_type&quot;)
+<span class="fc" id="L67">    private FuelType fuelType;</span>
+
+
+    @NotBlank(message = &quot;Colour must not be blank &quot;)
+    @Size(max = 20, message = &quot;Color must be at most 20 characters&quot;)
+    @Size(min = 3, message = &quot;Colour has minimum 3 letter &quot;)
+    @Pattern(regexp = &quot;^[A-Za-z\\s]+$&quot;, message = &quot;Color must contain only letters and spaces&quot;)
+<span class="fc" id="L74">    private String color;</span>
+
+    @Column(unique = true)
+    @NotBlank(message = &quot;Registration number must not be blank&quot;)
+    @Pattern(regexp = &quot;^[A-Z0-9\\s]+$&quot;, message = &quot;registration number must contain only letters and number&quot;)
+<span class="fc" id="L79">    private String registrationNumber;</span>
+
+    @NotBlank(message =&quot;Description Must not be Blank&quot;)
+    @Size(max = 500, message = &quot;Description must be at most 500 characters&quot;)
+    @Size(min = 10,message = &quot;Description have at least 10 characters &quot;)
+<span class="fc" id="L84">    private String description;</span>
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;seller_id&quot;, nullable = false)
+    @JsonIgnore
+<span class="fc" id="L90">    private Seller seller;</span>
+
+<span class="pc" id="L92">@OneToMany(mappedBy = &quot;bike&quot;, cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)</span>
+@JsonManagedReference
+<span class="fc" id="L94">private List&lt;BikeImage&gt; images = new ArrayList&lt;&gt;();</span>
+
+    @NotNull(message = &quot;Bike status must not be null&quot;)
+    @Enumerated(EnumType.STRING)
+<span class="fc" id="L98">    private bikeStatus status; // only ACTIVE, INACTIVE, DELETED</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

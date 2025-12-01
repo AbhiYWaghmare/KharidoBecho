@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LaptopController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.laptop.controller</a> &gt; <span class="el_source">LaptopController.java</span></div><h1>LaptopController.java</h1><pre class="source lang-java linenums">package com.spring.jwt.laptop.controller;
+
+import com.spring.jwt.entity.Status;
+import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
+import com.spring.jwt.laptop.dto.LaptopRequestDTO;
+import com.spring.jwt.laptop.dto.LaptopResponseDTO;
+import com.spring.jwt.laptop.entity.Laptop;
+import com.spring.jwt.laptop.entity.LaptopBooking;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
+import com.spring.jwt.laptop.repository.LaptopRepository;
+import com.spring.jwt.laptop.service.LaptopService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+//********************************************************//
+
+    //Author : Sudhir Lokade
+    //Laptop Controller
+    //Date : 22/09/2025
+
+//*******************************************************//
+
+@RestController
+@RequestMapping(&quot;/api/laptops&quot;)
+<span class="nc" id="L38">@RequiredArgsConstructor</span>
+public class LaptopController {
+    private final LaptopRepository laptopRepository;
+    private final LaptopService laptopService;
+    LaptopBooking booking;
+<span class="nc" id="L43">    LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO();</span>
+
+
+
+    //====================================================//
+    //  Create Laptop                                     //
+    //  Post /api/laptops/create                          //
+    //====================================================//
+    @PostMapping(&quot;/create&quot;)
+    public ResponseEntity&lt;LaptopResponseDTO&gt; create(@Valid @RequestBody LaptopRequestDTO laptopRequestDTO, HttpServletRequest request){
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (laptopRepository.existsBySerialNumber(laptopRequestDTO.getSerialNumber())) {</span>
+<span class="nc" id="L54">            throw new LaptopAlreadyExistsException(</span>
+<span class="nc" id="L55">                    &quot;Laptop with serial number &quot; + laptopRequestDTO.getSerialNumber() + &quot; already exists&quot;</span>
+            );
+        }
+
+<span class="nc" id="L59">        Laptop laptop = laptopService.create(laptopRequestDTO);</span>
+<span class="nc" id="L60">        String apiPath = request.getRequestURI();</span>
+//        String imageUrl = laptopPhotos.getPhoto_link();
+<span class="nc" id="L62">        Long laptopId = laptop.getId();</span>
+//        Long bookingId = booking.getLaptopBookingId();
+
+<span class="nc" id="L65">       return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L66">               .body(new LaptopResponseDTO(&quot;success&quot;,&quot;Laptop added successfully with id &quot; +laptop.getId(),&quot;CREATED&quot;,200, LocalDateTime.now(),&quot;NULL&quot;, apiPath,laptopResponseDTO.getImageUrl(),laptopId));</span>
+    }  
+
+    //====================================================//
+    //  Update Laptop                                     //
+    //  Patch /api/laptops/update                         //
+    //====================================================//
+    @PatchMapping(&quot;/update&quot;)
+    public ResponseEntity&lt;LaptopResponseDTO&gt; update(
+            @RequestParam Long laptopId,
+            @RequestBody LaptopRequestDTO requestDTO,
+            HttpServletRequest request) {
+
+
+<span class="nc" id="L80">            Laptop laptop = laptopService.update(laptopId, requestDTO);</span>
+<span class="nc" id="L81">            String apiPath = request.getRequestURI();</span>
+//            String imageUrl = laptopPhotos.getPhoto_link();
+<span class="nc" id="L83">            Long laptop_Id = laptop.getId();</span>
+//            Long bookingId = booking.getLaptopBookingId();
+<span class="nc" id="L85">            return ResponseEntity.ok(new LaptopResponseDTO(&quot;success&quot;,&quot;Laptop updated successfully with id &quot; +laptop.getId() ,&quot;UPDATED&quot;,200, LocalDateTime.now(),&quot;NULL&quot;, apiPath, laptopResponseDTO.getImageUrl(),laptop_Id));</span>
+    }
+
+    //====================================================//
+    //  Get All Laptops                                   //
+    //  Get /api/laptops/getAll                           //
+    //====================================================//
+    @GetMapping(&quot;/getAll&quot;)
+    public ResponseEntity&lt;List&lt;Laptop&gt;&gt; getAllLaptops() {
+<span class="nc" id="L94">        List&lt;Laptop&gt; laptops = laptopService.getAllLaptops();</span>
+<span class="nc" id="L95">        return ResponseEntity.ok(laptops);</span>
+    }
+
+    //====================================================//
+    //  Get Laptop By Id                                  //
+    //  Get /api/laptops/getById                          //
+    //====================================================//
+    @GetMapping(&quot;/getById&quot;)
+    public ResponseEntity&lt;Laptop&gt; getLaptopById(@RequestParam Long laptop_id) {
+<span class="nc" id="L104">        return ResponseEntity.ok(laptopService.getById(laptop_id));</span>
+    }
+
+
+    //====================================================//
+    //  Delete Laptop By Id(soft/hard)                    //
+    //  Delete /api/laptops/delete?laptopId={}&amp;type={}    //
+    //====================================================//
+    @DeleteMapping(&quot;/delete&quot;)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; deleteLaptopById(@RequestParam @Min(1) Long laptopId) {
+<span class="nc" id="L114">        String message = laptopService.deleteLaptopById(laptopId);</span>
+<span class="nc" id="L115">        return ResponseEntity.ok(Map.of(</span>
+                &quot;message&quot;, message,
+                &quot;status&quot;, &quot;success&quot;
+        ));
+    }
+
+
+    //====================================================//
+    //  Get Laptop By dealerId and Status                 //
+    //  Get /api/laptops/getByDealerIdAndStatus           //
+    //====================================================//
+    @GetMapping(&quot;/getByDealerIdAndStatus&quot;)
+    public ResponseEntity&lt;Page&lt;Laptop&gt;&gt; getLaptopsByDealerIdAndStatus(
+            @RequestParam Long sellerId,
+            @RequestParam Status status,
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;10&quot;) int size,
+            @RequestParam(defaultValue = &quot;id&quot;) String sortBy){
+
+<span class="nc" id="L134">        Page&lt;Laptop&gt; laptops = laptopService.getBySellerIdAndStatus(sellerId,status,page,size,sortBy);</span>
+<span class="nc" id="L135">        return ResponseEntity.ok((laptops));</span>
+    }
+
+
+    //====================================================//
+    //  Get Laptop By status only                         //
+    //  Get /api/laptops/getByStatus                      //
+    //====================================================//
+//    @GetMapping(&quot;/getByStatus&quot;)
+//    public ResponseEntity&lt;Page&lt;Laptop&gt;&gt; getLaptopByStatus(
+//            @RequestParam Status status,
+//            @RequestParam (defaultValue = &quot;0&quot;) int page,
+//            @RequestParam(defaultValue = &quot;10&quot;) int size,
+//            @RequestParam(defaultValue = &quot;id&quot;) String sortBy) {
+//
+//        Page&lt;Laptop&gt; laptops = laptopService.getByStatus(status,page,size,sortBy);
+//        return  ResponseEntity.ok(laptops);
+//    }
+
+
+    //====================================================//
+    //  Get Count of Laptop                               //
+    //  Get /api/laptops/getCountByDealerIdAndStatus      //
+    //====================================================//
+    @GetMapping(&quot;/getCountByDealerIdAndStatus&quot;)
+    public ResponseEntity&lt;Map&lt;String,Object&gt;&gt; countBySellerIdAndStatus(
+            @RequestParam Long sellerId,
+            @RequestParam Status status){
+
+<span class="nc" id="L164">        Long count = laptopService.countBySellerIdAndStatus(sellerId,status);</span>
+<span class="nc" id="L165">        Map&lt;String, Object&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L166">        response.put(&quot;message&quot;, &quot;Number of laptops for dealer &quot; + sellerId + &quot; with status &quot; + status);</span>
+<span class="nc" id="L167">        response.put(&quot;count&quot;, count);</span>
+<span class="nc" id="L168">        return ResponseEntity.ok(response);</span>
+    }
+
+    //====================================================//
+//  Get All Laptops By SellerId (Unified API)         //
+//  GET /api/laptops/getAllBySellerId                 //
+//====================================================//
+    @GetMapping(&quot;/getAllBySellerId&quot;)
+    public ResponseEntity&lt;Page&lt;Laptop&gt;&gt; getAllBySellerId(
+            @RequestParam Long sellerId,
+            @RequestParam(defaultValue = &quot;0&quot;) int page,
+            @RequestParam(defaultValue = &quot;50&quot;) int size,
+            @RequestParam(defaultValue = &quot;id&quot;) String sortBy) {
+
+<span class="nc" id="L182">        Page&lt;Laptop&gt; laptops = laptopService.getAllBySellerId(sellerId, page, size, sortBy);</span>
+<span class="nc" id="L183">        return ResponseEntity.ok(laptops);</span>
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
