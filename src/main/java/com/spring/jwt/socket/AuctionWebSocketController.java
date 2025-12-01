@@ -52,6 +52,8 @@ public class AuctionWebSocketController {
     // you can keep your bid/auction mappings here too if you want
 
     // Client sends: /app/auction/{auctionId}/bid
+
+
     @MessageMapping("/auction/{auctionId}/bid")
     public void placeBid(@DestinationVariable Long auctionId,
                          @Payload BidMessageDTO bidMessage) {
@@ -67,4 +69,5 @@ public class AuctionWebSocketController {
 
         auctionService.placeBid(auctionId, userId, amount);
     }
+
 }
