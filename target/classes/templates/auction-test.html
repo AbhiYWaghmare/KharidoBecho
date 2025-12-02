@@ -253,19 +253,16 @@
 <div id="status">Status: DISCONNECTED</div>
 
 <fieldset>
-<<<<<<< HEAD
     <legend>WebSocket Connection</legend>
     WebSocket URL:
     <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction" style="width:300px;">
-=======
     <legend>1. Connect</legend>
-    <div>
-        <label>WS Endpoint:</label>
-        <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">
-        <span>(SockJS URL)</span>
-    </div>
+<!--    <div>-->
+<!--        <label>WS Endpoint:</label>-->
+<!--        <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">-->
+<!--        <span>(SockJS URL)</span>-->
+<!--    </div>-->
     <!--  removed JWT token field completely -->
->>>>>>> 01ea4c53a85d91cb18d057fa94fe40b02c043f8b
     <button onclick="connect()">Connect</button>
     <button onclick="disconnect()">Disconnect</button>
 </fieldset>
@@ -330,9 +327,8 @@
 
     // CONNECT --------------------------------------------------------------
     function connect() {
-<<<<<<< HEAD
+
         const socket = new SockJS(document.getElementById("wsUrl").value);
-=======
         const baseUrl = document.getElementById('wsUrl').value.trim();
 
         if (!baseUrl) {
@@ -346,7 +342,6 @@
         log('Connecting to: ' + fullUrl);
 
         const socket = new SockJS(fullUrl);
->>>>>>> 01ea4c53a85d91cb18d057fa94fe40b02c043f8b
         stompClient = Stomp.over(socket);
         stompClient.debug = null;
 
@@ -431,11 +426,9 @@
         const destination = `/app/laptop/auction/${auctionId}/bid`;
 
         const payload = {
-<<<<<<< HEAD
             userId: Number(userId),
-=======
+
             userId: Number(userId),      //  send userId
->>>>>>> 01ea4c53a85d91cb18d057fa94fe40b02c043f8b
             auctionId: Number(auctionId),
             bidAmount: Number(amount)
         };
