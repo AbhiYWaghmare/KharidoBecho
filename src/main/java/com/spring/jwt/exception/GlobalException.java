@@ -5,6 +5,7 @@ package com.spring.jwt.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.spring.jwt.exception.bookings.LaptopRequestException;
+import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
 import com.spring.jwt.exception.colour.ColourNotFoundException;
 //import com.spring.jwt.laptop.dto.AuctionErrReponse;
@@ -337,6 +338,8 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     }
 
 
+    // ========================= LAPTOP EXCEPTIONS ========================= //
+
     @ExceptionHandler(LaptopAlreadyExistsException.class)
     public ResponseEntity<LaptopResponseDTO> handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
                                                                       WebRequest request) {
@@ -408,6 +411,7 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(ValidationException.class)
     public ResponseEntity<LaptopResponseDTO> handleValidationException(ValidationException ex, WebRequest webRequest){
         LaptopResponseDTO error = new LaptopResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
@@ -464,6 +468,21 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(LaptopRequestNotFoundException.class)
+    public ResponseEntity<LaptopErrorResponse> handleLaptopRequestNotFoundException(LaptopRequestNotFoundException ex, WebRequest request) {
+        LaptopErrorResponse error = new LaptopErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatus("error");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setApiPath(request.getDescription(false).replace("uri=", ""));
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(ColourAlreadyExistsException.class)
     public ResponseEntity<ColourResponseDTO> handleColourAlreadyExistsException(ColourAlreadyExistsException ex,WebRequest request) {
         ColourResponseDTO error = new ColourResponseDTO();
@@ -486,48 +505,6 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
-
-
-//    @ExceptionHandler(AuctionException.class)
-//    public ResponseEntity<AuctionErrReponse> handleAuctionException(AuctionException ex,WebRequest request){
-//        AuctionErrReponse error = new AuctionErrReponse();
-//        error.setApiPath(request.getDescription(false).replace("uri",""));
-//        error.setStatus("error");
-//        error.setMessage(ex.getMessage());
-//        error.setCode("NOT_FOUND");
-//        error.setStatusCode(HttpStatus.NOT_FOUND.value());
-//        error.setTimeStamp(LocalDateTime.now());
-//        error.setException(ex.toString());
-//
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-//    }
-
-//    @ExceptionHandler(HttpMessageNotReadableException.class)
-//    public ResponseEntity<Object> handleInvalidDateFormat(HttpMessageNotReadableException ex) {
-//        // Check if Jackson failed to parse a LocalDate
-//        Throwable cause = ex.getCause();
-//        if (cause instanceof InvalidFormatException invalidFormatException &&
-//                invalidFormatException.getTargetType() == LocalDate.class) {
-//
-//            return ResponseEntity
-//                    .status(HttpStatus.BAD_REQUEST)
-//                    .body(Map.of(
-//                            "error", "Invalid date format",
-//                            "message", "Please use date format yyyy-MM-dd (e.g. 2025-11-13)",
-//                            "status", HttpStatus.BAD_REQUEST.value()
-//                    ));
-//        }
-
-//        // Default fallback for other parse issues
-//        return ResponseEntity
-//                .status(HttpStatus.BAD_REQUEST)
-//                .body(Map.of(
-//                        "error", "Invalid request",
-//                        "message", "Malformed JSON or invalid data format",
-//                        "status", HttpStatus.BAD_REQUEST.value()
-//                ));
-//    }
-
 
 
     //Mobile Exception Handler
