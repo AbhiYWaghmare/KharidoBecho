@@ -3,7 +3,7 @@ package com.spring.jwt.car.controller;
 import com.spring.jwt.car.dto.CarCreateResponseDTO;
 import com.spring.jwt.car.dto.CarRequestDTO;
 import com.spring.jwt.car.dto.CarResponseDTO;
-import com.spring.jwt.car.service.CarService;
+import com.spring.jwt.car.services.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

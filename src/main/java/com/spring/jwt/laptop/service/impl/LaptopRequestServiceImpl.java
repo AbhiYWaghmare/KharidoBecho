@@ -262,11 +262,23 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
     }
 
     private LaptopRequestResponseDTO toResponse(LaptopBooking r) {
+
+        // Buyer User
+        User buyerUser = r.getBuyer().getUser();
+        String buyerName = buyerUser.getFirstName() + " " + buyerUser.getLastName();
+
+        // Seller User
+        User sellerUser = r.getSeller().getUser();
+        String sellerName = sellerUser.getFirstName() + " " + sellerUser.getLastName();
+
+
         return LaptopRequestResponseDTO.builder()
                 .laptopBookingId(r.getLaptopBookingId())
                 .laptopId(r.getLaptop().getId())
                 .buyerId(r.getBuyer().getBuyerId())
                 .sellerId(r.getSeller().getSellerId())
+                .buyerName(buyerName)
+                .sellerName(sellerName)
                 .status(r.getPendingStatus().name())
                 .conversationJson(r.getRequestConversation())
                 .createdAt(r.getCreatedAt())

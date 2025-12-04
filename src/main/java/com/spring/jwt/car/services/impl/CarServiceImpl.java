@@ -23,7 +23,7 @@ import java.time.Year;
 
 @Service
 @RequiredArgsConstructor
-public class CarServiceImpl implements com.spring.jwt.car.service.CarService {
+public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
 
     private final CarRepository carRepository;
     private final SellerRepository sellerRepository;
