@@ -253,19 +253,11 @@
 <div id="status">Status: DISCONNECTED</div>
 
 <fieldset>
-<<<<<<< HEAD
-    <legend>WebSocket Connection</legend>
-    WebSocket URL:
-    <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction" style="width:300px;">
-=======
-    <legend>1. Connect</legend>
     <div>
         <label>WS Endpoint:</label>
         <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">
-        <span>(SockJS URL)</span>
     </div>
-    <!--  removed JWT token field completely -->
->>>>>>> 01ea4c53a85d91cb18d057fa94fe40b02c043f8b
+
     <button onclick="connect()">Connect</button>
     <button onclick="disconnect()">Disconnect</button>
 </fieldset>
@@ -330,23 +322,17 @@
 
     // CONNECT --------------------------------------------------------------
     function connect() {
-<<<<<<< HEAD
-        const socket = new SockJS(document.getElementById("wsUrl").value);
-=======
-        const baseUrl = document.getElementById('wsUrl').value.trim();
+
+        const baseUrl = document.getElementById("wsUrl").value.trim();
 
         if (!baseUrl) {
             alert('Please enter WebSocket URL');
             return;
         }
 
-        //  No token, just plain SockJS URL
-        const fullUrl = baseUrl;
+        log('Connecting to: ' + baseUrl);
 
-        log('Connecting to: ' + fullUrl);
-
-        const socket = new SockJS(fullUrl);
->>>>>>> 01ea4c53a85d91cb18d057fa94fe40b02c043f8b
+        const socket = new SockJS(baseUrl);
         stompClient = Stomp.over(socket);
         stompClient.debug = null;
 
@@ -354,21 +340,25 @@
             setStatus("CONNECTED");
             log("Connected: " + frame);
 
-
             subscribeLiveAuctions();
 
         }, error => {
             setStatus("ERROR");
-            log("Error: " + error);
+            log("Connection error: " + error);
         });
     }
 
     function disconnect() {
-        if (stompClient) stompClient.disconnect(() => setStatus("DISCONNECTED"));
+        if (stompClient) stompClient.disconnect(() => {
+            setStatus("DISCONNECTED");
+            log("Disconnected");
+        });
     }
 
     // LIVE AUCTION LISTENER -----------------------------------------------
     function subscribeLiveAuctions() {
+        if (!stompClient) return log("Connect first!");
+
         const topic = "/topic/laptop-auctions/live";
         log("Listening for LIVE auctions at " + topic);
 
@@ -415,6 +405,8 @@
 
     // MANUAL AUCTION SUBSCRIBE --------------------------------------------
     function subscribeAuction() {
+        if (!stompClient) return log("Connect first!");
+
         const id = document.getElementById("auctionId").value;
         const topic = `/topic/laptop-auction/${id}`;
         log("Subscribing to " + topic);
@@ -424,28 +416,28 @@
 
     // SEND BID -------------------------------------------------------------
     function sendBid() {
-        const auctionId = document.getElementById("auctionId").value;
-        const userId = document.getElementById("userId").value;
-        const amount = document.getElementById("bidAmount").value;
+        if (!stompClient) return log("Connect first!");
+
+        const auctionId = Number(document.getElementById("auctionId").value);
+        const userId = Number(document.getElementById("userId").value);
+        const amount = Number(document.getElementById("bidAmount").value);
 
         const destination = `/app/laptop/auction/${auctionId}/bid`;
 
         const payload = {
-<<<<<<< HEAD
-            userId: Number(userId),
-=======
-            userId: Number(userId),      //  send userId
->>>>>>> 01ea4c53a85d91cb18d057fa94fe40b02c043f8b
-            auctionId: Number(auctionId),
-            bidAmount: Number(amount)
+            userId: userId,
+            auctionId: auctionId,
+            bidAmount: amount
         };
 
         log("Sending BID → " + JSON.stringify(payload));
         stompClient.send(destination, {}, JSON.stringify(payload));
     }
 
-    // CHAT ----------------------------------------------------------------
+    // CHAT -----------------------------------------------------------------
     function subscribeChat() {
+        if (!stompClient) return log("Connect first!");
+
         const id = document.getElementById("requestId").value;
         const topic = `/topic/laptop/chat/${id}`;
         log("Subscribing chat: " + topic);
@@ -454,6 +446,8 @@
     }
 
     function sendChat() {
+        if (!stompClient) return log("Connect first!");
+
         const id = document.getElementById("requestId").value;
         const destination = `/app/laptop/chat/${id}/send`;
 
