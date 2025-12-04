@@ -13,7 +13,9 @@ public class LaptopRequestResponseDTO {
     private Long laptopBookingId;
     private Long laptopId;
     private Long buyerId;
+    private String buyerName;
     private Long sellerId;
+    private String sellerName;
     private String status;
     private String conversationJson;
     private OffsetDateTime createdAt;
