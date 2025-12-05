@@ -11,6 +11,7 @@ import com.spring.jwt.car.entity.CarImage;
 //import com.spring.jwt.car.entity.CarImage;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class CarMapper {
@@ -69,11 +70,14 @@ public class CarMapper {
 //    }
 
         dto.setImages(
-                car.getImages().stream()
+                Optional.ofNullable(car.getImages())
+                        .orElse(Collections.emptyList())
+                        .stream()
                         .map(CarMapper::toImageDTO)
                         .collect(Collectors.toList())
         );
         return dto;
+
     }
 
     private static CarImageDTO toImageDTO(CarImage image) {
