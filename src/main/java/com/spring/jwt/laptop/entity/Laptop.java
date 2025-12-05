@@ -92,18 +92,17 @@ public class Laptop {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
     private Seller seller;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
+//    @JsonIgnore
+    @OneToMany(mappedBy = "laptop", fetch = FetchType.EAGER)
     private List<LaptopPhotos> laptopPhotos;
 
 
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<LaptopBooking> bookings = new ArrayList<>();
 
 

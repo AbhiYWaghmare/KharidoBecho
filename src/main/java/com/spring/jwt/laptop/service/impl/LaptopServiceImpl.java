@@ -148,8 +148,13 @@ public class LaptopServiceImpl implements LaptopService {
     }
 
     public List<Laptop> getAllLaptops() {
+        List<Laptop> laptops = laptopRepository.findAll();
 
-        return laptopRepository.findAll();
+        if (laptops.isEmpty()) {
+            throw new LaptopNotFoundException("No laptops found");
+        }
+
+        return laptops;
     }
 
 
