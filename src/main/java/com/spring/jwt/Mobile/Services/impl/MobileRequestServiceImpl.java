@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.spring.jwt.Mobile.Mapper.MobileMapper;
 import com.spring.jwt.Mobile.entity.ConversationMessage;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -106,6 +108,16 @@ public class MobileRequestServiceImpl implements MobileRequestService {
         return requestRepo.findByBuyer_BuyerId(buyerId).stream()
                 .map(this::toResponse).toList();
     }
+
+//    @Override
+//    public List<MobileRequestDTO> getRequestsBySeller(Long sellerId) {
+//        List<MobileRequest> requests = MobileRequestRepository.findBySellerIdOrderByCreatedAtDesc(sellerId);
+//
+//        return requests.stream()
+//                .map(MobileMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
+
 
     @Override
     @Transactional
@@ -215,16 +227,35 @@ public class MobileRequestServiceImpl implements MobileRequestService {
     private void appendMessageInternal(MobileRequest req, Long senderId, String senderType, String text) {
         try {
             List<ConversationMessage> msgs = objectMapper.readValue(
-                    req.getConversation(), new TypeReference<List<ConversationMessage>>() {
-                    });
+                    req.getConversation(), new TypeReference<List<ConversationMessage>>() {}
+            );
             if (msgs == null) msgs = new ArrayList<>();
-            ConversationMessage cm = new ConversationMessage(senderId, senderType, text, OffsetDateTime.now());
+
+            // ⭐ Fetch sender user to get the full name
+            User sender = userRepo.findById(senderId)
+                    .orElseThrow(() -> new MobileRequestException("Sender user not found: " + senderId));
+
+            String senderName =
+                    (sender.getFirstName() == null ? "" : sender.getFirstName()) + " " +
+                            (sender.getLastName() == null ? "" : sender.getLastName());
+
+            // ⭐ Create message with senderName included
+            ConversationMessage cm = new ConversationMessage();
+            cm.setSenderId(senderId);
+            cm.setSenderType(senderType);
+            cm.setMessage(text);
+            cm.setTimestamp(OffsetDateTime.now());
+            cm.setSenderName(senderName.trim());
+
             msgs.add(cm);
+
             req.setConversation(objectMapper.writeValueAsString(msgs));
+
         } catch (Exception e) {
             throw new MobileRequestException("Failed to append message", e);
         }
     }
+
 
     private String determineSenderType(Long senderUserId, MobileRequest req) {
         try {
@@ -261,6 +292,25 @@ public class MobileRequestServiceImpl implements MobileRequestService {
         dto.setMobileId(req.getMobile().getMobileId());
         dto.setBuyerId(req.getBuyer().getBuyerId());
         dto.setSellerId(req.getSeller().getSellerId());
+
+        // buyer name from Buyer → User
+        if (req.getBuyer() != null && req.getBuyer().getUser() != null) {
+            var u = req.getBuyer().getUser();
+            String fullName = (u.getFirstName() != null ? u.getFirstName() : "") +
+                    " " +
+                    (u.getLastName() != null ? u.getLastName() : "");
+            dto.setBuyerName(fullName.trim());
+        }
+
+        // seller name from Seller → User
+        if (req.getSeller() != null && req.getSeller().getUser() != null) {
+            var u = req.getSeller().getUser();
+            String fullName = (u.getFirstName() != null ? u.getFirstName() : "") +
+                    " " +
+                    (u.getLastName() != null ? u.getLastName() : "");
+            dto.setSellerName(fullName.trim());
+        }
+
         dto.setStatus(req.getStatus().name());
         dto.setCreatedAt(req.getCreatedAt());
         dto.setUpdatedAt(req.getUpdatedAt());
