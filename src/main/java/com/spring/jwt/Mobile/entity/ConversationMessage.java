@@ -14,4 +14,5 @@ public class ConversationMessage {
     private String senderType;           // "BUYER" or "SELLER"
     private String message;
     private OffsetDateTime timestamp;
+    private String senderName;
 }
