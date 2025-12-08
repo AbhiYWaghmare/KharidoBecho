@@ -20,6 +20,7 @@ public class LaptopAuction {
         SCHEDULED,
         RUNNING,
         ENDED,
+
         COMPLETED,
         CANCELLED
     }

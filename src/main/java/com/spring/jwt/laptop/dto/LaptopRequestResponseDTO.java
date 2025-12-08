@@ -2,6 +2,7 @@ package com.spring.jwt.laptop.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import java.util.List;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ public class LaptopRequestResponseDTO {
     private Long sellerId;
     private String sellerName;
     private String status;
-    private String conversationJson;
+    private List<ConversationMessageDTO> conversation;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private LocalDate bookingDate;

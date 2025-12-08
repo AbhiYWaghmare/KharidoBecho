@@ -19,4 +19,8 @@ public interface LaptopRequestService {
     LaptopRequestResponseDTO updateRequestStatus(Long requestId, String status);
     LaptopRequestResponseDTO appendMessage(Long requestId, Long senderUserId, String message);
     void markRequestCompletedAndMarkSold(Long requestId);
+
+    LaptopRequestResponseDTO getRequestById(Long requestId);
+
+    boolean userExists(Long senderId);
 }

@@ -271,6 +271,19 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         User sellerUser = r.getSeller().getUser();
         String sellerName = sellerUser.getFirstName() + " " + sellerUser.getLastName();
 
+        List<ConversationMessageDTO> conversationList = new ArrayList<>();
+        try {
+            if (r.getRequestConversation() != null) {
+                conversationList = objectMapper.readValue(
+                        r.getRequestConversation(),
+                        new TypeReference<List<ConversationMessageDTO>>() {}
+                );
+            }
+        } catch (Exception e) {
+            throw new LaptopRequestException("Failed to parse conversation JSON");
+        }
+
+
 
         return LaptopRequestResponseDTO.builder()
                 .laptopBookingId(r.getLaptopBookingId())
@@ -280,10 +293,59 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                 .buyerName(buyerName)
                 .sellerName(sellerName)
                 .status(r.getPendingStatus().name())
-                .conversationJson(r.getRequestConversation())
+                .conversation(conversationList)
                 .createdAt(r.getCreatedAt())
                 .bookingDate(r.getOnDate())
                 .build();
     }
+
+    @Override
+    public LaptopRequestResponseDTO getRequestById(Long requestId) {
+
+        LaptopBooking entity = requestRepo.findById(requestId)
+                .orElseThrow(() -> new LaptopRequestNotFoundException(requestId));
+
+        List<ConversationMessageDTO> conversationList = new ArrayList<>();
+        try {
+            if (entity.getRequestConversation() != null) {
+                conversationList = objectMapper.readValue(
+                        entity.getRequestConversation(),
+                        new TypeReference<List<ConversationMessageDTO>>() {}
+                );
+            }
+        } catch (Exception e) {
+            throw new LaptopRequestException("Failed to parse conversation JSON");
+        }
+
+
+        return LaptopRequestResponseDTO.builder()
+                .laptopBookingId(entity.getLaptopBookingId())
+//                .laptopId(entity.getLaptop().getLaptopId())
+                .buyerId(entity.getBuyer().getBuyerId())
+//                .buyerName(entity.getBuyer().getFullName())
+                .sellerId(entity.getSeller().getSellerId())
+//                .sellerName(entity.getSeller().getFullName())
+                .status(entity.getPendingStatus().name())
+                .conversation(conversationList)
+                // FIXED OFFSET CONVERSION FOR LocalDate
+                .bookingDate(entity.getOnDate() != null
+                        ? entity.getOnDate().atStartOfDay()
+                        .atOffset(OffsetDateTime.now().getOffset()).toLocalDate()
+                        : null)
+
+                // Already OffsetDateTime → safe to assign
+                .createdAt(entity.getCreatedAt())
+
+                .build();
+    }
+
+
+
+    @Override
+    public boolean userExists(Long userId) {
+        return userRepo.existsById(userId);
+    }
+
+
 
 }
