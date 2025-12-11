@@ -23,4 +23,7 @@ public interface LaptopRequestService {
     LaptopRequestResponseDTO getRequestById(Long requestId);
 
     boolean userExists(Long senderId);
+
+    List<LaptopRequestResponseDTO> listRequestsForSeller(Long sellerId);
+
 }

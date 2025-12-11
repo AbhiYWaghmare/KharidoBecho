@@ -19,6 +19,7 @@ public class SocketIOConfig {
     private Integer port;
 
     @Value("${socketio.bossCount:1}")
+
     private Integer bossCount;
 
     @Value("${socketio.workCount:4}")
