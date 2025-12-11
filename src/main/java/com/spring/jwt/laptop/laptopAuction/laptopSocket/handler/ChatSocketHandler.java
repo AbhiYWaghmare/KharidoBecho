@@ -46,16 +46,23 @@ public class ChatSocketHandler {
                 return;
             }
 
-            // -------------------------------------------
             // Validate user belongs to this request (buyer or seller)
-            // -------------------------------------------
-            if (!senderId.equals(existingRequest.getBuyerId()) &&
-                    !senderId.equals(existingRequest.getSellerId())) {
+            boolean allowed =
+                    senderId.equals(existingRequest.getBuyerId()) ||
+                            senderId.equals(existingRequest.getSellerId());
 
+// Backward compatibility: allow users that already appear in conversation history
+            if (!allowed && existingRequest.getConversation() != null) {
+                allowed = existingRequest.getConversation().stream()
+                        .anyMatch(c -> c.getSenderId().equals(senderId));
+            }
+
+            if (!allowed) {
                 log.error("Chat failed: User {} is not part of request {}", senderId, requestId);
                 client.sendEvent("chat_error", "You are not allowed to chat in this request.");
                 return;
             }
+
 
             // -------------------------------------------
             // Save chat and broadcast

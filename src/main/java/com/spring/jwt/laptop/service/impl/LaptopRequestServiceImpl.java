@@ -10,6 +10,7 @@ import com.spring.jwt.entity.Status;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.exception.bookings.LaptopRequestException;
 import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
+import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.laptop.dto.*;
 import com.spring.jwt.laptop.entity.LaptopBooking;
 import com.spring.jwt.laptop.model.LaptopRequestStatus;
@@ -240,6 +241,7 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         }
     }
 
+    @Transactional
     private void appendMessageInternal(LaptopBooking req, Long senderId, String senderType, String text) {
         try {
             List<ConversationMessageDTO> msgs = objectMapper.readValue(
@@ -301,44 +303,11 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
 
     @Override
     public LaptopRequestResponseDTO getRequestById(Long requestId) {
-
         LaptopBooking entity = requestRepo.findById(requestId)
                 .orElseThrow(() -> new LaptopRequestNotFoundException(requestId));
 
-        List<ConversationMessageDTO> conversationList = new ArrayList<>();
-        try {
-            if (entity.getRequestConversation() != null) {
-                conversationList = objectMapper.readValue(
-                        entity.getRequestConversation(),
-                        new TypeReference<List<ConversationMessageDTO>>() {}
-                );
-            }
-        } catch (Exception e) {
-            throw new LaptopRequestException("Failed to parse conversation JSON");
-        }
-
-
-        return LaptopRequestResponseDTO.builder()
-                .laptopBookingId(entity.getLaptopBookingId())
-//                .laptopId(entity.getLaptop().getLaptopId())
-                .buyerId(entity.getBuyer().getBuyerId())
-//                .buyerName(entity.getBuyer().getFullName())
-                .sellerId(entity.getSeller().getSellerId())
-//                .sellerName(entity.getSeller().getFullName())
-                .status(entity.getPendingStatus().name())
-                .conversation(conversationList)
-                // FIXED OFFSET CONVERSION FOR LocalDate
-                .bookingDate(entity.getOnDate() != null
-                        ? entity.getOnDate().atStartOfDay()
-                        .atOffset(OffsetDateTime.now().getOffset()).toLocalDate()
-                        : null)
-
-                // Already OffsetDateTime → safe to assign
-                .createdAt(entity.getCreatedAt())
-
-                .build();
+        return toResponse(entity);
     }
-
 
 
     @Override
@@ -346,6 +315,26 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         return userRepo.existsById(userId);
     }
 
+    @Override
+    public List<LaptopRequestResponseDTO> listRequestsForSeller(Long sellerId) {
 
+
+        sellerRepo.findById(sellerId)
+                .orElseThrow(() -> new LaptopRequestException(
+                        "Seller not found with id: " + sellerId
+                ));
+
+
+        List<LaptopBooking> bookings = requestRepo.findBySellerSellerId(sellerId);
+
+        if (bookings.isEmpty()) {
+            throw new LaptopRequestException("No booking requests found for seller ID: " + sellerId);
+        }
+
+        return bookings.stream()
+                .map(this::toResponse)
+                .toList();
+
+    }
 
 }

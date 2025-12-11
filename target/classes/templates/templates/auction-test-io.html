@@ -237,7 +237,7 @@
 
         const reqId = Number(document.getElementById("requestId").value);
         const message = document.getElementById("chatMessage").value;
-        const userId = buyerId;
+        const userId = Number(document.getElementById("userId").value);
 
 
         const payload = {
@@ -250,7 +250,7 @@
         socket.emit("send_chat", payload);
     }
 
-</script>
 
+</script>
 </body>
 </html>
