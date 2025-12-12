@@ -39,9 +39,9 @@ public class MobileRequestController {
 
 //    @GetMapping("/seller/{sellerId}")
 //    public ResponseEntity<List<MobileRequestDTO>> getRequestsBySeller(@PathVariable Long sellerId) {
-//        List<MobileRequestDTO> requests = mobileRequestService.getRequestsBySeller(sellerId);
-//        return ResponseEntity.ok(requests);
+//        return ResponseEntity.ok(mobileRequestService.getRequestsBySeller(sellerId));
 //    }
+
 
 
 

@@ -1,6 +1,7 @@
 package com.spring.jwt.auction.service;
 
 import com.spring.jwt.auction.dto.AuctionDTO;
+import com.spring.jwt.auction.dto.AuctionRequestDTO;
 
 import java.math.BigDecimal;
 
@@ -18,5 +19,5 @@ public interface AuctionService {
 
     void winnerReject(Long auctionId, Long userId);
 
-    AuctionDTO createAuction(AuctionDTO dto);
+    AuctionDTO createAuction(AuctionRequestDTO dto);
 }
