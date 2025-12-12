@@ -1,6 +1,7 @@
 package com.spring.jwt.auction.service.impl;
 
 import com.spring.jwt.auction.dto.AuctionDTO;
+import com.spring.jwt.auction.dto.AuctionRequestDTO;
 import com.spring.jwt.auction.dto.AuctionUpdateMessageDTO;
 import com.spring.jwt.auction.entity.Auction;
 import com.spring.jwt.auction.entity.Bid;
@@ -41,7 +42,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     @Transactional
 
-    public AuctionDTO createAuction(AuctionDTO dto) {
+    public AuctionDTO createAuction(AuctionRequestDTO dto) {
         Long mobileId = dto.mobileId();
 
         if (mobileId == null) {

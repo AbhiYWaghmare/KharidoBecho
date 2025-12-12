@@ -11,7 +11,7 @@ public class AuctionMapper {
 
         Long mobileId = null;
         if (a.getMobile() != null) {
-            mobileId = a.getMobile().getMobileId();   // 👈 IMPORTANT
+            mobileId = a.getMobile().getMobileId();   //IMPORTANT
         }
 
         return new AuctionDTO(
