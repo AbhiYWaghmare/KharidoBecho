@@ -662,6 +662,13 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
             RuntimeException ex,
             HttpServletRequest request) {
 
+        if (ex instanceof com.spring.jwt.exception.laptop.LaptopNotFoundException ||
+                ex instanceof com.spring.jwt.exception.laptop.LaptopImageException ||
+                ex instanceof com.spring.jwt.exception.laptop.ValidationException ||
+                ex instanceof com.spring.jwt.exception.laptop.BlankFieldsException) {
+            throw ex;
+        }
+
         Map<String, Object> errorResponse = new HashMap<>();
         String message = ex.getLocalizedMessage();
 
@@ -678,10 +685,6 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
-
-
-
-
 
 
 
