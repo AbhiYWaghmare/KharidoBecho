@@ -10,6 +10,7 @@ import com.spring.jwt.entity.Status;
 import com.spring.jwt.entity.User;
 import com.spring.jwt.exception.bookings.LaptopRequestException;
 import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
+import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.laptop.dto.*;
 import com.spring.jwt.laptop.entity.LaptopBooking;
 import com.spring.jwt.laptop.model.LaptopRequestStatus;
@@ -240,6 +241,7 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         }
     }
 
+    @Transactional
     private void appendMessageInternal(LaptopBooking req, Long senderId, String senderType, String text) {
         try {
             List<ConversationMessageDTO> msgs = objectMapper.readValue(
@@ -271,6 +273,19 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         User sellerUser = r.getSeller().getUser();
         String sellerName = sellerUser.getFirstName() + " " + sellerUser.getLastName();
 
+        List<ConversationMessageDTO> conversationList = new ArrayList<>();
+        try {
+            if (r.getRequestConversation() != null) {
+                conversationList = objectMapper.readValue(
+                        r.getRequestConversation(),
+                        new TypeReference<List<ConversationMessageDTO>>() {}
+                );
+            }
+        } catch (Exception e) {
+            throw new LaptopRequestException("Failed to parse conversation JSON");
+        }
+
+
 
         return LaptopRequestResponseDTO.builder()
                 .laptopBookingId(r.getLaptopBookingId())
@@ -280,10 +295,46 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                 .buyerName(buyerName)
                 .sellerName(sellerName)
                 .status(r.getPendingStatus().name())
-                .conversationJson(r.getRequestConversation())
+                .conversation(conversationList)
                 .createdAt(r.getCreatedAt())
                 .bookingDate(r.getOnDate())
                 .build();
+    }
+
+    @Override
+    public LaptopRequestResponseDTO getRequestById(Long requestId) {
+        LaptopBooking entity = requestRepo.findById(requestId)
+                .orElseThrow(() -> new LaptopRequestNotFoundException(requestId));
+
+        return toResponse(entity);
+    }
+
+
+    @Override
+    public boolean userExists(Long userId) {
+        return userRepo.existsById(userId);
+    }
+
+    @Override
+    public List<LaptopRequestResponseDTO> listRequestsForSeller(Long sellerId) {
+
+
+        sellerRepo.findById(sellerId)
+                .orElseThrow(() -> new LaptopRequestException(
+                        "Seller not found with id: " + sellerId
+                ));
+
+
+        List<LaptopBooking> bookings = requestRepo.findBySellerSellerId(sellerId);
+
+        if (bookings.isEmpty()) {
+            throw new LaptopRequestException("No booking requests found for seller ID: " + sellerId);
+        }
+
+        return bookings.stream()
+                .map(this::toResponse)
+                .toList();
+
     }
 
 }

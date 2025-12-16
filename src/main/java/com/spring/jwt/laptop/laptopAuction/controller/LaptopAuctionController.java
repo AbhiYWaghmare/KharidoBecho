@@ -1,11 +1,13 @@
 package com.spring.jwt.laptop.laptopAuction.controller;
 
 import com.spring.jwt.exception.laptop.LaptopAuctionNotFoundException;
+import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.laptopAuction.dto.LaptopAuctionDTO;
 import com.spring.jwt.laptop.laptopAuction.entity.LaptopAuction;
 import com.spring.jwt.laptop.laptopAuction.mapper.LaptopAuctionMapper;
 import com.spring.jwt.laptop.laptopAuction.repository.LaptopAuctionRepository;
 import com.spring.jwt.laptop.laptopAuction.service.LaptopAuctionService;
+import com.spring.jwt.laptop.repository.LaptopRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,66 +21,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LaptopAuctionController {
 
-    private final LaptopAuctionRepository laptopAuctionRepository;
     private final LaptopAuctionService laptopAuctionService;
 
-    // ========= CREATE AUCTION =========
+    //====================================================//
+    //  Create Auction                                    //
+    //  POST /api/v1/laptop-auctions/create               //
+    //====================================================//
     @PostMapping("/create")
-    public ResponseEntity<LaptopAuctionDTO> createLaptopAuction(@RequestBody LaptopAuctionDTO dto) {
+    public ResponseEntity<LaptopAuctionDTO> createAuction(@RequestBody LaptopAuctionDTO dto) {
 
-        LaptopAuction a = new LaptopAuction();
-        a.setLaptopId(dto.laptopId());
-        a.setStartPrice(dto.startPrice());
-        a.setCurrentPrice(dto.startPrice()); // initialize
-        a.setMinIncrementInRupees(dto.minIncrementInRupees());
-        a.setStartTime(dto.startTime() != null ? dto.startTime() : LocalDateTime.now());
-        a.setEndTime(dto.endTime());
-        a.setStatus(LaptopAuction.AuctionStatus.SCHEDULED);
-        a.setHighestBidderUserId(null);
+        LaptopAuctionDTO created = laptopAuctionService.createAuction(dto);
 
-        LaptopAuction saved = laptopAuctionRepository.save(a);
-
-        LaptopAuctionDTO response = LaptopAuctionMapper.toDTO(saved);
-
-        return ResponseEntity.created(URI.create("/api/v1/laptop-auctions/" + saved.getAuctionId()))
-                .body(response);
+        return ResponseEntity
+                .created(URI.create("/api/v1/laptop-auctions/" + created.auctionId()))
+                .body(created);
     }
 
-    // ========= GET BY ID =========
+    //====================================================//
+    //  Get Auction By ID                                 //
+    //  GET /api/v1/laptop-auctions/{id}                  //
+    //====================================================//
     @GetMapping("/{id}")
     public ResponseEntity<LaptopAuctionDTO> getById(@PathVariable Long id) {
-
-        LaptopAuction a = laptopAuctionRepository.findById(id)
-                .orElseThrow(() -> new LaptopAuctionNotFoundException(id));
-
-        return ResponseEntity.ok(LaptopAuctionMapper.toDTO(a));
+        LaptopAuctionDTO dto = laptopAuctionService.getById(id);
+        return ResponseEntity.ok(dto);
     }
 
-    // ========= LIST BY STATUS =========
+    //====================================================//
+    //  List Auctions By Status                           //
+    //  GET /api/v1/laptop-auctions/status?status=RUNNING //
+    //====================================================//
     @GetMapping("/status")
-    public ResponseEntity<List<LaptopAuctionDTO>> list(
+    public ResponseEntity<List<LaptopAuctionDTO>> listByStatus(
             @RequestParam(required = false) String status) {
 
-        List<LaptopAuction> auctions;
-
-        if (status != null) {
-            LaptopAuction.AuctionStatus st = LaptopAuction.AuctionStatus.valueOf(status);
-            auctions = laptopAuctionRepository.findAll()
-                    .stream()
-                    .filter(a -> a.getStatus() == st)
-                    .toList();
-        } else {
-            auctions = laptopAuctionRepository.findAll();
-        }
-
-        List<LaptopAuctionDTO> dtos = auctions.stream()
-                .map(LaptopAuctionMapper::toDTO)
-                .toList();
-
-        return ResponseEntity.ok(dtos);
+        List<LaptopAuctionDTO> auctions = laptopAuctionService.listByStatus(status);
+        return ResponseEntity.ok(auctions);
     }
 
-    // ========= WINNER ACCEPT =========
+    //====================================================//
+    //  Winner Accept                                      //
+    //  POST /api/v1/laptop-auctions/{auctionId}/winner-accept
+    //====================================================//
     @PostMapping("/{auctionId}/winner-accept")
     public ResponseEntity<Void> winnerAccept(
             @PathVariable Long auctionId,
@@ -88,7 +72,10 @@ public class LaptopAuctionController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========= WINNER REJECT =========
+    //====================================================//
+    //  Winner Reject                                      //
+    //  POST /api/v1/laptop-auctions/{auctionId}/winner-reject
+    //====================================================//
     @PostMapping("/{auctionId}/winner-reject")
     public ResponseEntity<Void> winnerReject(
             @PathVariable Long auctionId,
@@ -98,7 +85,10 @@ public class LaptopAuctionController {
         return ResponseEntity.noContent().build();
     }
 
-    // ========= MANUAL DEBUG ENDPOINTS =========
+    //====================================================//
+    //  Admin Debug Endpoints                              //
+    //====================================================//
+
     @PostMapping("/_start-due")
     public ResponseEntity<Void> startDue() {
         laptopAuctionService.startDueAuctions();

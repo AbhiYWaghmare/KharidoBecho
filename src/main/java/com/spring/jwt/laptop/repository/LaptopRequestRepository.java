@@ -23,4 +23,8 @@ public interface LaptopRequestRepository extends JpaRepository<LaptopBooking, Lo
     boolean existsByLaptop_IdAndPendingStatus(Long laptopId, LaptopRequestStatus pendingStatus);
 
     List<LaptopBooking> findByLaptop_IdAndPendingStatus(Long laptopId, LaptopRequestStatus pendingStatus);
+
+    List<LaptopBooking> findBySellerSellerId(Long sellerId);
+
+
 }

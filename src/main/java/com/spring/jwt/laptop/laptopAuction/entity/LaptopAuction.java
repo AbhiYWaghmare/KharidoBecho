@@ -1,5 +1,6 @@
 package com.spring.jwt.laptop.laptopAuction.entity;
 
+import com.spring.jwt.laptop.entity.Laptop;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Setter
@@ -20,6 +22,7 @@ public class LaptopAuction {
         SCHEDULED,
         RUNNING,
         ENDED,
+
         COMPLETED,
         CANCELLED
     }
@@ -29,8 +32,10 @@ public class LaptopAuction {
     @Column(name = "auction_id")
     private Long auctionId;
 
-    @Column(name = "laptop_id", nullable = false)
-    private Long laptopId;
+    @ManyToOne
+    @JoinColumn(name = "laptop_id", nullable = false)
+    private Laptop laptop;
+
 
     @Column(name = "start_price", nullable = false)
     private BigDecimal startPrice;
@@ -56,4 +61,12 @@ public class LaptopAuction {
 
     @Version
     private Long version;
+
+    @OneToMany(
+            mappedBy = "auction",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<LaptopBid> bids;
+
 }
