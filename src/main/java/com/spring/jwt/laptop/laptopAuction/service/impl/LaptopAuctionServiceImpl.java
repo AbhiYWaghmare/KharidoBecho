@@ -1,15 +1,20 @@
 package com.spring.jwt.laptop.laptopAuction.service.impl;
 
 import com.spring.jwt.entity.Status;
+import com.spring.jwt.exception.laptop.LaptopAuctionNotFoundException;
+import com.spring.jwt.exception.laptop.LaptopNotFoundException;
+import com.spring.jwt.exception.laptop.ValidationException;
 import com.spring.jwt.laptop.entity.Laptop;
+import com.spring.jwt.laptop.laptopAuction.dto.LaptopAuctionDTO;
 import com.spring.jwt.laptop.laptopAuction.dto.LaptopAuctionUpdateMessageDTO;
 import com.spring.jwt.laptop.laptopAuction.entity.LaptopAuction;
 import com.spring.jwt.laptop.laptopAuction.entity.LaptopBid;
+import com.spring.jwt.laptop.laptopAuction.mapper.LaptopAuctionMapper;
 import com.spring.jwt.laptop.laptopAuction.repository.LaptopAuctionRepository;
 import com.spring.jwt.laptop.laptopAuction.repository.LaptopBidRepository;
 import com.spring.jwt.laptop.laptopAuction.service.LaptopAuctionService;
 import com.spring.jwt.laptop.repository.LaptopRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -17,17 +22,59 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.IntStream;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class LaptopAuctionServiceImpl implements LaptopAuctionService {
     private final LaptopAuctionRepository auctionRepository;
     private final LaptopBidRepository bidRepository;
     private final LaptopRepository laptopRepository;
     private final SimpMessagingTemplate messagingTemplate;
+
+
+    @Override
+    @Transactional
+    public LaptopAuctionDTO createAuction(LaptopAuctionDTO dto){
+
+        Laptop laptop = laptopRepository.findById(dto.laptopId())
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop not found with id " + dto.laptopId()));
+
+        if (dto.startPrice().compareTo(BigDecimal.ONE) < 0)
+            throw new ValidationException("Start price must be greater than 0");
+
+        if (dto.minIncrementInRupees().compareTo(BigDecimal.ONE) < 0)
+            throw new ValidationException("Minimum increment must be greater than 0");
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (dto.startTime().isBefore(now.minusSeconds(1))) {
+            throw new ValidationException("Start time cannot be in the past");
+        }
+        if (dto.endTime().isBefore(now.minusSeconds(1))) {
+            throw new ValidationException("End time cannot be in the past");
+        }
+        if (dto.endTime().isBefore(dto.startTime()))
+            throw new ValidationException("End time must be after start time");
+
+        LaptopAuction auction = new LaptopAuction();
+        auction.setLaptop(laptop);
+        auction.setStartPrice(dto.startPrice());
+        auction.setCurrentPrice(dto.startPrice()); // Automatically set
+        auction.setMinIncrementInRupees(dto.minIncrementInRupees());
+        auction.setStartTime(dto.startTime());
+        auction.setEndTime(dto.endTime());
+        auction.setStatus(LaptopAuction.AuctionStatus.SCHEDULED);
+        auction.setHighestBidderUserId(null);
+
+        LaptopAuction saved = auctionRepository.save(auction);
+        return LaptopAuctionMapper.toDTO(saved);
+    }
+
 
     // =================================================================
     //                      PLACE BID (WebSocket)
@@ -37,19 +84,19 @@ public class LaptopAuctionServiceImpl implements LaptopAuctionService {
     public void placeBid(Long auctionId, Long userId, BigDecimal bidAmount) {
 
         LaptopAuction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new IllegalArgumentException("Laptop Auction not found: " + auctionId));
+                .orElseThrow(() -> new LaptopAuctionNotFoundException("Laptop Auction not found: " + auctionId));
 
         if (auction.getStatus() != LaptopAuction.AuctionStatus.RUNNING) {
-            throw new IllegalStateException("Laptop Auction is not RUNNING");
+            throw new ValidationException("Laptop Auction is not RUNNING");
         }
 
         if (LocalDateTime.now().isAfter(auction.getEndTime())) {
-            throw new IllegalStateException("Laptop Auction is already ended");
+            throw new ValidationException("Laptop Auction is already ended");
         }
 
         BigDecimal minAllowed = auction.getCurrentPrice().add(auction.getMinIncrementInRupees());
         if (bidAmount.compareTo(minAllowed) < 0) {
-            throw new IllegalArgumentException("Bid must be at least " + minAllowed);
+            throw new ValidationException("Bid must be at least " + minAllowed);
         }
 
         LaptopBid bid = LaptopBid.builder()
@@ -277,10 +324,10 @@ public class LaptopAuctionServiceImpl implements LaptopAuctionService {
     public void winnerAccept(Long auctionId, Long userId) {
 
         LaptopAuction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new IllegalArgumentException("Laptop Auction not found: " + auctionId));
+                .orElseThrow(() -> new LaptopAuctionNotFoundException("Laptop Auction not found: " + auctionId));
 
         if (auction.getStatus() != LaptopAuction.AuctionStatus.ENDED) {
-            throw new IllegalStateException("Laptop Auction is not in ENDED state");
+            throw new ValidationException("Laptop Auction is not in ENDED state");
         }
 
         List<LaptopBid> all = bidRepository.findAllByAuctionOrderByAmountDesc(auctionId);
@@ -300,8 +347,8 @@ public class LaptopAuctionServiceImpl implements LaptopAuctionService {
         auction.setStatus(LaptopAuction.AuctionStatus.COMPLETED);
         auctionRepository.save(auction);
 
-        Laptop laptop = laptopRepository.findById(auction.getLaptopId())
-                .orElseThrow(() -> new IllegalArgumentException("Laptop not found: " + auction.getLaptopId()));
+        Laptop laptop = laptopRepository.findById(auction.getLaptop().getId())
+                .orElseThrow(() -> new LaptopNotFoundException("Laptop not found: " + auction.getLaptop().getId()));
         laptop.setStatus(Status.SOLD);
         laptopRepository.save(laptop);
 
@@ -348,4 +395,50 @@ public class LaptopAuctionServiceImpl implements LaptopAuctionService {
 
         processExpiredOffers(); // fallback to next candidate
     }
+
+    @Override
+    public LaptopAuctionDTO getById(Long id) {
+        LaptopAuction auction = auctionRepository.findById(id)
+                .orElseThrow(() -> new LaptopAuctionNotFoundException(id));
+
+        return LaptopAuctionMapper.toDTO(auction);
+    }
+
+    @Override
+    public List<LaptopAuctionDTO> listByStatus(String status) {
+        List<LaptopAuction> auctions;
+
+        if (status != null) {
+            LaptopAuction.AuctionStatus st = LaptopAuction.AuctionStatus.valueOf(status);
+            auctions = auctionRepository.findAll()
+                    .stream()
+                    .filter(a -> a.getStatus() == st)
+                    .toList();
+        } else {
+            auctions = auctionRepository.findAll();
+        }
+
+        return auctions.stream().map(LaptopAuctionMapper::toDTO).toList();
+    }
+    @Transactional(readOnly = true)
+    public void broadcastRunningAuctions() {
+
+        List<LaptopAuction> runningAuctions =
+                auctionRepository.findByStatus(LaptopAuction.AuctionStatus.RUNNING);
+
+        for (LaptopAuction a : runningAuctions) {
+            messagingTemplate.convertAndSend(
+                    "/topic/laptop-auctions/live",
+                    new LaptopAuctionUpdateMessageDTO(
+                            "LIVE_AUCTION",
+                            a.getAuctionId(),
+                            a.getCurrentPrice(),
+                            a.getHighestBidderUserId(),
+                            List.of(),
+                            null
+                    )
+            );
+        }
+    }
+
 }
