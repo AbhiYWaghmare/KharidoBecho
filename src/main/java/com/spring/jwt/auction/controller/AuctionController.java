@@ -1,6 +1,7 @@
 package com.spring.jwt.auction.controller;
 
 import com.spring.jwt.auction.dto.AuctionDTO;
+import com.spring.jwt.auction.dto.AuctionRequestDTO;
 import com.spring.jwt.auction.entity.Auction;
 import com.spring.jwt.auction.exception.AuctionNotFoundException;
 import com.spring.jwt.auction.mapper.AuctionMapper;
@@ -24,7 +25,7 @@ public class AuctionController {
 
     // CREATE AUCTION
     @PostMapping("/create")
-    public ResponseEntity<AuctionDTO> createAuction(@RequestBody AuctionDTO dto) {
+    public ResponseEntity<AuctionDTO> createAuction(@RequestBody AuctionRequestDTO dto) {
 
         AuctionDTO response = auctionService.createAuction(dto);
 

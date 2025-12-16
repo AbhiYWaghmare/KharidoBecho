@@ -14,7 +14,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.spring.jwt.laptop.entity.Laptop;
 
 
 import java.time.LocalDate;
