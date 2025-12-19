@@ -26,5 +26,7 @@ public interface LaptopRequestRepository extends JpaRepository<LaptopBooking, Lo
 
     List<LaptopBooking> findBySellerSellerId(Long sellerId);
 
+    List<LaptopBooking> findByLaptopBookingId(Long bookingId);
+
 
 }

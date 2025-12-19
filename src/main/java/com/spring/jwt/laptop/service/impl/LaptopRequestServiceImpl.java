@@ -337,4 +337,14 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
 
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<LaptopRequestResponseDTO> listRequestByBooking(Long bookingId) {
+
+        LaptopBooking booking = requestRepo.findById(bookingId)
+                .orElseThrow(() -> new LaptopRequestNotFoundException(bookingId));
+
+        return List.of(toResponse(booking));
+    }
+
 }
