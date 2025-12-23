@@ -38,7 +38,7 @@ public class CarController {
         CarResponseDTO savedCar = carService.createCar(request);
 
         CarCreateResponseDTO response = CarCreateResponseDTO.builder()
-                .code("2 01")
+                .code("201")
                 .message("Car Added Successfully !!")
                 .carId(savedCar.getCarId())
                 .build();

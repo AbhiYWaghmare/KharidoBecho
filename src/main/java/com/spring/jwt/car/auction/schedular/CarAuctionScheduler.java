@@ -1,6 +1,6 @@
-package com.spring.jwt.auction.schedular;
+package com.spring.jwt.car.auction.schedular;
 
-import com.spring.jwt.auction.service.AuctionService;
+import com.spring.jwt.car.auction.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

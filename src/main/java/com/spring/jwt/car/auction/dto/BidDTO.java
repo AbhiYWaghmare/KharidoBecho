@@ -1,13 +1,13 @@
-package com.spring.jwt.auction.dto;
+package com.spring.jwt.car.auction.dto;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
-public record CarBidDTO(
+public record BidDTO(
         Long bidId,
         Long auctionId,
         Long bidderUserId,
         BigDecimal amount,
         String status,
-        OffsetDateTime createdAt
+        LocalDateTime createdAt
 ) {}
