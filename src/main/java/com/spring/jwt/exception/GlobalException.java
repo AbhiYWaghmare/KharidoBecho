@@ -5,6 +5,7 @@ package com.spring.jwt.exception;
 
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+<<<<<<< HEAD
 import com.spring.jwt.car.auction.exception.*;
 //import com.spring.jwt.exception.bookings.LaptopRequestException;
 //import com.spring.jwt.exception.car.BookingNotFoundException;
@@ -15,11 +16,24 @@ import com.spring.jwt.car.auction.exception.*;
 //import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
 import com.spring.jwt.exception.car.AuctionException;
 import com.spring.jwt.exception.car.BookingNotFoundException;
+=======
+import com.spring.jwt.exception.bookings.LaptopRequestException;
+import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
+import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
+import com.spring.jwt.exception.colour.ColourNotFoundException;
+//import com.spring.jwt.laptop.dto.AuctionErrReponse;
+import com.spring.jwt.laptop.dto.LaptopErrorResponse;
+import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 import com.spring.jwt.exception.laptop.*;
 
 
 //import com.spring.jwt.auction.exception.AuctionException;
+<<<<<<< HEAD
 //import com.spring.jwt.auction.exception.*;
+=======
+import com.spring.jwt.auction.exception.*;
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 //import com.spring.jwt.auction.exception.BidException;
 import com.spring.jwt.exception.Bike.*;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -342,6 +356,8 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     }
 
 
+    // ========================= LAPTOP EXCEPTIONS ========================= //
+
     @ExceptionHandler(LaptopAlreadyExistsException.class)
     public ResponseEntity<LaptopResponseDTO> handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
                                                                        WebRequest request) {
@@ -413,6 +429,10 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+<<<<<<< HEAD
+=======
+    @ExceptionHandler(ValidationException.class)
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     public ResponseEntity<LaptopResponseDTO> handleValidationException(ValidationException ex, WebRequest webRequest){
         LaptopResponseDTO error = new LaptopResponseDTO();
         error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
@@ -442,6 +462,7 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 
 
 
+<<<<<<< HEAD
 //    @ExceptionHandler(AuctionException.class)
 //    public ResponseEntity<AuctionErrReponse> handleAuctionException(AuctionException ex,WebRequest request){
 //        AuctionErrReponse error = new AuctionErrReponse();
@@ -482,6 +503,72 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 //                ));
 //    }
 
+=======
+    @ExceptionHandler(ColourNotFoundException.class)
+    public ResponseEntity<ColourResponseDTO> handleColourNotFoundException(ColourNotFoundException ex,WebRequest request) {
+        ColourResponseDTO error = new ColourResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(LaptopRequestException.class)
+    public ResponseEntity<LaptopErrorResponse> handleLaptopRequestException(LaptopRequestException ex, WebRequest request) {
+        LaptopErrorResponse error = new LaptopErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setCode("BAD REQUEST");
+        error.setStatus("error");
+        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setApiPath(request.getDescription(false).replace("uri=", ""));
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(LaptopRequestNotFoundException.class)
+    public ResponseEntity<LaptopErrorResponse> handleLaptopRequestNotFoundException(LaptopRequestNotFoundException ex, WebRequest request) {
+        LaptopErrorResponse error = new LaptopErrorResponse();
+        error.setMessage(ex.getMessage());
+        error.setCode("NOT FOUND");
+        error.setStatus("error");
+        error.setStatusCode(HttpStatus.NOT_FOUND.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setApiPath(request.getDescription(false).replace("uri=", ""));
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ColourAlreadyExistsException.class)
+    public ResponseEntity<ColourResponseDTO> handleColourAlreadyExistsException(ColourAlreadyExistsException ex,WebRequest request) {
+        ColourResponseDTO error = new ColourResponseDTO();
+        error.setApiPath(request.getDescription(false).replace("uri",""));
+        error.setStatus("error");
+        error.setMessage(ex.getMessage());
+        error.setCode("CONFLICT");
+        error.setStatusCode(HttpStatus.CONFLICT.value());
+        error.setTimeStamp(LocalDateTime.now());
+        error.setException(ex.toString());
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(LaptopAuctionNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopAuctionNotFoundException(LaptopAuctionNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("error", "Auction not found");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
 
     //Mobile Exception Handler
@@ -639,6 +726,16 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
             RuntimeException ex,
             HttpServletRequest request) {
 
+<<<<<<< HEAD
+=======
+        if (ex instanceof com.spring.jwt.exception.laptop.LaptopNotFoundException ||
+                ex instanceof com.spring.jwt.exception.laptop.LaptopImageException ||
+                ex instanceof com.spring.jwt.exception.laptop.ValidationException ||
+                ex instanceof com.spring.jwt.exception.laptop.BlankFieldsException) {
+            throw ex;
+        }
+
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
         Map<String, Object> errorResponse = new HashMap<>();
         String message = ex.getLocalizedMessage();
 
@@ -658,10 +755,13 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 
 
 
+<<<<<<< HEAD
 
 
 
 
+=======
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 //    @ExceptionHandler(HttpMessageNotReadableException.class)
 //    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(
 //            HttpMessageNotReadableException ex, WebRequest req) {
@@ -684,6 +784,13 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
 //        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 //    }
 
+<<<<<<< HEAD
+=======
+
+        @ExceptionHandler(DataIntegrityViolationException.class)
+        public ResponseEntity<Map<String, Object>> handleDataIntegrity(
+                DataIntegrityViolationException ex, WebRequest req) {
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrity(
@@ -788,4 +895,99 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     }
 
 
+<<<<<<< HEAD
+=======
+            return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+        }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBookingNotFound(BookingNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", "Booking Not Found");
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+
+
+    }
+
+
+//    @ExceptionHandler(com.spring.jwt.auction.exception.AuctionException.class)
+//    public ResponseEntity<Map<String, Object>> handleAuctionException(AuctionException ex, WebRequest request) {
+//        Map<String,Object> body = new HashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("status", HttpStatus.BAD_REQUEST.value());
+//        body.put("error", "Auction Error");
+//        body.put("message", ex.getMessage());
+//        body.put("path", request.getDescription(false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+//    }
+//
+//    @ExceptionHandler(com.spring.jwt.auction.exception.BidException.class)
+//    public ResponseEntity<Map<String, Object>> handleBidException(BidException ex, WebRequest request) {
+//        Map<String,Object> body = new HashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("status", HttpStatus.BAD_REQUEST.value());
+//        body.put("error", "Bid Error");
+//        body.put("message", ex.getMessage());
+//        body.put("path", request.getDescription(false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+//    }
+@ExceptionHandler(AuctionNotFoundException.class)
+public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFoundException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("timestamp", OffsetDateTime.now());
+    body.put("error", "Auction not found");
+    body.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+}
+
+    @ExceptionHandler(BidNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBidNotFound(BidNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Bid not found");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(BadBidException.class)
+    public ResponseEntity<Map<String, Object>> handleBadBid(BadBidException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Invalid bid");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(MobileNotFoundForAuctionException.class)
+    public ResponseEntity<Map<String, Object>> handleMobileNotFoundForAuction(MobileNotFoundForAuctionException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Mobile not found for auction");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(InvalidBidException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidBid(InvalidBidException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Invalid Bid");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+
+    @ExceptionHandler(InvalidAuctionStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidAuctionState(InvalidAuctionStateException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", OffsetDateTime.now());
+        body.put("error", "Invalid Auction State");
+        body.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 }

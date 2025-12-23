@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColourController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.utils.Colours.controller</a> &gt; <span class="el_source">ColourController.java</span></div><h1>ColourController.java</h1><pre class="source lang-java linenums">package com.spring.jwt.utils.Colours.controller;
+
+import com.spring.jwt.utils.Colours.dto.ColourDto;
+import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
+import com.spring.jwt.utils.Colours.entity.Colour;
+import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
+import com.spring.jwt.utils.Colours.repository.ColourRepository;
+import com.spring.jwt.utils.Colours.service.ColourService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/api/colours&quot;)
+<span class="nc" id="L25">@RequiredArgsConstructor</span>
+public class ColourController {
+
+    private final ColourRepository colourRepository;
+    private final ColourService colourService;
+
+    @PostMapping(&quot;/createColour&quot;)
+    public ResponseEntity&lt;ColourResponseDTO&gt; createColours(@Valid @RequestBody ColourDto colourDto,HttpServletRequest request){
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (colourRepository.existsByColourName(colourDto.getColourName())) {</span>
+<span class="nc" id="L34">            throw new ColourAlreadyExistsException(&quot;Colour already exists with name: &quot; + colourDto.getColourName());</span>
+        }
+
+<span class="nc" id="L37">        Colour colour = colourService.createColour(colourDto);</span>
+<span class="nc" id="L38">        String apiPath = request.getRequestURI();</span>
+<span class="nc" id="L39">        Long colourId = colour.getColourId();</span>
+
+<span class="nc" id="L41">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L42">                .body(new ColourResponseDTO(</span>
+                        &quot;success&quot;,
+                        &quot;Colour added successfully&quot;,
+                        &quot;CREATED&quot;,
+<span class="nc" id="L46">                        200,</span>
+<span class="nc" id="L47">                        LocalDateTime.now(),</span>
+                        &quot;NULL&quot;,
+                        apiPath,
+                        colourId));
+    }
+
+    @PatchMapping(&quot;/updateColour&quot;)
+    public ResponseEntity&lt;ColourResponseDTO&gt; updateColour(
+            @RequestParam Long colourId,
+            @RequestBody ColourDto colourDto,
+            HttpServletRequest request){
+<span class="nc" id="L58">        Colour colour = colourService.updateColour(colourId,colourDto);</span>
+<span class="nc" id="L59">        String apiPath = request.getRequestURI();</span>
+<span class="nc" id="L60">        Long colour_Id = colour.getColourId();</span>
+
+<span class="nc" id="L62">        return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="nc" id="L63">                .body(new ColourResponseDTO(</span>
+                        &quot;success&quot;,
+                        &quot;Colour updated successfully&quot;,
+                        &quot;UPDATE&quot;,
+<span class="nc" id="L67">                        200,</span>
+<span class="nc" id="L68">                        LocalDateTime.now(),</span>
+                        &quot;NULL&quot;,
+                        apiPath,
+                        colourId));
+
+    }
+
+    @GetMapping(&quot;/getAllColours&quot;)
+    public ResponseEntity&lt;List&lt;Colour&gt;&gt; getAllColours(){
+<span class="nc" id="L77">        return ResponseEntity.ok(colourService.getAllColours());</span>
+    }
+
+    @DeleteMapping(&quot;/deleteColour&quot;)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; deleteColourById(@RequestParam @Min(1) Long colourId) {
+<span class="nc" id="L82">        colourService.deleteColourById(colourId);</span>
+<span class="nc" id="L83">        Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L84">        response.put(&quot;status&quot;, &quot;success&quot;);</span>
+<span class="nc" id="L85">        response.put(&quot;message&quot;, &quot;Colour deleted successfully&quot;);</span>
+<span class="nc" id="L86">        return ResponseEntity.ok(response);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

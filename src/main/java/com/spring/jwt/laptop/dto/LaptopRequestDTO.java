@@ -1,16 +1,21 @@
 package com.spring.jwt.laptop.dto;
 
-import com.spring.jwt.laptop.model.Status;
+import com.spring.jwt.entity.Status;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.net.ssl.SSLSession;
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class LaptopRequestDTO {
 
     @NotBlank(message= "Serial number is required")
@@ -131,4 +136,5 @@ public class LaptopRequestDTO {
 
     @NotNull(message= "Seller id is required")
     private Long sellerId;
+
 }

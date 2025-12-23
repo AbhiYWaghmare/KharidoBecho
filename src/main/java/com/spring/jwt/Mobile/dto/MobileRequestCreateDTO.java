@@ -10,3 +10,7 @@ public class MobileRequestCreateDTO {
     private Long buyerUserId; // user's id (from User table)
     private String message;   // optional initial message
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0

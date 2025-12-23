@@ -12,4 +12,9 @@ public interface MobileRequestService {
     MobileRequestResponseDTO updateRequestStatus(Long requestId, String status);
     MobileRequestResponseDTO appendMessage(Long requestId, Long senderUserId, String message);
     void markRequestCompletedAndMarkSold(Long requestId); // seller confirms final sale
+<<<<<<< HEAD
+=======
+//    List<MobileRequestDTO> getRequestsBySeller(Long sellerId);
+
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 }

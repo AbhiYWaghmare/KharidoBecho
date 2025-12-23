@@ -31,9 +31,9 @@ import java.util.List;
 @Data
 public class LaptopPhotoServiceImpl implements LaptopPhotoService {
 
-    public LaptopPhotoRepository laptopPhotoRepository;
-    public CloudinaryService cloudinaryService;
-    public LaptopRepository laptopRepository;
+    public final LaptopPhotoRepository laptopPhotoRepository;
+    public final CloudinaryService cloudinaryService;
+    public final LaptopRepository laptopRepository;
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
 

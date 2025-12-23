@@ -1,14 +1,13 @@
 package com.spring.jwt.laptop.service.impl;
 
 import com.spring.jwt.entity.Seller;
+import com.spring.jwt.entity.Status;
 import com.spring.jwt.exception.laptop.BlankFieldsException;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
-import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.exception.laptop.LaptopNotFoundException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.entity.Laptop;
-import com.spring.jwt.laptop.model.Status;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.laptop.service.LaptopService;
@@ -149,35 +148,54 @@ public class LaptopServiceImpl implements LaptopService {
     }
 
     public List<Laptop> getAllLaptops() {
+        List<Laptop> laptops = laptopRepository.findAll();
 
-        return laptopRepository.findAll();
+        if (laptops.isEmpty()) {
+            throw new LaptopNotFoundException("No laptops found");
+        }
+
+        return laptops;
     }
 
 
     @Override
-    public void deleteLaptopById(Long laptopId) {
+    @Transactional
+    public String deleteLaptopById(Long laptopId) {
         Laptop laptop = laptopRepository.findById(laptopId)
                 .orElseThrow(() -> new LaptopNotFoundException("Laptop not found with id: " + laptopId));
 
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
         log.debug("Processing delete for Laptop with ID {} at {}", laptopId, now);
 
-        if (laptop.isDeleted() || laptop.getStatus() == Status.DELETED) {
-            log.warn("Laptop with ID {} is already soft deleted", laptopId);
+        // === HARD DELETE (if already soft deleted) ===
+        if (laptop.isDeleted() || laptop.getStatus() == Status.DELETE) {
 
+            if (laptop.getBookings() != null && !laptop.getBookings().isEmpty()) {
+                laptop.getBookings().clear();
+            }
+
+            if (laptop.getLaptopPhotos() != null && !laptop.getLaptopPhotos().isEmpty()) {
+                laptop.getLaptopPhotos().clear();
+            }
+
+            // Now safe to hard delete
             laptopRepository.delete(laptop);
             log.info("Hard deleted Laptop with ID {}", laptopId);
-        } else {
-            laptop.setDeleted(true);
-            laptop.setDeletedAt(now);
-            laptop.setStatus(Status.DELETED);
-
-            laptopRepository.save(laptop);
-            log.info("Soft deleted Laptop with ID {} at {}", laptopId, now);
+            return "Laptop with ID " + laptopId + " was permanently deleted from database.";
         }
 
+        // === SOFT DELETE (first delete call) ===
+        laptop.setDeleted(true);
+        laptop.setDeletedAt(now);
+        laptop.setStatus(Status.DELETE);
 
+        laptopRepository.save(laptop);
+        log.info("Soft deleted Laptop with ID {} at {}", laptopId, now);
+
+        return "Soft deleted Laptop with ID " + laptopId + " at " + now;
     }
+
+
 
     @Override
     public Page<Laptop> getBySellerIdAndStatus(Long sellerId, Status status, int page, int size, String sortBy) {
@@ -201,6 +219,12 @@ public class LaptopServiceImpl implements LaptopService {
                 .orElseThrow(() -> new SellerNotFoundException(sellerId));
 
         return laptopRepository.countBySellerAndStatus(sellerId,status);
+    }
+
+    @Override
+    public Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
+        return laptopRepository.findBySeller_SellerId(sellerId, pageable);
     }
 
 

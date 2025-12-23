@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 package com.spring.jwt.socket;
 
 import com.spring.jwt.jwt.JwtService;
@@ -13,7 +16,11 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.util.Map;
 
 @Component
+<<<<<<< HEAD
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
+=======
+public class  JwtHandshakeInterceptor implements HandshakeInterceptor {
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
     private final JwtService jwtService;
 

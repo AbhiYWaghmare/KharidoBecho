@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.config</a> &gt; <span class="el_source">AppConfig.java</span></div><h1>AppConfig.java</h1><pre class="source lang-java linenums">package com.spring.jwt.config;
+
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.spring.jwt.config.filter.*;
+import com.spring.jwt.jwt.JwtConfig;
+import com.spring.jwt.jwt.JwtService;
+import com.spring.jwt.repository.UserRepository;
+import com.spring.jwt.service.security.UserDetailsServiceCustom;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.filter.ForwardedHeaderFilter;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Configuration
+@EnableWebSecurity
+@EnableScheduling
+@EnableMethodSecurity(
+    securedEnabled = true,
+    jsr250Enabled = true,
+    prePostEnabled = true
+)
+<span class="nc" id="L46">@Slf4j</span>
+<span class="nc" id="L47">public class AppConfig {</span>
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    @Lazy
+    private JwtService jwtService;
+
+    @Autowired
+    private JwtConfig jwtConfig;
+
+    @Autowired
+    private CustomAuthenticationProvider customAuthenticationProvider;
+
+    @Autowired
+    private SecurityHeadersFilter securityHeadersFilter;
+
+    @Autowired
+    private XssFilter xssFilter;
+
+    @Autowired
+    private SqlInjectionFilter sqlInjectionFilter;
+
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
+
+    @Autowired
+    private com.spring.jwt.jwt.ActiveSessionService activeSessionService;
+
+    @Value(&quot;${app.url.frontend:http://localhost:5173}&quot;)
+    private String frontendUrl;
+
+    @Value(&quot;#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/}'.split(',')}&quot;)
+    private List&lt;String&gt; allowedOrigins;
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+<span class="nc" id="L85">        return new BCryptPasswordEncoder();</span>
+    }
+
+    @Bean
+    public UserDetailsServiceCustom userDetailsService() {
+<span class="nc" id="L90">        return new UserDetailsServiceCustom(userRepository);</span>
+    }
+
+    @Bean
+    public JwtRefreshTokenFilter jwtRefreshTokenFilter(
+            AuthenticationManager authenticationManager,
+            JwtConfig jwtConfig,
+            JwtService jwtService,
+            UserDetailsServiceCustom userDetailsService,
+            com.spring.jwt.jwt.ActiveSessionService activeSessionService) {
+<span class="nc" id="L100">        return new JwtRefreshTokenFilter(authenticationManager, jwtConfig, jwtService, userDetailsService, activeSessionService);</span>
+    }
+
+    @Bean
+    public ForwardedHeaderFilter forwardedHeaderFilter() {
+<span class="nc" id="L105">        return new ForwardedHeaderFilter();</span>
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+<span class="nc" id="L110">        log.debug(&quot;Configuring security filter chain&quot;);</span>
+
+<span class="nc" id="L112">        http.csrf(csrf -&gt; csrf</span>
+<span class="nc" id="L113">            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())</span>
+<span class="nc" id="L114">            .ignoringRequestMatchers(</span>
+                &quot;/api/**&quot;,
+
+                    &quot;api/v1/user/**&quot;,
+                    &quot;/api/laptops/**&quot;,
+                    &quot;/api/laptopBookings/**&quot;,
+                    &quot;/api/colours/**&quot;,
+                &quot;api/v1/user/**&quot;,
+
+                    &quot;api/v1/cars/**&quot;,
+                    &quot;/api/v1/car-images&quot;,
+                    &quot;/api/laptops/**&quot;,
+                    &quot;/api/laptop-photo/**&quot;,
+
+                    &quot;/bikes/**&quot;,
+
+
+                    &quot;api/v1/auth/**&quot;,
+                    &quot;api/v1/buyers/**&quot;,
+                    &quot;api/v1/sellers/**&quot;,
+                    &quot;api/v1/mobiles/**&quot;,
+                    &quot;/api/v1/mobile-images/**&quot;,
+
+                    &quot;/Auction/**&quot;,
+                    &quot;/Auction&quot;,
+                    &quot;/ws/**&quot;,
+                    &quot;/websocket/**&quot;,
+                    &quot;/sockjs/**&quot;,
+                    &quot;/laptop/auctions/live&quot;,
+                    &quot;/api/beadingLaptops/**&quot;,
+
+                    &quot;/api/v1/mobile/requests/**&quot;,
+                    &quot;/api/v1/auctions/**&quot;,
+
+
+<span class="nc" id="L149">                jwtConfig.getUrl(),</span>
+<span class="nc" id="L150">                jwtConfig.getRefreshUrl(),</span>
+
+                    &quot;/ws-auction/**&quot;
+            )
+        );
+
+<span class="nc" id="L156">        http.cors(Customizer.withDefaults());</span>
+
+<span class="nc" id="L158">        http.sessionManagement(session -&gt; session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+
+<span class="nc" id="L160">        http.headers(headers -&gt; headers</span>
+<span class="nc" id="L161">                .xssProtection(xss -&gt; xss</span>
+<span class="nc" id="L162">                    .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))</span>
+<span class="nc" id="L163">                .contentSecurityPolicy(csp -&gt; csp</span>
+<span class="nc" id="L164">                    .policyDirectives(&quot;default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';&quot; +</span>
+                            &quot; connect-src 'self' ws: wss: http://localhost:8087;\n'&quot;))
+//                connect-src 'self'
+
+<span class="nc" id="L168">                .frameOptions(frame -&gt; frame.deny())</span>
+<span class="nc" id="L169">                .referrerPolicy(referrer -&gt; referrer</span>
+<span class="nc" id="L170">                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))</span>
+<span class="nc" id="L171">                .permissionsPolicy(permissions -&gt; permissions</span>
+<span class="nc" id="L172">                    .policy(&quot;camera=(), microphone=(), geolocation=()&quot;))</span>
+            );
+
+<span class="nc" id="L175">        log.debug(&quot;Configuring URL-based security rules&quot;);</span>
+<span class="nc" id="L176">        http.authorizeHttpRequests(authorize -&gt; authorize</span>
+
+                //For testing All API are permitted
+<span class="nc" id="L179">                .requestMatchers(&quot;/api/auth/**&quot;).permitAll()</span>
+<span class="nc" id="L180">                .requestMatchers(&quot;/api/v1/users/**&quot;).permitAll()</span>
+<span class="nc" id="L181">                .requestMatchers(&quot;/api/v1/auth/**&quot;).permitAll()</span>
+<span class="nc" id="L182">                .requestMatchers(&quot;/api/v1/buyers/**&quot;).permitAll()</span>
+<span class="nc" id="L183">                .requestMatchers(&quot;/api/v1/sellers/**&quot;).permitAll()</span>
+<span class="nc" id="L184">                .requestMatchers(&quot;/api/v1/users/password/**&quot;).permitAll()</span>
+
+<span class="nc" id="L186">                .requestMatchers(&quot;/api/v1/mobiles/**&quot;).permitAll()</span>
+<span class="nc" id="L187">                .requestMatchers(&quot;/api/v1/mobile-images/**&quot;).permitAll()</span>
+<span class="nc" id="L188">                .requestMatchers(&quot;/api/v1/mobile/requests/**&quot;).permitAll()</span>
+
+<span class="nc" id="L190">                .requestMatchers(&quot;/api/v1/cars/**&quot;).permitAll()</span>
+<span class="nc" id="L191">                .requestMatchers(&quot;/api/v1/car-images/**&quot;).permitAll()</span>
+
+
+<span class="nc" id="L194">                .requestMatchers(&quot;/api/v1/exam/**&quot;).permitAll()</span>
+<span class="nc" id="L195">                .requestMatchers(&quot;/api/v1/**&quot;).permitAll()</span>
+
+<span class="nc" id="L197">                .requestMatchers(&quot;/api/laptops/**&quot;).permitAll()</span>
+<span class="nc" id="L198">                .requestMatchers(&quot;/api/laptop-photo/**&quot;).permitAll()</span>
+
+<span class="nc" id="L200">                .requestMatchers(&quot;/bikes/**&quot;).permitAll()  // &lt;-- ADD THIS LINE</span>
+
+                // existing rules...
+<span class="nc" id="L203">                .requestMatchers(&quot;/api/auth/**&quot;).permitAll()</span>
+<span class="nc" id="L204">                .requestMatchers(&quot;/api/v1/users/**&quot;).permitAll()</span>
+<span class="nc" id="L205">                .requestMatchers(&quot;/api/v1/auth/**&quot;).permitAll()</span>
+<span class="nc" id="L206">                .requestMatchers(&quot;/api/v1/buyers/**&quot;).permitAll()</span>
+<span class="nc" id="L207">                .requestMatchers(&quot;/api/v1/sellers/**&quot;).permitAll()</span>
+
+<span class="nc" id="L209">                .requestMatchers(&quot;/api/v1/auctions/**&quot;).permitAll()</span>
+<span class="nc" id="L210">                .requestMatchers(&quot;/api/laptopBookings/**&quot;).permitAll()</span>
+<span class="nc" id="L211">                .requestMatchers(&quot;/api/colours/**&quot;).permitAll()</span>
+<span class="nc" id="L212">                .requestMatchers(&quot;/Auction/**&quot;, &quot;/Auction&quot;, &quot;/ws/**&quot;, &quot;/websocket/**&quot;, &quot;/sockjs/**&quot;).permitAll()</span>
+<span class="nc" id="L213">                .requestMatchers(&quot;/laptop/auctions/live&quot;).permitAll()</span>
+<span class="nc" id="L214">                .requestMatchers(&quot;/api/beadingLaptops/**&quot;).permitAll()</span>
+
+
+
+
+
+//                .requestMatchers(&quot;/ws-auction/**&quot;).permitAll()   //  add this
+
+<span class="nc" id="L222">                .requestMatchers(jwtConfig.getUrl()).permitAll()</span>
+<span class="nc" id="L223">                .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()</span>
+
+<span class="nc" id="L225">                .requestMatchers(</span>
+                        &quot;/v2/api-docs&quot;,
+                        &quot;/v3/api-docs&quot;,
+                        &quot;/v*/a*-docs/**&quot;,
+                        &quot;/swagger-resources&quot;,
+                        &quot;/swagger-resources/**&quot;,
+                        &quot;/configuration/ui&quot;,
+                        &quot;/configuration/security&quot;,
+                        &quot;/swagger-ui/**&quot;,
+                        &quot;/webjars/**&quot;,
+                        &quot;/swagger-ui.html&quot;
+<span class="nc" id="L236">                ).permitAll()</span>
+
+<span class="nc" id="L238">                .requestMatchers(&quot;/api/public/**&quot;).permitAll()</span>
+<span class="nc" id="L239">                .requestMatchers(&quot;/user/**&quot;).permitAll()</span>
+<span class="nc" id="L240">                .requestMatchers(&quot;/ws-auction/**&quot;).permitAll()</span>
+
+
+//                .anyRequest().authenticated());
+
+              //=====================================================
+                //Use When we want to permit all request
+<span class="nc" id="L247">                .anyRequest().permitAll());</span>
+            //=========================================================
+
+        // Create a request matcher for public URLs
+<span class="nc" id="L251">        org.springframework.security.web.util.matcher.RequestMatcher publicUrls =</span>
+            new org.springframework.security.web.util.matcher.OrRequestMatcher(
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/auth/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/public/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/users/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/auth/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/auctions/**&quot;),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/buyers/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/sellers/**&quot;),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/mobiles/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/mobile-images/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/mobile/requests/**&quot;),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/cars/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/car-images/**&quot;),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/v1/users/password/**&quot;),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/laptops/**&quot;),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/laptop-photo/**&quot;),
+
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/bikes/**&quot;),
+
+
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/laptops/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/photo/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/laptopBookings/**&quot;),
+
+
+
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/v2/api-docs/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/v3/api-docs/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/swagger-resources/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/swagger-ui/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/configuration/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/webjars/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/swagger-ui.html&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/user/**&quot;),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/api/beadingLaptops/**&quot;),
+
+<span class="nc" id="L293">                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getUrl()),</span>
+<span class="nc" id="L294">                new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl()),</span>
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher(&quot;/ws-auction/**&quot;)
+            );
+
+
+<span class="nc" id="L299">        log.debug(&quot;Configuring security filters&quot;);</span>
+
+        //For testing filter is comment out
+<span class="nc" id="L302">        JwtUsernamePasswordAuthenticationFilter jwtUsernamePasswordAuthenticationFilter = new JwtUsernamePasswordAuthenticationFilter(authenticationManager(http), jwtConfig, jwtService, userRepository, activeSessionService);</span>
+<span class="nc" id="L303">        JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter = new JwtTokenAuthenticationFilter(jwtConfig, jwtService, userDetailsService(), publicUrls, activeSessionService);</span>
+<span class="nc" id="L304">        JwtRefreshTokenFilter jwtRefreshTokenFilter = new JwtRefreshTokenFilter(authenticationManager(http), jwtConfig, jwtService, userDetailsService(), activeSessionService);</span>
+
+<span class="nc" id="L306">        http.addFilterBefore(jwtTokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)</span>
+<span class="nc" id="L307">                .addFilterBefore(jwtUsernamePasswordAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)</span>
+<span class="nc" id="L308">                .addFilterBefore(jwtRefreshTokenFilter, UsernamePasswordAuthenticationFilter.class);</span>
+
+
+        //==========================================================
+//                Only For Backend For not Create Authentication
+        //==========================================================
+
+//                http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(xssFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(sqlInjectionFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class);
+
+<span class="nc" id="L320">        http.authenticationProvider(customAuthenticationProvider);</span>
+
+<span class="nc" id="L322">        log.debug(&quot;Security configuration completed&quot;);</span>
+<span class="nc" id="L323">        return http.build();</span>
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+<span class="nc" id="L328">        return new CorsConfigurationSource() {</span>
+            @Override
+            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+<span class="nc" id="L331">                CorsConfiguration config = new CorsConfiguration();</span>
+
+<span class="nc" id="L333">                config.setAllowedOriginPatterns(List.of(&quot;*&quot;));</span>
+
+//                config.setAllowedOrigins(allowedOrigins); // now includes 63342
+<span class="nc" id="L336">                config.setAllowedOrigins(allowedOrigins);</span>
+
+<span class="nc" id="L338">                config.setAllowedMethods(Arrays.asList(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
+<span class="nc" id="L339">                config.setAllowCredentials(true);</span>
+<span class="nc" id="L340">                config.setAllowedHeaders(Arrays.asList(&quot;Authorization&quot;, &quot;Content-Type&quot;, &quot;X-Requested-With&quot;, &quot;Accept&quot;));</span>
+<span class="nc" id="L341">                config.setExposedHeaders(Arrays.asList(&quot;Authorization&quot;));</span>
+<span class="nc" id="L342">                config.setMaxAge(3600L);</span>
+<span class="nc" id="L343">                return config;</span>
+            }
+        };
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+<span class="nc" id="L350">        AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);</span>
+<span class="nc" id="L351">        builder.userDetailsService(userDetailsService())</span>
+<span class="nc" id="L352">                .passwordEncoder(passwordEncoder());</span>
+<span class="nc" id="L353">        return builder.build();</span>
+    }
+
+//    Used For to not accept float value in year so user can enter only INTEGER value
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
+<span class="nc" id="L359">        return builder -&gt; builder.featuresToDisable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);</span>
+    }
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
