@@ -2,8 +2,10 @@
 package com.spring.jwt.socket;
 
 import com.spring.jwt.Mobile.Services.MobileRequestService;
-import com.spring.jwt.Mobile.dto.MobileRequestResponseDTO;
-import com.spring.jwt.auction.service.AuctionService;
+import com.spring.jwt.car.auction.service.AuctionService;
+import com.spring.jwt.car.dto.CarBookingDTO;
+import com.spring.jwt.car.entity.CarBooking;
+import com.spring.jwt.car.services.CarBookingService;
 import com.spring.jwt.socket.dto.AuctionEventDTO;
 import com.spring.jwt.socket.dto.BidMessageDTO;
 import com.spring.jwt.socket.dto.ChatMessageDTO;
@@ -21,7 +23,7 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class AuctionWebSocketController {
 
-    private final MobileRequestService mobileRequestService;
+    private final CarBookingService carBookingService;
     private final SimpMessagingTemplate messagingTemplate;
     private final AuctionService auctionService;
 
@@ -54,4 +56,22 @@ public class AuctionWebSocketController {
         messagingTemplate.convertAndSend("/topic/auction/" + auctionId, update);
     }
 
+    @MessageMapping("/car/chat/{bookingId}/send")
+    public void sendChat(@DestinationVariable Long bookingId,
+                         @Payload ChatMessageDTO chatMessage) {
+
+        Long userId = chatMessage.getUserId();
+        String message = chatMessage.getMessage();
+
+        CarBooking updated =
+                carBookingService.addMessage(bookingId, userId, message);
+
+        messagingTemplate.convertAndSend(
+                "/topic/car/chat/" + bookingId,
+                updated
+        );
+    }
+
+
 }
+

@@ -1,49 +1,17 @@
-//package com.spring.jwt.car.entity;
-//
-//import com.spring.jwt.entity.Status;
-//import jakarta.persistence.*;
-//import lombok.AllArgsConstructor;
-//import lombok.Data;
-//import lombok.NoArgsConstructor;
-//
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//
-//@Entity
-//@Table(name = "car_bookings")
-//@Data
-//@AllArgsConstructor
-//@NoArgsConstructor
-//public class CarBooking {
-//
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "booking_id")
-//    private Long id;
-//
-////    @OneToOne(fetch = FetchType.EAGER)
-//    @JoinColumn(name = "car_id", nullable = false)
-//    @ManyToOne
-//    private Cesar car;
-//
-//    @Column(name = "booking_date")
-//    private LocalDate onDate;
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "status")
-//    private Status status;
-//    @Column(name = "created_at")
-//    private LocalDateTime createdAt;
-//}
 package com.spring.jwt.car.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.car.converter.ConversationConverter;
 import com.spring.jwt.entity.Buyer;
+import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "car_bookings")
@@ -52,7 +20,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // Prevents ByteBuddy proxy error
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CarBooking {
 
     @Id
@@ -61,7 +29,6 @@ public class CarBooking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -73,35 +40,32 @@ public class CarBooking {
     @Column(name = "booking_status", nullable = false)
     private Status bookingStatus;
 
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Seller seller;
+
     @Column(name = "booking_date", nullable = false)
     private OffsetDateTime bookingDate;
 
-//    @ElementCollection
-//    @CollectionTable(
-//            name = "booking_conversations",
-//            joinColumns = @JoinColumn(name = "booking_id")
-//    )
-//    private List<ConversationMessage> conversation = new ArrayList<>();
-//
-//    @PrePersist
-//    private void prePersist() {
-//        if (this.bookingDate == null) {
-//            this.bookingDate = OffsetDateTime.now();
-//        }
-//        if (this.bookingStatus == null) {
-//            this.bookingStatus = Status.PENDING;
-//        }
-//    }
-        @Column(name = "created_at")
-        private LocalDateTime createdAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "conversation", columnDefinition = "JSON")
-    private String conversation;
+    // ✅ CORRECT TYPE — LIST, NOT STRING
+    @Convert(converter = ConversationConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private List<Map<String, Object>> conversation = new ArrayList<>();
+//    @ElementCollection
+//    @CollectionTable(name = "car_booking_conversation", joinColumns = @JoinColumn(name = "booking_id"))
+//    @Column(name = "message")
+//    private List<Map<String, Object>> conversation = new ArrayList<>();
+
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
         if (this.bookingStatus == null) this.bookingStatus = Status.PENDING;
-        if (this.conversation == null) this.conversation = "[]";
+        if (this.conversation == null) this.conversation = new ArrayList<>();
     }
 
     public enum Status {
@@ -110,8 +74,6 @@ public class CarBooking {
         CANCELLED,
         COMPLETED,
         ACTIVE,
-
         SOLD
     }
 }
-

@@ -21,6 +21,8 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     Page<Car> findBySeller_SellerIdAndDeletedFalse(Long sellerId, Pageable pageable);
 
     Optional<Car> findByRegistrationNumber(String registrationNumber);
+    List<CarBooking> findBySeller_SellerId(Long sellerId);
+
     List<CarBooking> findByBuyer(Buyer buyer);
 
 

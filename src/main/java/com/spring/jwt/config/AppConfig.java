@@ -123,32 +123,26 @@ public class AppConfig {
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .ignoringRequestMatchers(
                         "/api/**",
-                        "api/v1/user/**",
-
-                        "api/v1/cars/**",
-                        "/api/v1/car-images",
+                        "/api/v1/user/**",
+                        "/api/v1/cars/**",
+                        "/api/v1/car-images/**",
                         "/api/laptops/**",
                         "/api/laptop-photo/**",
-
                         "/bikes/**",
-
-
-                        "api/v1/auth/**",
-                        "api/v1/buyers/**",
-                        "api/v1/sellers/**",
-                        "api/v1/mobiles/**",
+                        "/api/v1/auth/**",
+                        "/api/v1/buyers/**",
+                        "/api/v1/sellers/**",
+                        "/api/v1/mobiles/**",
                         "/api/v1/mobile-images/**",
                         "/api/v1/mobile/requests/**",
                         "/api/carBookings/**",
                         "/api/v1/auctions/**",
-
-
                         jwtConfig.getUrl(),
                         jwtConfig.getRefreshUrl(),
-
                         "/ws-auction/**"
                 )
         );
+
 
         http.cors(Customizer.withDefaults());
 
