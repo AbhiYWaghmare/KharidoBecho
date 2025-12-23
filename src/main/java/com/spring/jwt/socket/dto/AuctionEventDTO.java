@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 package com.spring.jwt.socket.dto;
 
 import java.math.BigDecimal;

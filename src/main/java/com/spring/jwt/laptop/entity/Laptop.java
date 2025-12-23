@@ -1,13 +1,10 @@
 package com.spring.jwt.laptop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spring.jwt.entity.Seller;
-import com.spring.jwt.entity.User;
-import com.spring.jwt.laptop.model.Status;
+import com.spring.jwt.entity.Status;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +13,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "laptops")
@@ -91,16 +87,24 @@ public class Laptop {
     @Column(name = "usb_port")
     private Integer usbPorts;
 
-    @Enumerated(EnumType.STRING)
-    private Status status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
     private Seller seller;
 
+//    @JsonIgnore
+    @OneToMany(mappedBy = "laptop", fetch = FetchType.EAGER)
+    private List<LaptopPhotos> laptopPhotos;
+
+
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LaptopPhotos> laptopPhotos = new ArrayList<>();
+    private List<LaptopBooking> bookings = new ArrayList<>();
+
 
     private boolean deleted = false;
 

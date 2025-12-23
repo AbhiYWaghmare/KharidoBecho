@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 package com.spring.jwt.socket;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setUserDestinationPrefix("/user");
     }
 
+<<<<<<< HEAD
 
+=======
+//    Use this when we enable authentication
+
+//    @Override
+//    public void registerStompEndpoints(StompEndpointRegistry registry) {
+//        registry.addEndpoint("/ws-auction")
+//                .setAllowedOriginPatterns("*")
+//                .addInterceptors(jwtHandshakeInterceptor)   // use injected bean
+//                .withSockJS();
+//    }
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
