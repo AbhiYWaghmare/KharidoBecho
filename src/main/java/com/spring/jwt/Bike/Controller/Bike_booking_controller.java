@@ -27,6 +27,7 @@ public class Bike_booking_controller {
     ) {
 
         Bike_booking booking = bikeBookingService.createBooking(dto);
+        Long sellerId = booking.getBike().getSeller().getSellerId();
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new BookingResponce(
@@ -34,7 +35,8 @@ public class Bike_booking_controller {
                         "Bike booking created successfully",
                         booking.getId(),
                         booking.getBike().getBike_id(),
-                        booking.getBuyer().getBuyerId()
+                        booking.getBuyer().getBuyerId(),
+                        sellerId
                 ));
     }
 
@@ -89,7 +91,7 @@ public class Bike_booking_controller {
                 new ApiResponse("SUCCESS", "Message added successfully")
         );
     }
-
+// update status of booking "ACCEPTED,IN_NEGOTIATION"
     @PutMapping("/update/status")
     public ResponseEntity<ApiResponse> updateBookingStatus(
             @RequestParam Long bookingId,
@@ -101,7 +103,25 @@ public class Bike_booking_controller {
     }
 
 
+    //  GET bookings by Buyer ID
+    @GetMapping("/buyer/{buyerId}")
+    public ResponseEntity<List<Bike_booking>> getBookingsByBuyer(
+            @PathVariable Long buyerId) {
 
+        return ResponseEntity.ok(
+                bikeBookingService.getBookingsByBuyerId(buyerId)
+        );
+    }
+
+    //  GET bookings by Seller ID
+    @GetMapping("/get-seller/{sellerId}")
+    public ResponseEntity<List<Bike_booking>> getBookingsBySeller(
+            @PathVariable Long sellerId) {
+
+        return ResponseEntity.ok(
+                bikeBookingService.getBookingsBySellerId(sellerId)
+        );
+    }
 
 
 }

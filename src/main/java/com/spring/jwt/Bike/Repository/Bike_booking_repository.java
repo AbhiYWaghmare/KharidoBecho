@@ -11,4 +11,11 @@ import java.util.List;
 public interface Bike_booking_repository extends JpaRepository<Bike_booking, Long> {
     List<Bike_booking> findByStatus(Bike_booking.BookingStatus status);
     List<Bike_booking> findByBikeAndBuyer(Bike bike, Buyer buyer);
+    // For Buyer
+    List<Bike_booking> findByBuyer_BuyerId(Long buyerId);
+
+    // For Seller
+    //List<Bike_booking> findByBike_Seller_Seller_Id(Long sellerUserId);
+    List<Bike_booking> findByBike_Seller_SellerId(Long sellerId);
+
 }
