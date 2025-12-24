@@ -10,6 +10,7 @@ import java.util.List;
 public interface MobileRequestRepository extends JpaRepository<MobileRequest, Long> {
     List<MobileRequest> findByMobile_MobileIdOrderByCreatedAtAsc(Long mobileId);
     List<MobileRequest> findByBuyer_BuyerId(Long buyerId);
+    List<MobileRequest> findBySeller_SellerId(Long sellerId);
     boolean existsByMobile_MobileIdAndStatus(Long mobileId, RequestStatus status);
     List<MobileRequest> findByMobile_MobileIdAndStatus(Long mobileId, RequestStatus status);
 }
