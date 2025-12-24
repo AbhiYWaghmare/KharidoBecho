@@ -12,7 +12,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.util.Map;
 
 @Component
-public class JwtHandshakeInterceptor implements HandshakeInterceptor {
+public class  JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     private final JwtService jwtService;
 

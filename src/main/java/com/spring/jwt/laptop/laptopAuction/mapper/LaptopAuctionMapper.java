@@ -9,11 +9,11 @@ public class LaptopAuctionMapper {
 
         return new LaptopAuctionDTO(
                 a.getAuctionId(),
-                a.getLaptopId(),
+                a.getLaptop().getId(),
                 a.getStartPrice(),
                 a.getCurrentPrice(),
                 a.getMinIncrementInRupees(),
-                a.getStatus() != null ? a.getStatus().name() : null,
+//                a.getStatus() != null ? a.getStatus().name() : null,
                 a.getStartTime(),
                 a.getEndTime(),
                 a.getHighestBidderUserId()

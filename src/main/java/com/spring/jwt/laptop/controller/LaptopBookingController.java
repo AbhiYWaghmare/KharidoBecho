@@ -60,6 +60,16 @@ public class LaptopBookingController {
     }
 
     /**
+     * List all booking requests for a specific seller
+     * Returns 200 OK
+     */
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<LaptopRequestResponseDTO>> listForSeller(@PathVariable Long sellerId) {
+        return ResponseEntity.ok(service.listRequestsForSeller(sellerId));
+    }
+
+
+    /**
      * Update status (PENDING / ACCEPTED / REJECTED / COMPLETED)
      * Returns 200 OK
      */

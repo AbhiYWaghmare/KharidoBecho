@@ -16,7 +16,9 @@ public interface LaptopAuctionRepository extends JpaRepository<LaptopAuction,Lon
     @Query("""
         select a from LaptopAuction a
         where a.status = :status
-          and a.endTime < :now
+          and a.endTime <= :now
     """)
     List<LaptopAuction> findExpiredAuctions(LaptopAuction.AuctionStatus status, LocalDateTime now);
+
+    List<LaptopAuction> findByStatus(LaptopAuction.AuctionStatus status);
 }

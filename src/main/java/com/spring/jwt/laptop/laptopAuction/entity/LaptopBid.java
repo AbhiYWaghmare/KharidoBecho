@@ -47,4 +47,6 @@ public class LaptopBid {
 
     @Column(name = "offer_expires_at")
     private LocalDateTime offerExpiresAt;
+
+
 }

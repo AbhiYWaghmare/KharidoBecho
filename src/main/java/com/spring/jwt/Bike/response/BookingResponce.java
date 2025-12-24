@@ -15,15 +15,17 @@ public class BookingResponce {
     private Long bookingId;
     private Long bikeId;
     private Long buyerId;
+    private Long sellerId;
     private LocalDateTime timestamp;
 
     // constructor
-    public BookingResponce(String status, String message, Long bookingId, Long bikeId, Long buyerId) {
+    public BookingResponce(String status, String message, Long bookingId, Long bikeId, Long buyerId,Long sellerId) {
         this.status = status;
         this.message = message;
         this.bookingId = bookingId;
         this.bikeId = bikeId;
         this.buyerId = buyerId;
+        this.sellerId = sellerId;
         this.timestamp = LocalDateTime.now();
     }
 }
