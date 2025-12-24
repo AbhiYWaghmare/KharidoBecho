@@ -6,6 +6,7 @@ import com.spring.jwt.Bike.Entity.Bike;
 
 import com.spring.jwt.Bike.Entity.Bike_booking;
 import com.spring.jwt.Bike.Entity.bikeStatus;
+import com.spring.jwt.Bike.dto.BookingConversationDto;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.exception.Bike.BookingNotFoundException;
 import com.spring.jwt.exception.Bike.InvalidBikeData;
@@ -160,10 +161,10 @@ public Bike_booking rejectBooking(Long bookingId) {
         Bike_booking booking = bikeBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking not found with ID: " + bookingId));
 
-        // Then delete it
+        // delete
         bikeBookingRepository.delete(booking);
 
-        // Optionally, return deleted booking info
+        //
         return booking;
     }
 
@@ -246,6 +247,53 @@ private String determineSenderType(Long senderUserId, Bike_booking booking) {
         booking.setStatus(newStatus);
         return bikeBookingRepository.save(booking);
     }
+
+    @Override
+    public List<Bike_booking> getBookingsByBuyerId(Long buyerId) {
+
+        List<Bike_booking> bookings =
+                bikeBookingRepository.findByBuyer_BuyerId(buyerId);
+
+        if (bookings.isEmpty()) {
+            throw new BookingNotFoundException(
+                    "No bookings found for buyerId: " + buyerId
+            );
+        }
+        return bookings;
+    }
+
+
+@Override
+public List<Bike_booking> getBookingsBySellerId(Long sellerId) {
+
+    List<Bike_booking> bookings =
+            bikeBookingRepository.findByBike_Seller_SellerId(sellerId);
+
+    if (bookings.isEmpty()) {
+        throw new BookingNotFoundException(
+                "No bookings found for sellerId: " + sellerId
+        );
+    }
+    return bookings;
+}
+//
+//    @Override
+//    @Transactional
+//    public Bike_booking addMessage(Long bookingId, Bike_booking_dto dto) {
+//
+//        Bike_booking booking = bikeBookingRepository.findById(bookingId)
+//                .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+//
+//        BookingConversationDto msg = new BookingConversationDto();
+//        msg.setUserId(dto.getUserId());
+//        msg.setMessage(dto.getMessage());
+//        msg.setSenderType(determineSenderType(dto.getUserId(), booking));
+//        msg.setTimestamp(OffsetDateTime.now());
+//
+//        booking.getConversation().add(msg);
+//
+//        return bikeBookingRepository.save(booking);
+//    }
 
 
 
