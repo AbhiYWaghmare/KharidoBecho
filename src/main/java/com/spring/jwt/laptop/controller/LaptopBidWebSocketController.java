@@ -26,7 +26,7 @@ public class LaptopBidWebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
     private final BidLaptopRepository bidLaptopRepo;
 
-    @MessageMapping("/auction/{auctionId}/bid")
+    @MessageMapping("/auction/{auctionId}/bid/bid")
     public void placeBid(
             @DestinationVariable Long auctionId,
             BidLaptopDTO bidMessage

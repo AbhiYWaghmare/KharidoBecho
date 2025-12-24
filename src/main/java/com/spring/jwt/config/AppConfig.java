@@ -197,6 +197,11 @@ public class AppConfig {
 
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/user/**").permitAll()
+                .requestMatchers(
+                        "/ws-auction/**",
+                        "/ws/**",
+                        "/ws-info/**"
+                ).permitAll()
 
 
                 .anyRequest().authenticated());
