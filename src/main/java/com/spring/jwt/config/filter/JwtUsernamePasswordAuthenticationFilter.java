@@ -135,6 +135,7 @@ public class JwtUsernamePasswordAuthenticationFilter extends AbstractAuthenticat
             responseData.put("expiresIn", jwtConfig.getExpiration());
             responseData.put("roles", roles);
             responseData.put("userId", userDetailsCustom.getUserId());
+            responseData.put("firstName",userDetailsCustom.getFirstName());
             
             String json = HelperUtils.JSON_WRITER.writeValueAsString(responseData);
             response.setContentType("application/json; charset=UTF-8");

@@ -1,6 +1,7 @@
 package com.spring.jwt.auction.controller;
 
 import com.spring.jwt.auction.dto.AuctionDTO;
+import com.spring.jwt.auction.dto.AuctionRequestDTO;
 import com.spring.jwt.auction.entity.Auction;
 import com.spring.jwt.auction.exception.AuctionNotFoundException;
 import com.spring.jwt.auction.mapper.AuctionMapper;
@@ -22,28 +23,18 @@ public class AuctionController {
     private final AuctionRepository auctionRepository;
     private final AuctionService auctionService;
 
-    // ========= CREATE AUCTION =========
+    // CREATE AUCTION
     @PostMapping("/create")
-    public ResponseEntity<AuctionDTO> createAuction(@RequestBody AuctionDTO dto) {
-        // For create, we ignore dto.auctionId and status, and set sane defaults
-        Auction a = new Auction();
-        a.setMobileId(dto.mobileId());
-        a.setStartPrice(dto.startPrice());
-        a.setCurrentPrice(dto.startPrice()); // initialize
-        a.setMinIncrementInRupees(dto.minIncrementInRupees());
-        a.setStartTime(dto.startTime() != null ? dto.startTime() : OffsetDateTime.now());
-        a.setEndTime(dto.endTime());
-        a.setStatus(Auction.Status.SCHEDULED);  // created as SCHEDULED
-        a.setHighestBidderUserId(null);
+    public ResponseEntity<AuctionDTO> createAuction(@RequestBody AuctionRequestDTO dto) {
 
-        Auction saved = auctionRepository.save(a);
-        AuctionDTO response = AuctionMapper.toDTO(saved);
+        AuctionDTO response = auctionService.createAuction(dto);
+
         return ResponseEntity
-                .created(URI.create("/api/v1/auctions/" + saved.getAuctionId()))
+                .created(URI.create("/api/v1/auctions/" + response.auctionId()))
                 .body(response);
     }
 
-    // ========= GET BY ID =========
+    // GET BY ID
     @GetMapping("/{id}")
     public ResponseEntity<AuctionDTO> getById(@PathVariable Long id) {
         Auction a = auctionRepository.findById(id)
@@ -76,7 +67,7 @@ public class AuctionController {
         return ResponseEntity.ok(dtos);
     }
 
-    // ========= WINNER ACCEPT / REJECT =========
+    // WINNER ACCEPT / REJECT
     // typically the winner (buyer) will call these
 
     @PostMapping("/{auctionId}/winner-accept")
@@ -95,7 +86,7 @@ public class AuctionController {
         return ResponseEntity.noContent().build();
     }
 
-    // (Optional) manual start/end endpoints for debugging:
+    //  we can manually start & end the Aunction endpoints
     @PostMapping("/_start-due")
     public ResponseEntity<Void> startDue() {
         auctionService.startDueAuctions();
