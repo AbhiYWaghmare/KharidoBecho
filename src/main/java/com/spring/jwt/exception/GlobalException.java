@@ -4,6 +4,7 @@ package com.spring.jwt.exception;
 
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.auction.exception.AuctionNotFoundException;
 import com.spring.jwt.exception.bookings.LaptopRequestException;
 import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
