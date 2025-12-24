@@ -19,6 +19,10 @@ public interface Bike_booking_service {
   Bike_booking addMessage(Long id, Bike_booking_dto conversation);
   Bike_booking getBookingById(Long id);
   Bike_booking updateBookingStatus(Long bookingId, Bike_booking.BookingStatus newStatus);
+    List<Bike_booking> getBookingsByBuyerId(Long buyerId);
+
+    List<Bike_booking> getBookingsBySellerId(Long sellerId);
+
 
 }
 
