@@ -3,6 +3,7 @@ package com.spring.jwt.laptop.service;
 
 import com.spring.jwt.entity.Status;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
+import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Laptop;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ public interface LaptopService {
     Laptop getById(Long laptopId);
 
     //Method to get all laptops
-    List<Laptop> getAllLaptops();
+    List<LaptopResponseDTO> getAllLaptops();
 
     Page<Laptop> getBySellerIdAndStatus(Long sellerId, Status status, int page, int size, String sortBy);
 
@@ -35,4 +36,5 @@ public interface LaptopService {
     Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy);
 
 
+    LaptopResponseDTO updateLaptop(Long id, LaptopRequestDTO request);
 }

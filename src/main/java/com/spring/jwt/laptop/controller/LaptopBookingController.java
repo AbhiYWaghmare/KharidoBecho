@@ -59,6 +59,11 @@ public class LaptopBookingController {
         return ResponseEntity.ok(service.listRequestsForBuyer(buyerId));
     }
 
+    @GetMapping("/laptop-bookings/{bookingId}")
+    public ResponseEntity<List<LaptopRequestResponseDTO>> listByBookingId(@PathVariable Long bookingId){
+        return ResponseEntity.ok(service.listRequestByBooking(bookingId));
+    }
+
     /**
      * List all booking requests for a specific seller
      * Returns 200 OK
