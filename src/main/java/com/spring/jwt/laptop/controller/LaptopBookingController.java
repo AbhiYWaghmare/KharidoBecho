@@ -60,6 +60,16 @@ public class LaptopBookingController {
     }
 
     /**
+     * List all booking requests for a specific seller
+     * Returns 200 OK
+     */
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<LaptopRequestResponseDTO>> listForSeller(@PathVariable Long sellerId) {
+        return ResponseEntity.ok(service.listRequestsForSeller(sellerId));
+    }
+
+
+    /**
      * Update status (PENDING / ACCEPTED / REJECTED / COMPLETED)
      * Returns 200 OK
      */
@@ -74,13 +84,13 @@ public class LaptopBookingController {
      * Append a chat message to a laptop request conversation
      * Returns 200 OK
      */
-//    @PostMapping("/{laptopBookingId}/message")
-//    public ResponseEntity<LaptopRequestResponseDTO> sendMessage(
-//            @PathVariable Long laptopBookingId,
-//            @RequestParam Long senderUserId,
-//            @RequestParam String message) {
-//        return ResponseEntity.ok(service.appendMessage(laptopBookingId, senderUserId, message));
-//    }
+    @PostMapping("/{laptopBookingId}/message")
+    public ResponseEntity<LaptopRequestResponseDTO> sendMessage(
+            @PathVariable Long laptopBookingId,
+            @RequestParam Long senderUserId,
+            @RequestParam String message) {
+        return ResponseEntity.ok(service.appendMessage(laptopBookingId, senderUserId, message));
+    }
 
     /**
      * Mark request as completed (sold) and reject others

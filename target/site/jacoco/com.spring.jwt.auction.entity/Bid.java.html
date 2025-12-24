@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bid.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.auction.entity</a> &gt; <span class="el_source">Bid.java</span></div><h1>Bid.java</h1><pre class="source lang-java linenums">package com.spring.jwt.auction.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+@Entity
+@Table(name = &quot;bids&quot;)
+@Getter
+<span class="nc" id="L11">@Setter</span>
+<span class="nc" id="L12">@NoArgsConstructor</span>
+<span class="nc" id="L13">@AllArgsConstructor</span>
+<span class="nc" id="L14">@Builder</span>
+public class Bid {
+
+<span class="nc" id="L17">    public enum Status {</span>
+<span class="nc" id="L18">        PLACED,        // normal bid during auction</span>
+<span class="nc" id="L19">        WINNING_OFFER, // after auction ended, currently offered to user</span>
+<span class="nc" id="L20">        ACCEPTED,      // user accepted and bought</span>
+<span class="nc" id="L21">        REJECTED,</span>
+<span class="nc" id="L22">        EXPIRED</span>
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;bid_id&quot;)
+<span class="nc" id="L28">    private Long bidId;</span>
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;auction_id&quot;, nullable = false)
+<span class="nc" id="L32">    private Auction auction;</span>
+
+    @Column(name = &quot;bidder_user_id&quot;, nullable = false)
+<span class="nc" id="L35">    private Long bidderUserId;</span>
+
+    @Column(name = &quot;amount&quot;, nullable = false)
+<span class="nc" id="L38">    private BigDecimal amount;</span>
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = &quot;status&quot;, nullable = false)
+<span class="nc" id="L42">    private Status status;</span>
+
+    @Column(name = &quot;created_at&quot;, nullable = false)
+<span class="nc" id="L45">    private OffsetDateTime createdAt;</span>
+
+    // When we make an offer after end
+    @Column(name = &quot;offer_expires_at&quot;)
+<span class="nc" id="L49">    private OffsetDateTime offerExpiresAt;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -31,7 +31,7 @@
         <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">
         <span>(SockJS URL)</span>
     </div>
-    <!--  removed JWT token field completely -->
+    <!-- 🔥 removed JWT token field completely -->
     <button onclick="connect()">Connect</button>
     <button onclick="disconnect()">Disconnect</button>
 </fieldset>
@@ -112,7 +112,7 @@
             return;
         }
 
-        //  No token, just plain SockJS URL
+        // 🔥 No token, just plain SockJS URL
         const fullUrl = baseUrl;
 
         log('Connecting to: ' + fullUrl);
@@ -185,7 +185,7 @@
 
         const destination = '/app/auction/' + auctionId + '/bid';
         const payload = {
-            userId: Number(userId),      //  send userId
+            userId: Number(userId),      // 🔥 send userId
             auctionId: Number(auctionId),
             bidAmount: Number(bidAmount)
         };
@@ -205,7 +205,7 @@
 
         const destination = '/app/chat/' + requestId + '/send';
         const payload = {
-            userId: Number(userId),      // 🔥 send userId
+            userId: Number(userId),      //  send userId
             message: message
         };
 
@@ -220,3 +220,247 @@
 
 </body>
 </html>
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Laptop Auction - Live WebSocket UI</title>-->
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
+
+<!--    <style>-->
+<!--        body { font-family: Arial; margin: 20px; background: #f2f2f2; }-->
+<!--        fieldset { margin-bottom: 20px; padding: 15px; background: #fff; border-radius: 8px; }-->
+<!--        textarea { width: 100%; height: 180px; }-->
+<!--        .auction-card {-->
+<!--            padding: 10px;-->
+<!--            background: white;-->
+<!--            border: 1px solid #ccc;-->
+<!--            border-radius: 6px;-->
+<!--            margin-bottom: 10px;-->
+<!--        }-->
+<!--        .live { color: green; font-weight: bold; }-->
+<!--        .ended { color: red; font-weight: bold; }-->
+<!--        button { padding: 6px 12px; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<h2>💻 Laptop LIVE Auction Dashboard</h2>-->
+
+<!--<div id="status">Status: DISCONNECTED</div>-->
+
+<!--<fieldset>-->
+<!--    <div>-->
+<!--        <label>WS Endpoint:</label>-->
+<!--        <input type="text" id="wsUrl" value="http://localhost:8087/ws-auction">-->
+<!--    </div>-->
+
+<!--    <button onclick="connect()">Connect</button>-->
+<!--    <button onclick="disconnect()">Disconnect</button>-->
+<!--</fieldset>-->
+
+<!--<fieldset>-->
+<!--    <legend>LIVE Auctions</legend>-->
+<!--    <button onclick="subscribeLiveAuctions()">Start Listening</button>-->
+
+<!--    <div id="liveAuctionsContainer" style="margin-top:10px;">-->
+<!--        <i>No live auctions yet...</i>-->
+<!--    </div>-->
+<!--</fieldset>-->
+
+<!--<fieldset>-->
+<!--    <legend>Subscribe to an Auction</legend>-->
+<!--    Auction ID:-->
+<!--    <input type="number" id="auctionId" value="1">-->
+<!--    <button onclick="subscribeAuction()">Subscribe</button>-->
+<!--</fieldset>-->
+
+<!--<fieldset>-->
+<!--    <legend>Place a Bid</legend>-->
+<!--    User ID:-->
+<!--    <input type="number" id="userId" value="10005"><br><br>-->
+
+<!--    Bid Amount:-->
+<!--    <input type="number" id="bidAmount" value="20000">-->
+<!--    <button onclick="sendBid()">Send Bid</button>-->
+<!--</fieldset>-->
+
+<!--<fieldset>-->
+<!--    <legend>Chat System</legend>-->
+<!--    Request ID:-->
+<!--    <input type="number" id="requestId" value="3">-->
+<!--    <button onclick="subscribeChat()">Subscribe Chat</button><br><br>-->
+
+<!--    Message:-->
+<!--    <input type="text" id="chatMessage" value="Hello!" style="width:300px;">-->
+<!--    <button onclick="sendChat()">Send</button>-->
+<!--</fieldset>-->
+
+<!--<fieldset>-->
+<!--    <legend>Logs</legend>-->
+<!--    <textarea id="log" readonly></textarea>-->
+<!--</fieldset>-->
+
+<!--<script>-->
+
+<!--    let stompClient = null;-->
+<!--    let liveAuctions = {};-->
+
+<!--    function log(msg) {-->
+<!--        const area = document.getElementById("log");-->
+<!--        area.value += msg + "\n";-->
+<!--        area.scrollTop = area.scrollHeight;-->
+<!--        console.log(msg);-->
+<!--    }-->
+
+<!--    function setStatus(msg) {-->
+<!--        document.getElementById("status").innerText = "Status: " + msg;-->
+<!--    }-->
+
+<!--    // CONNECT &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+<!--    function connect() {-->
+
+<!--        const baseUrl = document.getElementById("wsUrl").value.trim();-->
+
+<!--        if (!baseUrl) {-->
+<!--            alert('Please enter WebSocket URL');-->
+<!--            return;-->
+<!--        }-->
+
+<!--        log('Connecting to: ' + baseUrl);-->
+
+<!--        const socket = new SockJS(baseUrl);-->
+<!--        stompClient = Stomp.over(socket);-->
+<!--        stompClient.debug = null;-->
+
+<!--        stompClient.connect({}, frame => {-->
+<!--            setStatus("CONNECTED");-->
+<!--            log("Connected: " + frame);-->
+
+<!--            subscribeLiveAuctions();-->
+
+<!--        }, error => {-->
+<!--            setStatus("ERROR");-->
+<!--            log("Connection error: " + error);-->
+<!--        });-->
+<!--    }-->
+
+<!--    function disconnect() {-->
+<!--        if (stompClient) stompClient.disconnect(() => {-->
+<!--            setStatus("DISCONNECTED");-->
+<!--            log("Disconnected");-->
+<!--        });-->
+<!--    }-->
+
+<!--    // LIVE AUCTION LISTENER -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+<!--    function subscribeLiveAuctions() {-->
+<!--        if (!stompClient) return log("Connect first!");-->
+
+<!--        const topic = "/topic/laptop-auctions/live";-->
+<!--        log("Listening for LIVE auctions at " + topic);-->
+
+<!--        stompClient.subscribe(topic, msg => {-->
+<!--            const data = JSON.parse(msg.body);-->
+<!--            log("[LIVE EVENT] " + msg.body);-->
+
+<!--            if (data.type === "LIVE_AUCTION") {-->
+<!--                liveAuctions[data.auctionId] = data;-->
+<!--                updateLiveAuctionUI();-->
+<!--            }-->
+
+<!--            if (data.type === "AUCTION_ENDED") {-->
+<!--                delete liveAuctions[data.auctionId];-->
+<!--                updateLiveAuctionUI();-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+
+<!--    function updateLiveAuctionUI() {-->
+<!--        const container = document.getElementById("liveAuctionsContainer");-->
+
+<!--        if (Object.keys(liveAuctions).length === 0) {-->
+<!--            container.innerHTML = "<i>No live auctions right now...</i>";-->
+<!--            return;-->
+<!--        }-->
+
+<!--        container.innerHTML = Object.values(liveAuctions)-->
+<!--            .map(a => `-->
+<!--                <div class="auction-card">-->
+<!--                    <span class="live">LIVE AUCTION #${a.auctionId}</span><br>-->
+<!--                    Current Price: ₹${a.currentPrice}<br>-->
+<!--                    Highest Bidder: ${a.highestBidderUserId || "-"}<br>-->
+<!--                    <button onclick="subscribeAuctionId(${a.auctionId})">Subscribe to this Auction</button>-->
+<!--                </div>-->
+<!--            `)-->
+<!--            .join("");-->
+<!--    }-->
+
+<!--    function subscribeAuctionId(id) {-->
+<!--        document.getElementById("auctionId").value = id;-->
+<!--        subscribeAuction();-->
+<!--    }-->
+
+<!--    // MANUAL AUCTION SUBSCRIBE &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+<!--    function subscribeAuction() {-->
+<!--        if (!stompClient) return log("Connect first!");-->
+
+<!--        const id = document.getElementById("auctionId").value;-->
+<!--        const topic = `/topic/laptop-auction/${id}`;-->
+<!--        log("Subscribing to " + topic);-->
+
+<!--        stompClient.subscribe(topic, msg => log("[AUCTION] " + msg.body));-->
+<!--    }-->
+
+<!--    // SEND BID -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+<!--    function sendBid() {-->
+<!--        if (!stompClient) return log("Connect first!");-->
+
+<!--        const auctionId = Number(document.getElementById("auctionId").value);-->
+<!--        const userId = Number(document.getElementById("userId").value);-->
+<!--        const amount = Number(document.getElementById("bidAmount").value);-->
+
+<!--        const destination = `/app/laptop/auction/${auctionId}/bid`;-->
+
+<!--        const payload = {-->
+<!--            userId: userId,-->
+<!--            auctionId: auctionId,-->
+<!--            bidAmount: amount-->
+<!--        };-->
+
+<!--        log("Sending BID → " + JSON.stringify(payload));-->
+<!--        stompClient.send(destination, {}, JSON.stringify(payload));-->
+<!--    }-->
+
+<!--    // CHAT -&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;-->
+<!--    function subscribeChat() {-->
+<!--        if (!stompClient) return log("Connect first!");-->
+
+<!--        const id = document.getElementById("requestId").value;-->
+<!--        const topic = `/topic/laptop/chat/${id}`;-->
+<!--        log("Subscribing chat: " + topic);-->
+
+<!--        stompClient.subscribe(topic, msg => log("[CHAT] " + msg.body));-->
+<!--    }-->
+
+<!--    function sendChat() {-->
+<!--        if (!stompClient) return log("Connect first!");-->
+
+<!--        const id = document.getElementById("requestId").value;-->
+<!--        const destination = `/app/laptop/chat/${id}/send`;-->
+
+<!--        const payload = {-->
+<!--            userId: Number(document.getElementById("userId").value),-->
+<!--            message: document.getElementById("chatMessage").value-->
+<!--        };-->
+
+<!--        log("Sending CHAT → " + JSON.stringify(payload));-->
+<!--        stompClient.send(destination, {}, JSON.stringify(payload));-->
+<!--    }-->
+
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->

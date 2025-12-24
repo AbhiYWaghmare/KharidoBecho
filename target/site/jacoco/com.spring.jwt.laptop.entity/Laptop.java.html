@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Laptop.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">JWT-with-Spring-Security</a> &gt; <a href="index.source.html" class="el_package">com.spring.jwt.laptop.entity</a> &gt; <span class="el_source">Laptop.java</span></div><h1>Laptop.java</h1><pre class="source lang-java linenums">package com.spring.jwt.laptop.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.spring.jwt.entity.Seller;
+import com.spring.jwt.entity.Status;
+import com.spring.jwt.laptop.model.LaptopRequestStatus;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = &quot;laptops&quot;)
+<span class="nc bnc" id="L19" title="All 212 branches missed.">@Data</span>
+<span class="nc" id="L20">@AllArgsConstructor</span>
+<span class="nc" id="L21">@NoArgsConstructor</span>
+public class Laptop {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = &quot;laptop_id&quot;)
+<span class="nc" id="L27">    private Long id;</span>
+
+    @NotBlank
+    @Column(name = &quot;serial_Number&quot;, nullable = false, unique = true)
+<span class="nc" id="L31">    private String serialNumber;</span>
+
+    @Column(name = &quot;dealer&quot;)
+<span class="nc" id="L34">    private String dealer;</span>
+
+    @Column(name = &quot;model&quot;)
+<span class="nc" id="L37">    private String model;</span>
+
+    @Column(name = &quot;brand&quot;)
+<span class="nc" id="L40">    private String brand;</span>
+
+    @Column(name = &quot;price&quot;)
+<span class="nc" id="L43">    private double price;</span>
+
+    @Column(name = &quot;warranty_In_Year&quot;)
+<span class="nc" id="L46">    private Long warrantyInYear;</span>
+
+    @Column(name = &quot;processor&quot;)
+<span class="nc" id="L49">    private String processor;</span>
+
+    @Column(name = &quot;processor_brand&quot;)
+<span class="nc" id="L52">    private String processorBrand;</span>
+
+    @Column(name = &quot;memory_type&quot;)
+<span class="nc" id="L55">    private String memoryType;</span>
+
+    @Column(name = &quot;screen_size&quot;)
+<span class="nc" id="L58">    private String screenSize;</span>
+
+    @Column(name = &quot;colour&quot;)
+<span class="nc" id="L61">    private String colour;</span>
+
+    @Column(name = &quot;ram&quot;)
+<span class="nc" id="L64">    private String ram;</span>
+
+    @Column(name = &quot;storage&quot;)
+<span class="nc" id="L67">    private String storage;</span>
+
+    @Column(name = &quot;battery&quot;)
+<span class="nc" id="L70">    private String battery;</span>
+
+    @Column(name = &quot;battery_life&quot;)
+<span class="nc" id="L73">    private String batteryLife;</span>
+
+    @Column(name = &quot;graphics_card&quot;)
+<span class="nc" id="L76">    private String graphicsCard;</span>
+
+    @Column(name = &quot;graphics_brand&quot;)
+<span class="nc" id="L79">    private String graphicBrand;</span>
+
+    @Column(name = &quot;weight&quot;)
+<span class="nc" id="L82">    private String weight;</span>
+
+    @Column(name = &quot;manufacturer&quot;)
+<span class="nc" id="L85">    private String manufacturer;</span>
+
+    @Column(name = &quot;usb_port&quot;)
+<span class="nc" id="L88">    private Integer usbPorts;</span>
+
+
+<span class="nc" id="L91">    @Enumerated(EnumType.STRING)</span>
+    @Column(nullable = false)
+<span class="nc" id="L93">    private Status status = Status.ACTIVE;</span>
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = &quot;seller_id&quot;, nullable = false)
+    @JsonIgnore
+<span class="nc" id="L98">    private Seller seller;</span>
+
+    @JsonIgnore
+    @OneToMany(mappedBy = &quot;laptop&quot;, fetch = FetchType.LAZY)
+<span class="nc" id="L102">    private List&lt;LaptopPhotos&gt; laptopPhotos;</span>
+
+
+<span class="nc" id="L105">    @OneToMany(mappedBy = &quot;laptop&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    @JsonIgnore
+<span class="nc" id="L107">    private List&lt;LaptopBooking&gt; bookings = new ArrayList&lt;&gt;();</span>
+
+
+<span class="nc" id="L110">    private boolean deleted = false;</span>
+
+<span class="nc" id="L112">    private LocalDateTime deletedAt;</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -31,10 +31,10 @@ public class AuctionWebSocketController {
         Long senderUserId = chatMessage.getUserId();
         String text = chatMessage.getMessage();
 
-        // 1-persist message using your existing logic
+        // 1 persist message using your existing logic
         MobileRequestResponseDTO updated = mobileRequestService.appendMessage(requestId, senderUserId, text);
 
-        // 2-broadcast updated conversation to all subscribers
+        // 2 broadcast updated conversation to all subscribers
         messagingTemplate.convertAndSend("/topic/chat/" + requestId, updated);
     }
 
@@ -42,7 +42,7 @@ public class AuctionWebSocketController {
 //    public void placeBid(@DestinationVariable Long auctionId,
 //                         @Payload BidMessageDTO bidMessage) {
 //
-//        Long userId = bidMessage.userId();  // 👈 from message, not from JWT
+//        Long userId = bidMessage.userId();  //   from message, not from JWT
 //        if (userId == null) {
 //            throw new IllegalArgumentException("userId is required in bidMessage");
 //        }
@@ -52,6 +52,8 @@ public class AuctionWebSocketController {
     // you can keep your bid/auction mappings here too if you want
 
     // Client sends: /app/auction/{auctionId}/bid
+
+
     @MessageMapping("/auction/{auctionId}/bid")
     public void placeBid(@DestinationVariable Long auctionId,
                          @Payload BidMessageDTO bidMessage) {
@@ -67,4 +69,5 @@ public class AuctionWebSocketController {
 
         auctionService.placeBid(auctionId, userId, amount);
     }
+
 }
