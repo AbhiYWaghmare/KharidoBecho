@@ -1,5 +1,6 @@
 package com.spring.jwt.laptop.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -42,7 +43,7 @@ public class LaptopBooking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "laptop_id", nullable = false)
-    @JsonIgnore
+    @JsonBackReference
     private Laptop laptop;
 
     @ManyToOne(fetch = FetchType.LAZY)
