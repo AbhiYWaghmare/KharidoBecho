@@ -20,6 +20,10 @@ public class CarBookingDTO {
                  @Positive(message = "buyerId must be a positive number")
                  private Long buyerId;
 
+//                @NotNull(message = "buyerId is required")
+//                @Positive(message = "buyerId must be a positive number")
+//                private Long sellerId;
+
 //                 @NotNull(message = "userId is required")
                  @Positive(message = "userId must be a positive number")
                  private Long userId;

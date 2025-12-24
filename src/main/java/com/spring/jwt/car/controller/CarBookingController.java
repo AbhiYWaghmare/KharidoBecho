@@ -24,20 +24,17 @@ public class CarBookingController {
     // ✅ Create booking
 
     @PostMapping("/createBooking")
-    public ResponseEntity<CarBookingResponseDTO> createBooking( @Valid @RequestBody CarBookingDTO carBookingDTO) {
+    public ResponseEntity<?> createBooking(@Valid @RequestBody CarBookingDTO carBookingDTO) {
+
         CarBooking booking = carBookingService.createBooking(carBookingDTO);
 
-        String message = booking.getBookingStatus() == CarBooking.Status.PENDING
-                ? "Car booking created successfully (status: pending)"
-                : "Car booked successfully!";
+        Map<String, Object> response = new HashMap<>();
+        response.put("bookingId", booking.getBookingId());
+        response.put("carId", booking.getCar().getCarId());
+        response.put("bookingStatus", booking.getBookingStatus().name());
+        response.put("conversation", booking.getConversation());
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new CarBookingResponseDTO(
-                        message,
-                        booking.getCar() != null ? booking.getCar().getCarId() : null,
-                        booking.getBookingId(),
-                        booking.getBookingStatus().name()
-                ));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 
@@ -93,9 +90,16 @@ public class CarBookingController {
             @RequestParam Long bookingId,
             @RequestBody CarBookingDTO newMessage) {
 
-        carBookingService.addMessage(bookingId, newMessage);
-        return ResponseEntity.ok("Message added successfully");
+        CarBooking updatedBooking = carBookingService.addMessage(bookingId, newMessage);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("bookingId", updatedBooking.getBookingId());
+        response.put("bookingStatus", updatedBooking.getBookingStatus().name());
+        response.put("conversation", updatedBooking.getConversation());
+
+        return ResponseEntity.ok(response);
     }
+
     // 🔵 Get all bookings by buyerId (Chat List)
     @GetMapping("/buyer/{buyerId}")
     public ResponseEntity<?> getBookingsByBuyer(@PathVariable Long buyerId) {
@@ -109,6 +113,12 @@ public class CarBookingController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<CarBooking>> getBookingsBySeller(@PathVariable Long sellerId) {
+        return ResponseEntity.ok(carBookingService.getBookingsBySellerId(sellerId));
+    }
+
 
 
     // 🔵 Get single booking + conversation (Chat Thread)

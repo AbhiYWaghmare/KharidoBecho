@@ -15,6 +15,8 @@ package com.spring.jwt.car.repository;
 
 import com.spring.jwt.car.entity.CarBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,6 +35,13 @@ public interface CarBookingRepository extends JpaRepository<CarBooking, Long> {
     boolean existsByBuyer_BuyerIdAndCar_CarId(Long buyerId, Long carId);
     List<CarBooking> findByBuyer_BuyerId(Long buyerId);
 
+    List<CarBooking> findBySeller_SellerId(Long sellerId);
+    @Query("SELECT c FROM CarBooking c WHERE c.seller.sellerId = :sellerId")
+    List<CarBooking> findBySellerId(@Param("sellerId") Long sellerId);
+
+
+
+//    List<CarBooking> findBySellerId(Long sellerId);
 
 
 }

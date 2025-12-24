@@ -14,6 +14,9 @@ public interface CarBookingService {
     CarBooking addMessage(Long id, CarBookingDTO conversation);
     List<CarBooking> getBookingsByBuyerId(Long buyerId);
 
+    List<CarBooking> getBookingsBySellerId(Long sellerId);
+
+
     CarBooking getBookingDetails(Long bookingId);
 
 

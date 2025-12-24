@@ -104,7 +104,7 @@ public class Car {
     // YEAR OF PURCHASE
     private Integer yearOfPurchase;
 
-    // FUEL TYPE
+    // FUEL TYPE?
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FuelType fuelType;
@@ -163,7 +163,7 @@ public class Car {
 
 
     public enum Status {
-        ACTIVE, SOLD, DELETED
+        ACTIVE, SOLD, DELETED,UNSOLD
     }
 
     private boolean deleted = false;
