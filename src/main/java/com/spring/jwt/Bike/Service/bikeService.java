@@ -28,6 +28,9 @@ public interface bikeService {
     void hardDeleteBike(Long bike_id);
 
     Page<bikeDto> getBikesBySellerAndStatus(Long sellerId, bikeStatus status, int page, int size);
+    Page<bikeDto> getBikesBySeller(Long sellerId, int page, int size);
+
+
 
     Page<bikeDto> getBikesByStatus(bikeStatus status, int page, int size);
 

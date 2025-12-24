@@ -74,7 +74,11 @@ public class CarBooking {
         CANCELLED,
         COMPLETED,
         ACTIVE,
+<<<<<<< HEAD
         SOLD,
         REJECTED
+=======
+        SOLD
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     }
 }

@@ -1,7 +1,10 @@
 package com.spring.jwt.car.auction.service.impl;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+=======
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 import com.spring.jwt.car.auction.dto.AuctionDTO;
 import com.spring.jwt.car.auction.dto.AuctionUpdateMessageDTO;
 import com.spring.jwt.car.auction.entity.Auction;
@@ -14,11 +17,16 @@ import com.spring.jwt.car.auction.repository.AuctionRepository;
 import com.spring.jwt.car.auction.repository.BidRepository;
 import com.spring.jwt.car.auction.service.AuctionService;
 import com.spring.jwt.car.entity.Car;
+<<<<<<< HEAD
 import com.spring.jwt.car.entity.CarBooking;
 import com.spring.jwt.car.repository.CarBookingRepository;
 import com.spring.jwt.car.repository.CarRepository;
 
 import com.spring.jwt.car.auction.carsocket.dto.ChatMessageDTO;
+=======
+import com.spring.jwt.car.repository.CarRepository;
+
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -27,11 +35,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+<<<<<<< HEAD
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+=======
+import java.util.List;
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 import java.util.stream.IntStream;
 
 @Slf4j
@@ -43,7 +55,10 @@ public class AuctionServiceImpl implements AuctionService {
     private final BidRepository bidRepository;
     private final CarRepository carRepository;
     private final SimpMessagingTemplate messagingTemplate;
+<<<<<<< HEAD
     private final CarBookingRepository carBookingRepository;
+=======
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 
     // ===================================================================
     // CREATE AUCTION
@@ -338,8 +353,12 @@ public class AuctionServiceImpl implements AuctionService {
         );
         messagingTemplate.convertAndSend("/topic/auction/" + auctionId, msg);
     }
+<<<<<<< HEAD
 
     //    ++++++++++++++++++++++++++++++
+=======
+//    ++++++++++++++++++++++++++++++
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     @Override
     public Auction getAuctionById(Long auctionId) {
         return auctionRepository.findById(auctionId)
@@ -438,6 +457,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     }
 
+<<<<<<< HEAD
     @Override
     @Transactional
     public void saveChatMessage(Long bookingId, ChatMessageDTO incomingMsg) {
@@ -502,4 +522,6 @@ public class AuctionServiceImpl implements AuctionService {
 
 
     }
+=======
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 }

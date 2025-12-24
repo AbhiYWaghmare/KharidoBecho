@@ -81,7 +81,14 @@ public class CarBookingServiceImpl implements CarBookingService {
     }
 
 
+    // -----------------------------------------------------
+    //  ADD CHAT MESSAGE
+    // -----------------------------------------------------
+    @Override
+    @Transactional
+    public CarBooking addMessage(Long bookingId, Long userId, String message) {
 
+<<<<<<< HEAD
     // -----------------------------------------------------
     //  ADD CHAT MESSAGE
     // -----------------------------------------------------
@@ -120,10 +127,55 @@ public class CarBookingServiceImpl implements CarBookingService {
                 booking.getCar().getSeller() != null &&
                 booking.getCar().getSeller().getUser().getId().equals(senderUserId))
             return "SELLER";
+=======
+        CarBooking booking = carBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+
+        List<Map<String, Object>> oldConversation = booking.getConversation();
+        List<Map<String, Object>> newConversation = new ArrayList<>();
+
+        if (oldConversation != null) {
+            newConversation.addAll(oldConversation);
+        }
+
+        String senderType = determineSenderType(userId, booking);
+
+        Map<String, Object> msg = new LinkedHashMap<>();
+        msg.put("userId", userId);
+        msg.put("senderType", senderType);
+        msg.put("message", message);
+        msg.put("timestamp", OffsetDateTime.now().toString());
+
+        newConversation.add(msg);
+
+        booking.setConversation(newConversation);
+
+        return carBookingRepository.save(booking);
+    }
+    private String determineSenderType(Long senderUserId, CarBooking booking) {
+
+        if (booking.getBuyer() != null &&
+                booking.getBuyer().getUser().getId().equals(senderUserId)) {
+            return "BUYER";
+        }
+
+        if (booking.getCar() != null &&
+                booking.getCar().getSeller() != null &&
+                booking.getCar().getSeller().getUser().getId().equals(senderUserId)) {
+            return "SELLER";
+        }
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 
         return "UNKNOWN";
     }
 
+<<<<<<< HEAD
+=======
+
+
+
+
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     // -----------------------------------------------------
     //  OTHER METHODS (NO CHANGE)
     // -----------------------------------------------------
@@ -155,6 +207,7 @@ public class CarBookingServiceImpl implements CarBookingService {
 
     @Override
     public CarBooking rejectBooking(Long bookingId) {
+<<<<<<< HEAD
 
         CarBooking booking = carBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
@@ -174,6 +227,14 @@ public class CarBookingServiceImpl implements CarBookingService {
 
 
 
+=======
+        CarBooking booking = carBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+        booking.setBookingStatus(CarBooking.Status.PENDING);
+        return carBookingRepository.save(booking);
+    }
+
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     @Override
     public List<CarBooking> getBookingsByBuyerId(Long buyerId) {
         return carBookingRepository.findByBuyer_BuyerId(buyerId);

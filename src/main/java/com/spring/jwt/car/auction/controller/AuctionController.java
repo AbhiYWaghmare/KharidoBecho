@@ -7,7 +7,6 @@ import com.spring.jwt.car.auction.exception.CarAuctionNotFoundException;
 import com.spring.jwt.car.auction.mapper.AuctionMapper;
 import com.spring.jwt.car.auction.repository.AuctionRepository;
 import com.spring.jwt.car.auction.service.AuctionService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,6 @@ public class AuctionController {
 
     // ========= CREATE AUCTION =========
     @PostMapping("/create")
-    public ResponseEntity<AuctionDTO> createAuction(@Valid @RequestBody  AuctionDTO dto) {
 
         AuctionDTO response = AuctionService.createAuction(dto);
 

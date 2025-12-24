@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 
+<<<<<<< HEAD:src/main/java/com/spring/jwt/car/auction/carsocket/JwtHandshakeInterceptor.java
 package com.spring.jwt.car.auction.carsocket;
+=======
+=======
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
+package com.spring.jwt.socket;
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d:src/main/java/com/spring/jwt/socket/JwtHandshakeInterceptor.java
 
 import com.spring.jwt.jwt.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +20,11 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import java.util.Map;
 
 @Component
+<<<<<<< HEAD
 public class JwtHandshakeInterceptor implements HandshakeInterceptor {
+=======
+public class  JwtHandshakeInterceptor implements HandshakeInterceptor {
+>>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
     private final JwtService jwtService;
 

@@ -85,21 +85,53 @@ public class CarBookingController {
                 booking.getBookingStatus().name()
         ));
     }
+//    @PostMapping("/send")
+//    public ResponseEntity<?> sendMessage(
+//            @RequestParam Long bookingId,
+//            @RequestParam Long userId,
+//            @RequestParam String message,
+//            @RequestBody CarBookingDTO newMessage){
+//
+//        CarBooking updatedBooking = carBookingService.addMessage(bookingId, userId, message);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("bookingId", updatedBooking.getBookingId());
+//        response.put("conversation", updatedBooking.getConversation());
+//
+//        return ResponseEntity.ok(response);
+//    }
     @PostMapping("/send")
     public ResponseEntity<?> sendMessage(
             @RequestParam Long bookingId,
-            @RequestBody CarBookingDTO newMessage) {
+            @RequestBody CarBookingDTO dto) {
 
+<<<<<<< HEAD
         CarBooking updatedBooking = carBookingService.addMessage(bookingId, newMessage);
 
         Map<String, Object> response = new HashMap<>();
         response.put("bookingId", updatedBooking.getBookingId());
         response.put("bookingStatus", updatedBooking.getBookingStatus().name());
         response.put("conversation", updatedBooking.getConversation());
+=======
+        CarBooking updated =
+                carBookingService.addMessage(
+                        bookingId,
+                        dto.getUserId(),
+                        dto.getMessage()
+                );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("bookingId", updated.getBookingId());
+        response.put("conversation", updated.getConversation());
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
 
         return ResponseEntity.ok(response);
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     // 🔵 Get all bookings by buyerId (Chat List)
     @GetMapping("/buyer/{buyerId}")
     public ResponseEntity<?> getBookingsByBuyer(@PathVariable Long buyerId) {
