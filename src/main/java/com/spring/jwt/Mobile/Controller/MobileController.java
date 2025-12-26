@@ -1,10 +1,7 @@
 package com.spring.jwt.Mobile.Controller;
 
 import com.spring.jwt.Mobile.Services.MobileService;
-import com.spring.jwt.Mobile.dto.MobileAddReqDTO;
-import com.spring.jwt.Mobile.dto.MobileRequestCreateDTO;
-import com.spring.jwt.Mobile.dto.MobileRequestDTO;
-import com.spring.jwt.Mobile.dto.MobileResponseDTO;
+import com.spring.jwt.Mobile.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -67,7 +64,7 @@ public class MobileController {
 
     //To update the details of mobile by id
     @PatchMapping("/update/{id}")
-    public ResponseEntity<MobileResponseDTO> update(@PathVariable Long id,@Valid @RequestBody MobileRequestDTO req) {
+    public ResponseEntity<MobileResponseDTO> update(@PathVariable Long id, @Valid @RequestBody MobileUpdateDTO req) {
         return ResponseEntity.ok(mobileService.updateMobile(id, req));
     }
 

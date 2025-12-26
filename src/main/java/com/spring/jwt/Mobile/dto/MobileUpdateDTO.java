@@ -12,9 +12,6 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class MobileUpdateDTO {
 
-
-    public class MobileRequestDTO {
-
         //  TITLE
 //        @NotBlank(message = "Title is required")
         @Size(max = 150, message = "Title cannot exceed 150 characters")
@@ -69,4 +66,4 @@ public class MobileUpdateDTO {
         private Long sellerId;
     }
 
-}
+
