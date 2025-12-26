@@ -3,15 +3,18 @@ package com.spring.jwt.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.jwt.dto.ResponseAllUsersDto;
 import com.spring.jwt.dto.UserDTO;
+import com.spring.jwt.laptop.dto.ImageUploadResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import jakarta.persistence.Entity;
 
 import java.util.List;
 import java.util.Map;
@@ -25,122 +28,113 @@ import java.util.Map;
 public class DecryptionResponseProcessor implements ResponseBodyAdvice<Object> {
 
     private final EncryptionUtil encryptionUtil;
-    private final ObjectMapper objectMapper;
 
+    /**
+     * We allow all responses here,
+     * filtering is safely handled in beforeBodyWrite().
+     */
     @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-
+    public boolean supports(MethodParameter returnType,
+                            Class<? extends HttpMessageConverter<?>> converterType) {
         return true;
     }
 
-
     @Override
-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType,
-                                 Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                 ServerHttpRequest request, ServerHttpResponse response) {
+    public Object beforeBodyWrite(Object body,
+                                  MethodParameter returnType,
+                                  MediaType selectedContentType,
+                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
+                                  ServerHttpRequest request,
+                                  ServerHttpResponse response) {
 
-        // FIX: Avoid NPE when controller returns no body (204 No Content)
-        if (body == null) {
-            return null;  // nothing to decrypt
-        }
 
-        try {
-            log.debug("Processing response for decryption: {}", body.getClass().getName());
-            return processResponse(body);
-        } catch (Exception e) {
-            log.error("Error processing response for decryption: {}", e.getMessage(), e);
-            return body;
-        }
-    }
-    
-    private Object processResponse(Object body) {
         if (body == null) {
             return null;
         }
 
-        if (body instanceof ResponseAllUsersDto) {
-            ResponseAllUsersDto responseDto = (ResponseAllUsersDto) body;
-            if (responseDto.getList() != null) {
-                log.debug("Processing ResponseAllUsersDto with {} items", responseDto.getList().size());
-                for (UserDTO user : responseDto.getList()) {
-                    decryptUserDTO(user);
-                }
-            }
+        if (body instanceof ProblemDetail) {
             return body;
         }
 
-        if (body instanceof UserDTO) {
-            decryptUserDTO((UserDTO) body);
+        if (body instanceof ImageUploadResponseDTO) {
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             return body;
         }
 
-        if (body instanceof List<?>) {
-            List<?> list = (List<?>) body;
-            for (Object item : list) {
-                if (item instanceof UserDTO) {
-                    decryptUserDTO((UserDTO) item);
-                } else {
-                    processResponse(item);
-                }
-            }
-            return body;
-        }
 
-        if (body instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) body;
-            for (Object value : map.values()) {
-                if (value instanceof UserDTO) {
-                    decryptUserDTO((UserDTO) value);
-                } else if (value instanceof List) {
-                    processResponse(value);
-                } else if (value instanceof Map) {
-                    processResponse(value);
-                }
-            }
+        if (!MediaType.APPLICATION_JSON.includes(selectedContentType)) {
             return body;
         }
 
         try {
-            Map<String, Object> objectMap = objectMapper.convertValue(body, Map.class);
-
-            for (String key : objectMap.keySet()) {
-                Object value = objectMap.get(key);
-                
-                if (value instanceof Map || value instanceof List) {
-                    processResponse(value);
-                }
-            }
-
-            if (objectMap.containsKey("list")) {
-                Object listObj = objectMap.get("list");
-                if (listObj instanceof List) {
-                    log.debug("Found 'list' field in response object, processing it");
-                    processResponse(listObj);
-                }
-            }
-
-            return body;
-        } catch (Exception e) {
-            log.debug("Could not process complex object for decryption: {}", e.getMessage());
-            return body;
+            log.debug("Decrypting response body: {}", body.getClass().getName());
+            return processResponse(body);
+        } catch (Exception ex) {
+            log.error("Error while decrypting response", ex);
+            return body; // never break response pipeline
         }
     }
-    
+
+
+    private Object processResponse(Object body) {
+
+        // Skip JPA entities
+        if (body.getClass().isAnnotationPresent(Entity.class)) {
+            return body;
+        }
+
+        // Skip Hibernate persistent collections
+        if (body instanceof org.hibernate.collection.spi.PersistentCollection) {
+            return body;
+        }
+
+        // Handle ResponseAllUsersDto
+        if (body instanceof ResponseAllUsersDto responseDto) {
+            if (responseDto.getList() != null) {
+                responseDto.getList().forEach(this::decryptUserDTO);
+            }
+            return body;
+        }
+
+        // Handle single UserDTO
+        if (body instanceof UserDTO userDTO) {
+            decryptUserDTO(userDTO);
+            return body;
+        }
+
+        // Handle List responses
+        if (body instanceof List<?> list) {
+            list.forEach(this::processResponse);
+            return body;
+        }
+
+        // Handle Map responses
+        if (body instanceof Map<?, ?> map) {
+            map.values().forEach(this::processResponse);
+            return body;
+        }
+
+        // Default: return untouched
+        return body;
+    }
+
+
     private void decryptUserDTO(UserDTO user) {
         try {
-            if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            if (user.getFirstName() != null && !user.getFirstName().isBlank()) {
                 user.setFirstName(encryptionUtil.decrypt(user.getFirstName()));
             }
 
-            if (user.getLastName() != null && !user.getLastName().isEmpty()) {
+            if (user.getLastName() != null && !user.getLastName().isBlank()) {
                 user.setLastName(encryptionUtil.decrypt(user.getLastName()));
             }
 
-            if (user.getAddress() != null && !user.getAddress().isEmpty()) {
+            if (user.getAddress() != null && !user.getAddress().isBlank()) {
                 user.setAddress(encryptionUtil.decrypt(user.getAddress()));
             }
         } catch (Exception e) {
-            log.error("Error decrypting user data: {}", e.getMessage());
+            log.error("Failed to decrypt UserDTO fields", e);
         }
     }
+
 } 

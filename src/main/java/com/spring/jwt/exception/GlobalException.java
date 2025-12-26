@@ -342,35 +342,31 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     // ========================= LAPTOP EXCEPTIONS ========================= //
 
     @ExceptionHandler(LaptopAlreadyExistsException.class)
-    public ResponseEntity<LaptopResponseDTO> handleLaptopAlreadyExists(LaptopAlreadyExistsException ex,
-                                                                      WebRequest request) {
-        LaptopResponseDTO error = new LaptopResponseDTO();
-        error.setApiPath(request.getDescription(false).replace("uri=", ""));
-        error.setStatus("error");
-        error.setMessage(ex.getMessage());
-        error.setCode("ALREADY EXISTS");
-        error.setStatusCode(HttpStatus.CONFLICT.value());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
+    public ResponseEntity<Map<String, Object>> handleLaptopAlreadyExists(
+            LaptopAlreadyExistsException ex, WebRequest request) {
 
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT.value());
+        body.put("error", "Laptop Already Exists");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(PhotoNotFoundException.class)
-    public ResponseEntity<LaptopResponseDTO> handlePhotoNotFoundException(
+    public ResponseEntity<Map<String, Object>> handlePhotoNotFoundException(
             PhotoNotFoundException ex, WebRequest request) {
 
-        LaptopResponseDTO error = new LaptopResponseDTO();
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Photo Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
 
-        error.setStatus("error");
-        error.setMessage(ex.getMessage());
-        error.setCode("NOT FOUND");
-        error.setStatusCode(HttpStatus.NOT_FOUND.value());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
-        error.setApiPath(error.getApiPath());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(CloudinaryDeleteException.class)
@@ -384,18 +380,19 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(LaptopNotFoundException.class)
-    public ResponseEntity<LaptopResponseDTO> handelLaptopNotFoundException(LaptopNotFoundException ex, WebRequest webRequest){
-        LaptopResponseDTO error = new LaptopResponseDTO();
-        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
-        error.setStatus("error");
-        error.setMessage(ex.getMessage());
-        error.setCode("NOT FOUND");
-        error.setStatusCode(HttpStatus.NOT_FOUND.value());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
+    public ResponseEntity<Map<String, Object>> handleLaptopNotFound(
+            LaptopNotFoundException ex, WebRequest request) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Laptop Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
 
 
     @ExceptionHandler(LaptopImageException.class)
@@ -413,31 +410,32 @@ public class  GlobalException extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<LaptopResponseDTO> handleValidationException(ValidationException ex, WebRequest webRequest){
-        LaptopResponseDTO error = new LaptopResponseDTO();
-        error.setApiPath(webRequest.getDescription(false).replace("uri=", ""));
-        error.setStatus("error");
-        error.setMessage(ex.getMessage());
-        error.setCode("BAD REQUEST");
-        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
+    public ResponseEntity<Map<String, Object>> handleLaptopValidationException(
+            ValidationException ex, WebRequest request) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(BlankFieldsException.class)
-    public ResponseEntity<LaptopResponseDTO> handleBlankFieldsException(BlankFieldsException ex, WebRequest webRequest){
-        LaptopResponseDTO error = new LaptopResponseDTO();
-        error.setApiPath(webRequest.getDescription(false).replace("uri",""));
-        error.setStatus("error");
-        error.setMessage(ex.getMessage());
-        error.setCode("BAD REQUEST");
-        error.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        error.setTimeStamp(LocalDateTime.now());
-        error.setException(ex.toString());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    @ExceptionHandler(BlankFieldsException.class)
+    public ResponseEntity<Map<String, Object>> handleBlankFieldsException(
+            BlankFieldsException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Validation Failed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
 

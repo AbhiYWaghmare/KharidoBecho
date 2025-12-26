@@ -101,6 +101,7 @@ public class LaptopAuctionController {
         return ResponseEntity.noContent().build();
     }
 
+
     @PostMapping("/_process-expired-offers")
     public ResponseEntity<Void> processExpiredOffers() {
         laptopAuctionService.processExpiredOffers();

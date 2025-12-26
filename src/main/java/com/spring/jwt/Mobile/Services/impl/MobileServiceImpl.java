@@ -255,6 +255,7 @@ public class MobileServiceImpl implements MobileService {
         m.setStatus(Mobile.Status.ACTIVE);
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
+
     }
 
 
