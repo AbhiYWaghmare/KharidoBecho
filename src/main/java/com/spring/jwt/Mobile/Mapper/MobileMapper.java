@@ -19,8 +19,15 @@ public class MobileMapper {
         dto.setPrice(m.getPrice());
         dto.setNegotiable(m.getNegotiable());
         dto.setCondition(m.getCondition() != null ? m.getCondition().name() : null);
-        dto.setBrand(m.getBrand());
-        dto.setModel(m.getModel());
+//        dto.setBrand(m.getBrand());
+//        dto.setModel(m.getModel());
+        dto.setBrand(
+                m.getModel() != null ? m.getModel().getBrand().getName() : null
+        );
+        dto.setModel(
+                m.getModel() != null ? m.getModel().getName() : null
+        );
+
         dto.setColor(m.getColor());
         dto.setYearOfPurchase(m.getYearOfPurchase());
         dto.setStatus(m.getStatus() != null ? m.getStatus().name() : null);
@@ -63,8 +70,8 @@ public class MobileMapper {
         m.setDescription(req.getDescription());
         m.setPrice(req.getPrice());
         m.setNegotiable(req.getNegotiable());
-        m.setBrand(req.getBrand());
-        m.setModel(req.getModel());
+//        m.setBrand(req.getBrand());
+//        m.setModel(req.getModel());
         m.setColor(req.getColor());
         if (req.getCondition() != null) {
             m.setCondition(Mobile.Condition.valueOf(req.getCondition().toUpperCase()));
@@ -79,8 +86,8 @@ public class MobileMapper {
         if (req.getDescription() != null) m.setDescription(req.getDescription());
         if (req.getPrice() != null) m.setPrice(req.getPrice());
         if (req.getNegotiable() != null) m.setNegotiable(req.getNegotiable());
-        if (req.getBrand() != null) m.setBrand(req.getBrand());
-        if (req.getModel() != null) m.setModel(req.getModel());
+//        if (req.getBrand() != null) m.setBrand(req.getBrand());
+//        if (req.getModel() != null) m.setModel(req.getModel());
         if (req.getColor() != null) m.setColor(req.getColor());
 
         if (req.getCondition() != null) {
