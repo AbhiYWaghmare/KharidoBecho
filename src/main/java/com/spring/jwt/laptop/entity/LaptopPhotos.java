@@ -30,7 +30,7 @@ public class LaptopPhotos {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "laptop_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Laptop laptop;
 }
 

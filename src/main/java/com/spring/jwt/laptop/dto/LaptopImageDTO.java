@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class LaptopImageDTO {
     private Long photoId;
-    private String photoLink;
+    private String photo_link;
 }

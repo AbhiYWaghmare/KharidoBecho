@@ -20,7 +20,7 @@ public interface LaptopService {
     Laptop update(Long laptopId, LaptopRequestDTO laptopRequestDTO);
 
     //Method to get laptop by id
-    Laptop getById(Long laptopId);
+    LaptopResponseDTO getById(Long laptopId);
 
     //Method to get all laptops
     List<LaptopResponseDTO> getAllLaptops();
