@@ -600,6 +600,8 @@
 package com.spring.jwt.exception;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import com.spring.jwt.car.auction.exception.CarAuctionNotFoundException;
+import com.spring.jwt.car.auction.exception.CarInvalidAuctionStateException;
 import com.spring.jwt.exception.car.*;
 import com.spring.jwt.exception.car.BuyerNotFoundException;
 import com.spring.jwt.exception.car.SellerNotFoundException;
@@ -641,7 +643,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalException extends ResponseEntityExceptionHandler {
 
-    // Invalid JSON OR unknown field
+    // Invalid JSON OR unknown fieldBookingNotFoundException
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex,
@@ -800,6 +802,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
+
 
     // TYPE MISMATCH
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -1103,6 +1106,33 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+//    @ExceptionHandler(CarAuctionException.class)
+//    public ResponseEntity<Map<String, Object>> handleCarAuctionException(CarAuctionException ex, WebRequest req) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put("message", ex.getMessage());
+//        error.put("timeStamp", LocalDateTime.now());
+//        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
+//        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+//    }
+
+    @ExceptionHandler(CarInvalidAuctionStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCarAuctionState(CarInvalidAuctionStateException ex, WebRequest req) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        error.put("timeStamp", LocalDateTime.now());
+        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CarAuctionNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleCarAuctionNotFound(CarAuctionNotFoundException ex, WebRequest req) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("message", ex.getMessage());
+        error.put("timeStamp", LocalDateTime.now());
+        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
 
     @ExceptionHandler(DuplicateBookingException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateBooking(

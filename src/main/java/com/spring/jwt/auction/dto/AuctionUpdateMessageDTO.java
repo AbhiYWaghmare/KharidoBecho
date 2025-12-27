@@ -1,3 +1,4 @@
+
 package com.spring.jwt.auction.dto;
 
 import java.math.BigDecimal;

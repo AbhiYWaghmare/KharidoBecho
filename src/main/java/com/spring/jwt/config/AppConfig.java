@@ -40,9 +40,9 @@ import java.util.List;
 @EnableWebSecurity
 @EnableScheduling
 @EnableMethodSecurity(
-        securedEnabled = true,
-        jsr250Enabled = true,
-        prePostEnabled = true
+    securedEnabled = true,
+    jsr250Enabled = true,
+    prePostEnabled = true
 )
 @Slf4j
 public class AppConfig {
@@ -78,11 +78,9 @@ public class AppConfig {
     @Value("${app.url.frontend:http://localhost:5173}")
     private String frontendUrl;
 
-//    @Value("#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/}'.split(',')}")
-//    private List<String> allowedOrigins;
-
     @Value("#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/,http://localhost:63342}'.split(',')}")
     private List<String> allowedOrigins;
+
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -107,64 +105,37 @@ public class AppConfig {
     @Bean
     public ForwardedHeaderFilter forwardedHeaderFilter() {
         return new ForwardedHeaderFilter();
-
     }
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/ws-auction/**");
-    }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.debug("Configuring security filter chain");
 
         http.csrf(csrf -> csrf
-<<<<<<< HEAD
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers(
-                        "/api/**",
-                        "/api/v1/user/**",
-                        "/api/v1/cars/**",
-                        "/api/v1/car-images/**",
-                        "/api/laptops/**",
-                        "/api/laptop-photo/**",
-                        "/bikes/**",
-                        "/api/v1/auth/**",
-                        "/api/v1/buyers/**",
-                        "/api/v1/sellers/**",
-                        "/api/v1/mobiles/**",
-                        "/api/v1/mobile-images/**",
-                        "/api/v1/mobile/requests/**",
-                        "/api/carBookings/**",
-                        "/api/v1/auctions/**",
-                        jwtConfig.getUrl(),
-                        jwtConfig.getRefreshUrl(),
-                        "/ws-auction/**"
-                )
-=======
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .ignoringRequestMatchers(
                 "/api/**",
+                    "/cars/**",
+                    "/api/v1/cars/**",
 
-                    "api/v1/user/**",
+                    "/api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
                     "/api/laptops/**",
                     "/api/laptop-photo/**",
                     "/api/v1/laptop-auctions/**",
                     "/api/colours/**",
-                    "api/v1/user/**",
-                    "api/v1/cars/**",
+                    "/api/v1/user/**",
+                    "/api/v1/cars/**",
                     "/api/v1/car-images",
 
 
                     "/bikes/**",
 
 
-                    "api/v1/auth/**",
-                    "api/v1/buyers/**",
-                    "api/v1/sellers/**",
+                    "/api/v1/auth/**",
+                    "/api/v1/buyers/**",
+                    "/api/v1/sellers/**",
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
 
@@ -178,6 +149,9 @@ public class AppConfig {
 
                     "/api/v1/mobile/requests/**",
                     "/api/v1/auctions/**",
+                    "/api/v1/car-auctions/**",
+                    "/api/carBookings/**",
+
 
 
                 jwtConfig.getUrl(),
@@ -185,9 +159,7 @@ public class AppConfig {
 
                     "/ws-auction/**"
             )
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
         );
-
 
         http.cors(Customizer.withDefaults());
 
@@ -195,22 +167,28 @@ public class AppConfig {
 
         http.headers(headers -> headers
                 .xssProtection(xss -> xss
-                        .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                    .headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                 .contentSecurityPolicy(csp -> csp
-<<<<<<< HEAD
-                        .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"))
-=======
-                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';" +
-                            " connect-src 'self' ws: wss: http://localhost:8087;\n'"))
+                        .policyDirectives(
+                                "default-src 'self'; " +
+                                        "script-src 'self' 'unsafe-inline'; " +
+                                        "style-src 'self' 'unsafe-inline'; " +
+                                        "img-src 'self' data:; " +
+                                        "font-src 'self'; " +
+                                        "connect-src 'self' ws: wss: http://localhost:8087;"
+                        ))
+
+//                        .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';" +
+//                            " connect-src 'self' ws: wss: http://localhost:8087;\n'"))
+
 //                connect-src 'self'
 
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
                 .frameOptions(frame -> frame.deny())
                 .referrerPolicy(referrer -> referrer
-                        .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                 .permissionsPolicy(permissions -> permissions
-                        .policy("camera=(), microphone=(), geolocation=()"))
-        );
+                    .policy("camera=(), microphone=(), geolocation=()"))
+            );
 
         log.debug("Configuring URL-based security rules");
         http.authorizeHttpRequests(authorize -> authorize
@@ -237,7 +215,6 @@ public class AppConfig {
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/laptop-photo/**").permitAll()
 
-
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
                 // existing rules...
@@ -248,24 +225,27 @@ public class AppConfig {
                 .requestMatchers("/api/v1/sellers/**").permitAll()
 
                 .requestMatchers("/api/v1/auctions/**").permitAll()
-<<<<<<< HEAD
-=======
+                .requestMatchers("/api/v1/car-auctions/**").permitAll()
                 .requestMatchers("/api/laptopBookings/**").permitAll()
                 .requestMatchers("/api/v1/laptop-auctions/**").permitAll()
                 .requestMatchers("/api/colours/**").permitAll()
                 .requestMatchers("/Auction/**", "/Auction", "/ws/**", "/websocket/**", "/sockjs/**").permitAll()
                 .requestMatchers("/laptop/auctions/live").permitAll()
                 .requestMatchers("/api/beadingLaptops/**").permitAll()
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
-
                 .requestMatchers("/api/carBookings/**").permitAll()
-                .requestMatchers("/auction-endpoint/**").permitAll()
-//  add this
+
+
 
 
 
 
 //                .requestMatchers("/ws-auction/**").permitAll()   //  add this
+                .requestMatchers(
+                        "/ws-auction/**",
+                        "/ws/**",
+                        "/ws-info/**"
+                ).permitAll()
+
 
                 .requestMatchers(jwtConfig.getUrl()).permitAll()
                 .requestMatchers(jwtConfig.getRefreshUrl()).permitAll()
@@ -280,40 +260,21 @@ public class AppConfig {
                         "/configuration/security",
                         "/swagger-ui/**",
                         "/webjars/**",
+                        "/api/carBookings/**",
                         "/swagger-ui.html"
                 ).permitAll()
 
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/user/**").permitAll()
-<<<<<<< HEAD
-//                .requestMatchers("/ws-auction/**").permitAll()
-                .requestMatchers(
-                        "/ws-auction/**",
-                        "/ws/**",
-                        "/ws-info/**"
-                ).permitAll()
-=======
                 .requestMatchers("/ws-auction/**").permitAll()
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
+
 
 
 //                .anyRequest().authenticated());
 
-                //=====================================================
+              //=====================================================
                 //Use When we want to permit all request
                 .anyRequest().permitAll());
-<<<<<<< HEAD
-        //=========================================================
-
-        // Create a request matcher for public URLs
-        org.springframework.security.web.util.matcher.RequestMatcher publicUrls =
-                new org.springframework.security.web.util.matcher.OrRequestMatcher(
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/auth/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/public/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
-=======
             //=========================================================
 
         // Create a request matcher for public URLs
@@ -324,53 +285,24 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-auctions/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
 
-<<<<<<< HEAD
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
-=======
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/carBookings/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
 
-<<<<<<< HEAD
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
-=======
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
 
-<<<<<<< HEAD
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
-
-
-
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-resources/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/configuration/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/webjars/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/swagger-ui.html"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/user/**"),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getUrl()),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl()),
-                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws-auction/**")
-                );
-=======
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
 
 
@@ -379,6 +311,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptopBookings/**"),
 
 
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/carBookings/**"),
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**"),
@@ -394,7 +327,6 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl()),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws-auction/**")
             );
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 
 
         log.debug("Configuring security filters");
@@ -430,17 +362,16 @@ public class AppConfig {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
-<<<<<<< HEAD
-=======
 
-                config.setAllowedOriginPatterns(List.of("*"));
+//                config.setAllowedOriginPatterns(List.of("*"));
 
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
 //                config.setAllowedOrigins(allowedOrigins); // now includes 63342
                 config.setAllowedOrigins(allowedOrigins);
 
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH","PUT", "DELETE", "OPTIONS"));
+//                config.setAllowCredentials(true);
                 config.setAllowCredentials(true);
+
                 config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
                 config.setExposedHeaders(Arrays.asList("Authorization"));
                 config.setMaxAge(3600L);
@@ -454,13 +385,17 @@ public class AppConfig {
         AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder.userDetailsService(userDetailsService())
                 .passwordEncoder(passwordEncoder());
-     return builder.build();
+        return builder.build();
     }
 
-    //    Used For to not accept float value in year so user can enter only INTEGER value
+//    Used For to not accept float value in year so user can enter only INTEGER value
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
         return builder -> builder.featuresToDisable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+    }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/ws-auction/**");
     }
 
 

@@ -3,6 +3,8 @@ package com.spring.jwt.car.controller;
 import com.spring.jwt.car.dto.CarCreateResponseDTO;
 import com.spring.jwt.car.dto.CarRequestDTO;
 import com.spring.jwt.car.dto.CarResponseDTO;
+import com.spring.jwt.car.entity.Car;
+import com.spring.jwt.car.mapper.CarMapper;
 import com.spring.jwt.car.services.CarService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +45,7 @@ public class CarController {
                 .carId(savedCar.getCarId())
                 .build();
 
-         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     // Get all cars
     @GetMapping("/getAllCars")
@@ -58,9 +60,13 @@ public class CarController {
 
     // Get car by ID
     @GetMapping("/{id}")
-    public ResponseEntity<CarResponseDTO> get(@PathVariable Long id) {
-        return ResponseEntity.ok(carService.getCar(id));
+    public ResponseEntity<CarResponseDTO> getCar(@PathVariable Long id) {
+
+        CarResponseDTO dto = carService.getCar(id);
+        return ResponseEntity.ok(dto);
     }
+
+
 
     // Update car by ID
     @PatchMapping("/update/{id}")

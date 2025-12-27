@@ -1,5 +1,6 @@
 package com.spring.jwt.car.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
@@ -72,7 +73,9 @@ public class Car {
 
     @ManyToOne
     @JoinColumn(name = "buyer_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
     private Buyer buyer;
+
 
 
     // NEGOTIABLE
@@ -173,12 +176,16 @@ public class Car {
 
 
     // SELLER
-    @ManyToOne(fetch = FetchType.LAZY)
+    // SELLER
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
     private Seller seller;
 
+
+
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<CarImage> images;
 
 }

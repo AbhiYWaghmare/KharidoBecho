@@ -1,6 +1,6 @@
 package com.spring.jwt.car.auction.scheduler;
 
-import com.spring.jwt.car.auction.service.AuctionService;
+import com.spring.jwt.car.auction.service.CarAuctionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,17 +11,17 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CarAuctionScheduler {
 
-    private final AuctionService auctionService;
+    private final CarAuctionService carauctionService;
 
     // 🔁 Every 30 seconds → start & end auctions
     @Scheduled(fixedDelay = 30000)
     public void handleStartAndEnd() {
         log.info("🚗 Car Auction scheduler fired");
 
-        auctionService.startDueAuctions();
-        auctionService.endDueAuctions();
+        carauctionService.startDueAuctions();
+        carauctionService.endDueAuctions();
 
-        auctionService.broadcastRunningAuctions();
+        carauctionService.broadcastRunningAuctions();
     }
 
     // 🔁 Every 60 seconds → expire offers
@@ -29,7 +29,7 @@ public class CarAuctionScheduler {
     public void handleExpiredOffers() {
         log.info("⏰ Car Auction expired offers check");
 
-        auctionService.processExpiredOffers();
+        carauctionService.processExpiredOffers();
     }
 }
 ///

@@ -122,6 +122,7 @@ public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
     }
 
     @Override
+    @Transactional
     public Page<CarResponseDTO> listCars(int page, int size, Long sellerId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Car> pageResult = (sellerId != null)
@@ -133,6 +134,7 @@ public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
 
 
     @Override
+    @Transactional
     public CarResponseDTO getCar(Long id) {
         Car car = carRepository.findByCarIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CarNotFoundException(id));

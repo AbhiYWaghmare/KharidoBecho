@@ -29,6 +29,7 @@ public class CarBooking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -74,11 +75,7 @@ public class CarBooking {
         CANCELLED,
         COMPLETED,
         ACTIVE,
-<<<<<<< HEAD
         SOLD,
         REJECTED
-=======
-        SOLD
->>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     }
 }

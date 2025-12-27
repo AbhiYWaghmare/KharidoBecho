@@ -10,9 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/carBookings")
@@ -22,142 +21,131 @@ public class CarBookingController {
     private final CarBookingService carBookingService;
 
     // ✅ Create booking
-
     @PostMapping("/createBooking")
-    public ResponseEntity<?> createBooking(@Valid @RequestBody CarBookingDTO carBookingDTO) {
+    public ResponseEntity<CarBookingResponseDTO> createBooking(
+            @Valid @RequestBody CarBookingDTO carBookingDTO) {
 
         CarBooking booking = carBookingService.createBooking(carBookingDTO);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("bookingId", booking.getBookingId());
-        response.put("carId", booking.getCar().getCarId());
-        response.put("bookingStatus", booking.getBookingStatus().name());
-        response.put("conversation", booking.getConversation());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                buildResponse("Booking created successfully", booking)
+        );
     }
-
-
 
     // ✅ Accept booking
     @PatchMapping("/acceptBooking")
-    public ResponseEntity<CarBookingResponseDTO> acceptBooking(@RequestParam Long bookingId) {
+    public ResponseEntity<CarBookingResponseDTO> acceptBooking(
+            @RequestParam Long bookingId) {
+
         CarBooking booking = carBookingService.acceptBooking(bookingId);
+
         return ResponseEntity.ok(
-                new CarBookingResponseDTO(
-                        "Car booking accepted successfully",
-                        booking.getCar() != null ? booking.getCar().getCarId() : null,
-                        booking.getBookingId(),
-                        booking.getBookingStatus().name()
-                )
+                buildResponse("Car booking accepted successfully", booking)
+        );
+    }
+
+    // ✅ Approve booking
+    @PatchMapping("/approveBooking")
+    public ResponseEntity<CarBookingResponseDTO> approveBooking(
+            @RequestParam Long bookingId) {
+
+        CarBooking booking = carBookingService.approveBooking(bookingId);
+
+        return ResponseEntity.ok(
+                buildResponse("Car booking approved successfully", booking)
+        );
+    }
+
+    // ✅ Reject booking
+    @PatchMapping("/rejectBooking")
+    public ResponseEntity<CarBookingResponseDTO> rejectBooking(
+            @RequestParam Long bookingId) {
+
+        CarBooking booking = carBookingService.rejectBooking(bookingId);
+
+        return ResponseEntity.ok(
+                buildResponse("Car booking rejected successfully", booking)
         );
     }
 
     // ✅ Get all pending bookings
     @GetMapping("/getPendingBookings")
-    public ResponseEntity<List<CarBooking> > getPendingBookings() {
-        return ResponseEntity.ok(carBookingService.getPendingBookings());
+    public ResponseEntity<List<CarBookingResponseDTO>> getPendingBookings() {
+
+        List<CarBooking> bookings = carBookingService.getPendingBookings();
+
+        List<CarBookingResponseDTO> response = bookings.stream()
+                .map(b -> buildResponse("Pending booking fetched", b))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
 
-    // ✅ Approve booking
-    @PatchMapping("/approveBooking")
-    public ResponseEntity<CarBookingResponseDTO> approveBooking(@RequestParam Long bookingId) {
-        CarBooking booking = carBookingService.approveBooking(bookingId);
+    // ✅ Send message
+    @PostMapping("/send")
+    public ResponseEntity<CarBookingResponseDTO> sendMessage(
+            @RequestParam Long bookingId,
+            @RequestBody CarBookingDTO newMessage) {
+
+        CarBooking booking = carBookingService.addMessage(bookingId, newMessage);
+
         return ResponseEntity.ok(
-                new CarBookingResponseDTO(
-                        "Car booking approved successfully",
-                        booking.getCar() != null ? booking.getCar().getCarId() : null,
-                        booking.getBookingId(),
-                        booking.getBookingStatus().name()
-                )
+                buildResponse("Message sent successfully", booking)
         );
     }
 
-
-    // ✅ Reject booking
-    @PatchMapping("/rejectBooking")
-    public ResponseEntity<CarBookingResponseDTO> rejectBooking(@RequestParam Long bookingId) {
-        CarBooking booking = carBookingService.rejectBooking(bookingId);
-        return ResponseEntity.ok(new CarBookingResponseDTO(
-                "Car booking rejected successfully",
-                booking.getCar() != null ? booking.getCar().getCarId() : null,
-                booking.getBookingId(),
-                booking.getBookingStatus().name()
-        ));
-    }
-//    @PostMapping("/send")
-//    public ResponseEntity<?> sendMessage(
-//            @RequestParam Long bookingId,
-//            @RequestParam Long userId,
-//            @RequestParam String message,
-//            @RequestBody CarBookingDTO newMessage){
-//
-//        CarBooking updatedBooking = carBookingService.addMessage(bookingId, userId, message);
-//
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("bookingId", updatedBooking.getBookingId());
-//        response.put("conversation", updatedBooking.getConversation());
-//
-//        return ResponseEntity.ok(response);
-//    }
-    @PostMapping("/send")
-    public ResponseEntity<?> sendMessage(
-            @RequestParam Long bookingId,
-            @RequestBody CarBookingDTO dto) {
-
-<<<<<<< HEAD
-        CarBooking updatedBooking = carBookingService.addMessage(bookingId, newMessage);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("bookingId", updatedBooking.getBookingId());
-        response.put("bookingStatus", updatedBooking.getBookingStatus().name());
-        response.put("conversation", updatedBooking.getConversation());
-=======
-        CarBooking updated =
-                carBookingService.addMessage(
-                        bookingId,
-                        dto.getUserId(),
-                        dto.getMessage()
-                );
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("bookingId", updated.getBookingId());
-        response.put("conversation", updated.getConversation());
->>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
-
-        return ResponseEntity.ok(response);
-    }
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 3f6fd5271690c6d33a58f5b7773addd3ba9a6e3d
     // 🔵 Get all bookings by buyerId (Chat List)
     @GetMapping("/buyer/{buyerId}")
-    public ResponseEntity<?> getBookingsByBuyer(@PathVariable Long buyerId) {
+    public ResponseEntity<List<CarBookingResponseDTO>> getBookingsByBuyer(
+            @PathVariable Long buyerId) {
 
-        List<CarBooking> bookings = carBookingService.getBookingsByBuyerId(buyerId);
+        List<CarBooking> bookings =
+                carBookingService.getBookingsByBuyerId(buyerId);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "All Car Requests Fetched Successfully");
-        response.put("count", bookings.size());
-        response.put("data", bookings);
+        List<CarBookingResponseDTO> response = bookings.stream()
+                .map(b -> buildResponse("Booking fetched successfully", b))
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
     }
 
+    // 🔵 Get all bookings by sellerId
     @GetMapping("/seller/{sellerId}")
-    public ResponseEntity<List<CarBooking>> getBookingsBySeller(@PathVariable Long sellerId) {
-        return ResponseEntity.ok(carBookingService.getBookingsBySellerId(sellerId));
+    public ResponseEntity<List<CarBookingResponseDTO>> getBookingsBySeller(
+            @PathVariable Long sellerId) {
+
+        List<CarBooking> bookings =
+                carBookingService.getBookingsBySellerId(sellerId);
+
+        List<CarBookingResponseDTO> response = bookings.stream()
+                .map(b -> buildResponse("Booking fetched successfully", b))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
     }
-
-
 
     // 🔵 Get single booking + conversation (Chat Thread)
     @GetMapping("/{bookingId}")
-    public ResponseEntity<CarBooking> getBookingDetails(@PathVariable Long bookingId) {
-        return ResponseEntity.ok(carBookingService.getBookingDetails(bookingId));
+    public ResponseEntity<CarBookingResponseDTO> getBookingDetails(
+            @PathVariable Long bookingId) {
+
+        CarBooking booking =
+                carBookingService.getBookingDetails(bookingId);
+
+        return ResponseEntity.ok(
+                buildResponse("Booking fetched successfully", booking)
+        );
     }
 
+    // 🔧 Common response builder (clean & reusable)
+    private CarBookingResponseDTO buildResponse(String message, CarBooking booking) {
 
+        return new CarBookingResponseDTO(
+                message,
+                booking.getCar() != null ? booking.getCar().getCarId() : null,
+                booking.getBookingId(),
+                booking.getBookingStatus().name(),
+                booking.getConversation()
+        );
+    }
 }

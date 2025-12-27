@@ -1,7 +1,10 @@
 package com.spring.jwt.Bike.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.spring.jwt.entity.Buyer;
 
+import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,6 +49,7 @@ public class Bike_booking {
 //        joinColumns = @JoinColumn(name = "booking_id")
 //)
 //private List<BikeBookingConversation> conversation = new ArrayList<>();
+        @JsonRawValue
         @Column(name = "conversation", columnDefinition = "JSON")
         private String conversation;
 

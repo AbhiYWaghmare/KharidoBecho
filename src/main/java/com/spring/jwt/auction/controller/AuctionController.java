@@ -105,4 +105,3 @@ public class AuctionController {
         return ResponseEntity.noContent().build();
     }
 }
-

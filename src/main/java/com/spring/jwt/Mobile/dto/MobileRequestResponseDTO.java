@@ -12,12 +12,9 @@ public class MobileRequestResponseDTO {
     private Long mobileId;
     private Long buyerId;
     private Long sellerId;
-<<<<<<< HEAD
-=======
     private String buyerName;
     private String sellerName;
 
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     private String status;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

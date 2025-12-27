@@ -17,52 +17,38 @@ public class MobileRequestController {
 
     private final MobileRequestService service;
 
-<<<<<<< HEAD
     /**
      * Create a new mobile request
      * Returns 201 CREATED on success
      */
-=======
-
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     @PostMapping("/create")
     public ResponseEntity<MobileRequestResponseDTO> create(@RequestBody MobileRequestCreateDTO dto) {
         MobileRequestResponseDTO response = service.createRequest(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-<<<<<<< HEAD
     /**
      * List all requests for a specific mobile
      * Returns 200 OK
      */
-=======
-
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     @GetMapping("/{mobileId}")
     public ResponseEntity<List<MobileRequestResponseDTO>> listForMobile(@PathVariable Long mobileId) {
         return ResponseEntity.ok(service.listRequestsForMobile(mobileId));
     }
 
-<<<<<<< HEAD
     /**
      * List all requests made by a specific buyer
      * Returns 200 OK
      */
-=======
-
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     @GetMapping("/buyer/{buyerId}")
     public ResponseEntity<List<MobileRequestResponseDTO>> listForBuyer(@PathVariable Long buyerId) {
         return ResponseEntity.ok(service.listRequestsForBuyer(buyerId));
     }
 
-<<<<<<< HEAD
     /**
      * Update status (PENDING / ACCEPTED / REJECTED / COMPLETED)
      * Returns 200 OK
      */
-=======
 
 //    @GetMapping("/seller/{sellerId}")
 //    public ResponseEntity<List<MobileRequestDTO>> getRequestsBySeller(@PathVariable Long sellerId) {
@@ -72,7 +58,6 @@ public class MobileRequestController {
 
 
 
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     @PatchMapping("/{requestId}/status")
     public ResponseEntity<MobileRequestResponseDTO> updateStatus(
             @PathVariable Long requestId,
@@ -80,14 +65,10 @@ public class MobileRequestController {
         return ResponseEntity.ok(service.updateRequestStatus(requestId, status));
     }
 
-<<<<<<< HEAD
     /**
      * Append a chat message to a mobile request conversation
      * Returns 200 OK
      */
-=======
-
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     @PostMapping("/{requestId}/message")
     public ResponseEntity<MobileRequestResponseDTO> sendMessage(
             @PathVariable Long requestId,
@@ -96,14 +77,10 @@ public class MobileRequestController {
         return ResponseEntity.ok(service.appendMessage(requestId, senderUserId, message));
     }
 
-<<<<<<< HEAD
     /**
      * Mark request as completed (sold) and reject others
      * Returns 200 OK
      */
-=======
-
->>>>>>> cfb28e11e2778507189739031086abecc0048ee0
     @PostMapping("/{requestId}/complete")
     public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
         service.markRequestCompletedAndMarkSold(requestId);
