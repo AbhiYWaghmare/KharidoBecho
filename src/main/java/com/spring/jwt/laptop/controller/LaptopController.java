@@ -28,9 +28,9 @@ import java.util.Map;
 
 //********************************************************//
 
-    //Author : Sudhir Lokade
-    //Laptop Controller
-    //Date : 22/09/2025
+//Author : Sudhir Lokade
+//Laptop Controller
+//Date : 22/09/2025
 
 //*******************************************************//
 
@@ -178,4 +178,3 @@ public class LaptopController {
     }
 
 }
-

@@ -21,8 +21,8 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
     @Query("SELECT l FROM Laptop l WHERE l.seller.sellerId = :sellerId AND l.status = :status")
     @EntityGraph(attributePaths = "laptopPhotos")
     Page<Laptop> findBySellerIdAndStatus(@Param("sellerId") Long sellerId,
-                                       @Param("status") Status status,
-                                       Pageable pageable);
+                                         @Param("status") Status status,
+                                         Pageable pageable);
 
     Page<Laptop> findByStatus(Status pendingStatus, Pageable pageable);
 

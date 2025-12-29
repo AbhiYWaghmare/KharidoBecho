@@ -1,3 +1,4 @@
+
 package com.spring.jwt.laptop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -99,6 +100,7 @@ public class Laptop {
     @JsonIgnore
     private Seller seller;
 
+    //    @JsonIgnore
     @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
     private List<LaptopPhotos> laptopPhotos;
 

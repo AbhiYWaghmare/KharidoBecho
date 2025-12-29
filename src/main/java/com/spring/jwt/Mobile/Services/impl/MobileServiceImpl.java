@@ -56,7 +56,7 @@ public class MobileServiceImpl implements MobileService {
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
 
-// This method is for Create mobile service
+    // This method is for Create mobile service
     private void validateCreateRequest(MobileRequestDTO req) {
         validateCommonCreateFields(req); //  all fields required
     }
@@ -579,7 +579,7 @@ public class MobileServiceImpl implements MobileService {
 
     // ================================================= //
     // in this method the image size is not defined //
-  //==========================================================//
+    //==========================================================//
 
 //    @Override
 //    @Transactional

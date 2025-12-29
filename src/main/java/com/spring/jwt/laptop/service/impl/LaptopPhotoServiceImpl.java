@@ -234,6 +234,22 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
         }
     }
 
+
+//    public LaptopPhotos uploadLaptopImage(Long laptopId, MultipartFile file) {
+//        Laptop laptop = laptopRepository.findById(laptopId)
+//                .orElseThrow(() -> new LaptopNotFoundException(laptopId));
+//
+//
+//        try {
+//            String imageUrl = cloudinaryService.uploadFile(file, "laptop_photo");
+//            LaptopPhotos image = new LaptopPhotos();
+//            image.setLaptop(laptop);
+//            image.setPhoto_link(imageUrl);
+//            return laptopPhotoRepository.save(image);
+//        } catch (IOException e) {
+//            throw new LaptopImageException("Failed to upload image: " + file.getOriginalFilename(), e);
+//        }
+//    }
 }
 
 

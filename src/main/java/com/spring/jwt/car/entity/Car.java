@@ -1,8 +1,15 @@
 package com.spring.jwt.car.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -13,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Car {
 
     @Id
@@ -43,6 +51,10 @@ public class Car {
     @Column(name = "sunroof")
     private Boolean sunroof;
 
+    @Column(name = "registration_number", length = 20, unique = true)
+    private String registrationNumber;
+
+
     //CHILD SAFETY LOCK
     @Column(name = "child_safety_locks")
     private Boolean childSafetyLocks;
@@ -58,6 +70,13 @@ public class Car {
     // PRICE
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
+    @ManyToOne
+    @JoinColumn(name = "buyer_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
+    private Buyer buyer;
+
+
 
     // NEGOTIABLE
     private Boolean negotiable;
@@ -88,7 +107,7 @@ public class Car {
     // YEAR OF PURCHASE
     private Integer yearOfPurchase;
 
-    // FUEL TYPE
+    // FUEL TYPE?
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private FuelType fuelType;
@@ -145,8 +164,9 @@ public class Car {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+
     public enum Status {
-        ACTIVE, SOLD, DELETED
+        ACTIVE, SOLD, DELETED,UNSOLD
     }
 
     private boolean deleted = false;
@@ -156,11 +176,16 @@ public class Car {
 
 
     // SELLER
-    @ManyToOne(fetch = FetchType.LAZY)
+    // SELLER
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "seller_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "user"})
     private Seller seller;
 
+
+
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<CarImage> images;
 
 }

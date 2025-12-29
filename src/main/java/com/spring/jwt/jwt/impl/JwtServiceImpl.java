@@ -47,11 +47,11 @@ public class JwtServiceImpl implements JwtService {
     private final ActiveSessionService activeSessionService;
 
     @Autowired
-    public JwtServiceImpl(@Lazy UserDetailsService userDetailsService, 
-                          UserRepository userRepository, 
+    public JwtServiceImpl(@Lazy UserDetailsService userDetailsService,
+                          UserRepository userRepository,
                           @Lazy JwtConfig jwtConfig,
-                           TokenBlacklistService tokenBlacklistService,
-                           ActiveSessionService activeSessionService) {
+                          TokenBlacklistService tokenBlacklistService,
+                          ActiveSessionService activeSessionService) {
         this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
         this.jwtConfig = jwtConfig;
@@ -132,12 +132,12 @@ public class JwtServiceImpl implements JwtService {
 
         Long userId = userDetailsCustom.getUserId();
         String firstName = userDetailsCustom.getFirstName();
-        
-        log.debug("Generating access token for user: {}, device: {}", 
-                userDetailsCustom.getUsername(), 
+
+        log.debug("Generating access token for user: {}, device: {}",
+                userDetailsCustom.getUsername(),
                 deviceFingerprint != null ? deviceFingerprint.substring(0, 8) + "..." : "none");
 
-            JwtBuilder jwtBuilder = Jwts.builder()
+        JwtBuilder jwtBuilder = Jwts.builder()
                 .setSubject(userDetailsCustom.getUsername())
                 .setIssuer(jwtConfig.getIssuer())
                 .setAudience(jwtConfig.getAudience())
@@ -150,9 +150,9 @@ public class JwtServiceImpl implements JwtService {
         if (userDetailsCustom.getUserProfileId() != null) {
             jwtBuilder.claim("userProfileId", userDetailsCustom.getUserProfileId());
         }
-        
 
-        
+
+
         jwtBuilder.claim(CLAIM_KEY_TOKEN_TYPE, TOKEN_TYPE_ACCESS)
                 .setIssuedAt(Date.from(now))
                 .setNotBefore(Date.from(notBefore))
@@ -165,21 +165,21 @@ public class JwtServiceImpl implements JwtService {
 
         return jwtBuilder.compact();
     }
-    
+
     @Override
     public String generateRefreshToken(UserDetailsCustom userDetailsCustom, String deviceFingerprint) {
         Instant now = Instant.now();
         Instant notBefore = now.plusSeconds(Math.max(0, jwtConfig.getNotBefore()));
-        
-        log.debug("Generating refresh token for user: {}, device: {}", 
-                userDetailsCustom.getUsername(), 
+
+        log.debug("Generating refresh token for user: {}, device: {}",
+                userDetailsCustom.getUsername(),
                 deviceFingerprint != null ? deviceFingerprint.substring(0, 8) + "..." : "none");
 
         List<String> roles = userDetailsCustom.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-            JwtBuilder jwtBuilder = Jwts.builder()
+        JwtBuilder jwtBuilder = Jwts.builder()
                 .setSubject(userDetailsCustom.getUsername())
                 .setIssuer(jwtConfig.getIssuer())
                 .setId(UUID.randomUUID().toString())
@@ -189,9 +189,9 @@ public class JwtServiceImpl implements JwtService {
         if (userDetailsCustom.getUserProfileId() != null) {
             jwtBuilder.claim("userProfileId", userDetailsCustom.getUserProfileId());
         }
-        
 
-        
+
+
         jwtBuilder.claim(CLAIM_KEY_TOKEN_TYPE, TOKEN_TYPE_REFRESH)
                 .setIssuedAt(Date.from(now))
                 .setNotBefore(Date.from(notBefore))
@@ -204,7 +204,7 @@ public class JwtServiceImpl implements JwtService {
 
         return jwtBuilder.compact();
     }
-    
+
     @Override
     public String extractDeviceFingerprint(String token) {
         try {
@@ -215,7 +215,7 @@ public class JwtServiceImpl implements JwtService {
             return null;
         }
     }
-    
+
     @Override
     public boolean isRefreshToken(String token) {
         try {
@@ -228,13 +228,13 @@ public class JwtServiceImpl implements JwtService {
             return false;
         }
     }
-    
+
     @Override
     public String generateDeviceFingerprint(HttpServletRequest request) {
         if (request == null) {
             return null;
         }
-        
+
         try {
             String ip = request.getHeader("X-Forwarded-For");
             if (ip != null && ip.contains(",")) {
@@ -262,7 +262,7 @@ public class JwtServiceImpl implements JwtService {
             return null;
         }
     }
-    
+
     @Override
     public Map<String, Object> extractAllCustomClaims(String token) {
         Claims claims = extractClaims(token);
@@ -275,7 +275,7 @@ public class JwtServiceImpl implements JwtService {
         customClaims.remove("iss");
         customClaims.remove("aud");
         customClaims.remove("nbf");
-        
+
         return customClaims;
     }
 
@@ -283,7 +283,7 @@ public class JwtServiceImpl implements JwtService {
     public boolean isValidToken(String token) {
         return isValidToken(token, null);
     }
-    
+
     @Override
     public boolean isValidToken(String token, String deviceFingerprint) {
         try {
@@ -291,16 +291,16 @@ public class JwtServiceImpl implements JwtService {
                 log.warn("Token is blacklisted");
                 return false;
             }
-            
+
             final String username = extractUsername(token);
-            
+
             if (StringUtils.hasText(username)) {
                 log.debug("Token validation failed: empty username");
                 return false;
             }
-    
+
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            
+
             if (ObjectUtils.isEmpty(userDetails)) {
                 log.debug("Token validation failed: user not found");
                 return false;
@@ -310,7 +310,7 @@ public class JwtServiceImpl implements JwtService {
 
             Date nbf = claims.getNotBefore();
             if (nbf != null && nbf.after(new Date())) {
-                log.debug("Token not yet valid. Current time: {}, Not before: {}", 
+                log.debug("Token not yet valid. Current time: {}, Not before: {}",
                         new Date(), nbf);
                 return false;
             }
@@ -338,7 +338,7 @@ public class JwtServiceImpl implements JwtService {
                     log.warn("Could not verify user's current device fingerprint: {}", e.getMessage());
                 }
             }
-            
+
             // Enforce single active session: token must be the current active token for this user
             try {
                 String tokenId = claims.getId();
@@ -397,7 +397,7 @@ public class JwtServiceImpl implements JwtService {
             Claims claims = extractClaims(token);
             String tokenId = claims.getId();
             Date expiration = claims.getExpiration();
-            
+
             if (tokenId != null && expiration != null) {
                 tokenBlacklistService.blacklistToken(tokenId, expiration.toInstant());
                 log.debug("Token blacklisted: {}", tokenId);
@@ -406,7 +406,7 @@ public class JwtServiceImpl implements JwtService {
             log.error("Error blacklisting token: {}", e.getMessage());
         }
     }
-    
+
     @Override
     public String extractTokenId(String token) {
         try {
@@ -417,7 +417,7 @@ public class JwtServiceImpl implements JwtService {
             return null;
         }
     }
-    
+
     @Override
     public boolean isBlacklisted(String token) {
         try {
@@ -429,5 +429,4 @@ public class JwtServiceImpl implements JwtService {
         }
     }
 }
-
 

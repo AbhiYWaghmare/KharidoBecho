@@ -42,7 +42,7 @@ public class Mobile {
     @Column(name = "mobile_condition",nullable = false)
     private Condition condition;
 
-//    private String brand;
+    //    private String brand;
 //    private String model;
     private String color;
     private Integer yearOfPurchase;
