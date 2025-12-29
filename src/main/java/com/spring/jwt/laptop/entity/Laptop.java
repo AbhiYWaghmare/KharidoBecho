@@ -91,7 +91,6 @@ public class Laptop {
     @Column(name = "usb_port")
     private Integer usbPorts;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
@@ -103,19 +102,13 @@ public class Laptop {
 
     //    @JsonIgnore
     @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
-//    @JsonManagedReference
-    @JsonIgnore
     private List<LaptopPhotos> laptopPhotos;
 
-
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonManagedReference
     @JsonIgnore
     private List<LaptopBooking> bookings = new ArrayList<>();
 
-
     private boolean deleted = false;
-
     private LocalDateTime deletedAt;
 
 }
