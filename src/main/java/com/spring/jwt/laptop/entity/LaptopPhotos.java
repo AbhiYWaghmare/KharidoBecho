@@ -1,5 +1,6 @@
 package com.spring.jwt.laptop.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,7 @@ public class LaptopPhotos {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "laptop_id", nullable = false)
     @JsonIgnore
+    @JsonBackReference
     private Laptop laptop;
 }
 

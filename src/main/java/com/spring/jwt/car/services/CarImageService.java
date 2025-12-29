@@ -2,6 +2,8 @@ package com.spring.jwt.car.services;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spring.jwt.car.dto.CarImageResponseDTO;
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface CarImageService {

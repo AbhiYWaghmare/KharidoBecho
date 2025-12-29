@@ -19,6 +19,7 @@ import java.util.Map;
 // Author : Abhishek Waghmare
 // Car Controller
 // Date   : 15/10/202/??5
+// Date   : 15/10/2025
 //********************************************************//
 
 @RestController
@@ -67,6 +68,10 @@ public class CarController {
     }
 
 
+
+    public ResponseEntity<CarResponseDTO> get(@PathVariable Long id) {
+        return ResponseEntity.ok(carService.getCar(id));
+    }
 
     // Update car by ID
     @PatchMapping("/update/{id}")

@@ -16,11 +16,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic/car", "/queue/car");
-        registry.setApplicationDestinationPrefixes("/app/car");
+        registry.enableSimpleBroker("/topic", "/queue");
+        registry.setApplicationDestinationPrefixes("/app");
         registry.setUserDestinationPrefix("/user");
     }
 
+//    Use this when we enable authentication
+
+//    @Override
+//    public void registerStompEndpoints(StompEndpointRegistry registry) {
+//        registry.addEndpoint("/ws-auction")
+//                .setAllowedOriginPatterns("*")
+//                .addInterceptors(jwtHandshakeInterceptor)   // use injected bean
+//                .withSockJS();
+//    }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {

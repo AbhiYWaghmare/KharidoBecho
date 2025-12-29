@@ -1,6 +1,5 @@
 package com.spring.jwt.laptop.service.impl;
 
-import com.cloudinary.Cloudinary;
 import com.spring.jwt.exception.laptop.LaptopImageException;
 import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.exception.laptop.LaptopNotFoundException;
@@ -9,7 +8,6 @@ import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import com.spring.jwt.utils.CloudinaryService;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.stereotype.Service;
 import com.spring.jwt.laptop.repository.LaptopPhotoRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +26,6 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Data
 public class LaptopPhotoServiceImpl implements LaptopPhotoService {
 
     public final LaptopPhotoRepository laptopPhotoRepository;
@@ -219,7 +216,8 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
     @Transactional
     public void deleteImage(Long imageId) {
         LaptopPhotos laptopPhotos = laptopPhotoRepository.findById(imageId)
-                .orElseThrow(() -> new LaptopNotFoundException("Laptop image not found with ID: " + imageId));
+                .orElseThrow(() -> new LaptopImageException("Laptop image not found with ID: " + imageId));
+
 
         try {
             //  first image will delete from cloudnairy then DB
@@ -237,20 +235,19 @@ public class LaptopPhotoServiceImpl implements LaptopPhotoService {
     }
 
 
-    public LaptopPhotos uploadLaptopImage(Long laptopId, MultipartFile file) {
-        Laptop laptop = laptopPhotoRepository.findById(laptopId)
-                .orElseThrow(() -> new LaptopNotFoundException(laptopId)).getLaptop();
-
-        try {
-            String imageUrl = cloudinaryService.uploadFile(file, "laptop_photo");
-            LaptopPhotos image = new LaptopPhotos();
-            image.setLaptop(laptop);
-            image.setPhoto_link(imageUrl);
-            return laptopPhotoRepository.save(image);
-        } catch (IOException e) {
-            throw new LaptopImageException("Failed to upload image: " + file.getOriginalFilename(), e);
-        }
-    }
+//    public LaptopPhotos uploadLaptopImage(Long laptopId, MultipartFile file) {
+//        Laptop laptop = laptopRepository.findById(laptopId)
+//                .orElseThrow(() -> new LaptopNotFoundException(laptopId));
+//
+//
+//        try {
+//            String imageUrl = cloudinaryService.uploadFile(file, "laptop_photo");
+//            LaptopPhotos image = new LaptopPhotos();
+//            image.setLaptop(laptop);
+//            image.setPhoto_link(imageUrl);
+//            return laptopPhotoRepository.save(image);
+//        } catch (IOException e) {
+//            throw new LaptopImageException("Failed to upload image: " + file.getOriginalFilename(), e);
+//        }
+//    }
 }
-
-

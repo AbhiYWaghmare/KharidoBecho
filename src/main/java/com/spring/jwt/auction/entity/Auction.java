@@ -1,4 +1,3 @@
-
 package com.spring.jwt.auction.entity;
 
 import com.spring.jwt.Mobile.entity.Mobile;

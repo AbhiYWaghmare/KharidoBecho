@@ -40,6 +40,7 @@ public class MobileRequestController {
      * List all requests made by a specific buyer
      * Returns 200 OK
      */
+
     @GetMapping("/buyer/{buyerId}")
     public ResponseEntity<List<MobileRequestResponseDTO>> listForBuyer(@PathVariable Long buyerId) {
         return ResponseEntity.ok(service.listRequestsForBuyer(buyerId));
@@ -54,6 +55,10 @@ public class MobileRequestController {
 //    public ResponseEntity<List<MobileRequestDTO>> getRequestsBySeller(@PathVariable Long sellerId) {
 //        return ResponseEntity.ok(mobileRequestService.getRequestsBySeller(sellerId));
 //    }
+    @GetMapping("/seller/{sellerId}")
+    public ResponseEntity<List<MobileRequestResponseDTO>> listForSeller(@PathVariable Long sellerId) {
+        return ResponseEntity.ok(service.listRequestsForSeller(sellerId));
+}
 
 
 
@@ -81,6 +86,7 @@ public class MobileRequestController {
      * Mark request as completed (sold) and reject others
      * Returns 200 OK
      */
+
     @PostMapping("/{requestId}/complete")
     public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
         service.markRequestCompletedAndMarkSold(requestId);

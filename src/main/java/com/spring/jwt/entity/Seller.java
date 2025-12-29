@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Seller {
 
     @Id
@@ -36,7 +35,6 @@ public class Seller {
             "seller",
             "userProfile"
     })
-
     private User user;
 
     //  Soft delete fields

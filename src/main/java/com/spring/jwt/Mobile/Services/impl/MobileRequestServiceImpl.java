@@ -109,6 +109,16 @@ public class MobileRequestServiceImpl implements MobileRequestService {
                 .map(this::toResponse).toList();
     }
 
+    @Override
+    public List<MobileRequestResponseDTO> listRequestsForSeller(Long sellerId) {
+        return requestRepo.findBySeller_SellerId(sellerId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+
+
 //    @Override
 //    public List<MobileRequestDTO> getRequestsBySeller(Long sellerId) {
 //        List<MobileRequest> requests = MobileRequestRepository.findBySellerIdOrderByCreatedAtDesc(sellerId);

@@ -1,6 +1,7 @@
 package com.spring.jwt.car.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.spring.jwt.car.entity.Car;
 import com.spring.jwt.utils.validation.MaxWords;
 import com.spring.jwt.utils.validation.MinWords;
 import jakarta.validation.constraints.*;

@@ -82,6 +82,9 @@ public class AppConfig {
     private List<String> allowedOrigins;
 
 
+//    @Value("#{'${app.cors.allowed-origins:http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost:5173/,http://localhost:8091/,http://localhost:8085/}'.split(',')}")
+//    private List<String> allowedOrigins;
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -127,8 +130,18 @@ public class AppConfig {
                     "/api/colours/**",
                     "/api/v1/user/**",
                     "/api/v1/cars/**",
-                    "/api/v1/car-images",
 
+                    "api/v1/user/**",
+                    "/api/laptops/**",
+                    "/api/laptopBookings/**",
+                    "/api/colours/**",
+                    "api/v1/user/**",
+                    "/api/v1/mobile-meta/**",
+
+                    "api/v1/cars/**",
+                    "/api/v1/car-images",
+                    "/api/laptops/**",
+                    "/api/laptop-photo/**",
 
                     "/bikes/**",
 
@@ -136,6 +149,9 @@ public class AppConfig {
                     "/api/v1/auth/**",
                     "/api/v1/buyers/**",
                     "/api/v1/sellers/**",
+                    "api/v1/auth/**",
+                    "api/v1/buyers/**",
+                    "api/v1/sellers/**",
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
 
@@ -181,6 +197,7 @@ public class AppConfig {
 //                        .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';" +
 //                            " connect-src 'self' ws: wss: http://localhost:8087;\n'"))
 
+
 //                connect-src 'self'
 
                 .frameOptions(frame -> frame.deny())
@@ -204,6 +221,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/mobiles/**").permitAll()
                 .requestMatchers("/api/v1/mobile-images/**").permitAll()
                 .requestMatchers("/api/v1/mobile/requests/**").permitAll()
+                .requestMatchers("/api/v1/mobile-meta/**").permitAll()
 
                 .requestMatchers("/api/v1/cars/**").permitAll()
                 .requestMatchers("/api/v1/car-images/**").permitAll()
@@ -228,6 +246,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/car-auctions/**").permitAll()
                 .requestMatchers("/api/laptopBookings/**").permitAll()
                 .requestMatchers("/api/v1/laptop-auctions/**").permitAll()
+                .requestMatchers("/api/laptopBookings/**").permitAll()
                 .requestMatchers("/api/colours/**").permitAll()
                 .requestMatchers("/Auction/**", "/Auction", "/ws/**", "/websocket/**", "/sockjs/**").permitAll()
                 .requestMatchers("/laptop/auctions/live").permitAll()
@@ -269,7 +288,6 @@ public class AppConfig {
                 .requestMatchers("/ws-auction/**").permitAll()
 
 
-
 //                .anyRequest().authenticated());
 
               //=====================================================
@@ -294,6 +312,7 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-meta/**"),
 
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
@@ -364,6 +383,7 @@ public class AppConfig {
                 CorsConfiguration config = new CorsConfiguration();
 
 //                config.setAllowedOriginPatterns(List.of("*"));
+                config.setAllowedOriginPatterns(List.of("*"));
 
 //                config.setAllowedOrigins(allowedOrigins); // now includes 63342
                 config.setAllowedOrigins(allowedOrigins);
@@ -372,6 +392,8 @@ public class AppConfig {
 //                config.setAllowCredentials(true);
                 config.setAllowCredentials(true);
 
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowCredentials(true);
                 config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
                 config.setExposedHeaders(Arrays.asList("Authorization"));
                 config.setMaxAge(3600L);

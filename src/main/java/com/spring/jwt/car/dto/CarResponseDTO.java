@@ -1,5 +1,6 @@
 package com.spring.jwt.car.dto;
 
+import com.spring.jwt.Mobile.dto.MobileImageDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -61,4 +62,6 @@ public class CarResponseDTO {
 
     // list of cloudinary image URLs (populated by CarImage module later)
     private List<String> images;
+//    private List<String> images;
+//    private List<CarImageDTO> images;
 }

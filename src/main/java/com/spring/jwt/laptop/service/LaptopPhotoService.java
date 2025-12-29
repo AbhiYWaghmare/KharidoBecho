@@ -9,6 +9,8 @@ import java.util.List;
 public interface LaptopPhotoService {
 
     List<String> uploadPhoto(Long photoId, List<MultipartFile> files) ;
+
+
    void deleteImage(Long imageId);
 
 

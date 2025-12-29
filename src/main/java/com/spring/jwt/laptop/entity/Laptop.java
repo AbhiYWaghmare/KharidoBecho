@@ -1,6 +1,9 @@
+
 package com.spring.jwt.laptop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
 import com.spring.jwt.laptop.model.LaptopRequestStatus;
@@ -19,6 +22,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Laptop {
 
     @Id
@@ -92,17 +96,21 @@ public class Laptop {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
     private Seller seller;
 
-//    @JsonIgnore
-    @OneToMany(mappedBy = "laptop", fetch = FetchType.EAGER)
+    //    @JsonIgnore
+    @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
+//    @JsonManagedReference
+    @JsonIgnore
     private List<LaptopPhotos> laptopPhotos;
 
 
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonManagedReference
+    @JsonIgnore
     private List<LaptopBooking> bookings = new ArrayList<>();
 
 

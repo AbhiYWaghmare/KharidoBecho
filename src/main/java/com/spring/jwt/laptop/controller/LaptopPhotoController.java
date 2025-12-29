@@ -1,28 +1,24 @@
 package com.spring.jwt.laptop.controller;
 
-import com.cloudinary.Cloudinary;
-import com.spring.jwt.laptop.dto.LaptopResponseDTO;
-import com.spring.jwt.laptop.entity.LaptopBooking;
+import com.spring.jwt.laptop.dto.ImageUploadResponseDTO;
 import com.spring.jwt.laptop.service.LaptopPhotoService;
 import com.spring.jwt.utils.BaseResponseDTO;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
 //********************************************************//
 
-    //Author : Sudhir Lokade
-    //Laptop Photo Controller
-    //Date : 24/09/2025
+//Author : Sudhir Lokade
+//Laptop Photo Controller
+//Date : 24/09/2025
 
 //*******************************************************//
 
@@ -31,47 +27,42 @@ import java.util.List;
 @RequestMapping("/api/laptop-photo")
 public class LaptopPhotoController {
 
+
     private final LaptopPhotoService laptopPhotoService;
-
-    private final Cloudinary cloudinary;
-
-    LaptopBooking booking;
-    private static final long MAX_FILE_SIZE = 400 * 1024;
-
 
     //====================================================//
     //  Upload image of Laptop                            //
-    //  Post /api/photo/upload                            //
+    //  POST /laptop-photo/upload                         //
     //====================================================//
 
-    //To upload images of particular laptop by ID
-    @PostMapping("/upload")
-    public ResponseEntity<LaptopResponseDTO> uploadImages(@RequestParam Long laptopId, @RequestParam("files") List<MultipartFile> files, HttpServletRequest httpServletRequest) {
-        List<String> photos = laptopPhotoService.uploadPhoto(laptopId, files);
-        String imageUrl = String.join(", ", photos);
+    @PostMapping(
+            value = "/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ImageUploadResponseDTO> uploadLaptopImages(
+            @RequestParam("laptopId") Long laptopId,
+            @RequestParam("files") List<MultipartFile> files) {
 
-        LaptopResponseDTO laptopResponseDTO = new LaptopResponseDTO(
-                "success",
-                "Laptop photos uploaded successfully for laptop id " + laptopId,
-                "CREATED",
-                HttpStatus.OK.value(),
-                LocalDateTime.now(),
-                "NULL",
-                httpServletRequest.getRequestURI(),
-                imageUrl,
-                laptopId
+        List<String> urls = laptopPhotoService.uploadPhoto(laptopId, files);
 
-        );
-        return ResponseEntity.ok(laptopResponseDTO);
+        ImageUploadResponseDTO response = ImageUploadResponseDTO.builder()
+                .code(String.valueOf(HttpStatus.OK.value()))
+                .message("Image uploaded successfully")
+                .images(urls)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
-
 
     //====================================================//
     //  Delete photo of Laptop by id                      //
-    //  Delete /api/photo/delete                          //
+    //  DELETE /laptop-photo/delete                       //
     //====================================================//
 
-    //To delete images By Image ID
     @DeleteMapping("/delete")
     public ResponseEntity<BaseResponseDTO> deleteImage(@RequestParam Long photoId) {
         laptopPhotoService.deleteImage(photoId);
@@ -83,5 +74,4 @@ public class LaptopPhotoController {
 
         return ResponseEntity.ok(response);
     }
-
 }

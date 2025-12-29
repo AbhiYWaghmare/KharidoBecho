@@ -2,6 +2,7 @@ package com.spring.jwt.Mobile.Services;
 
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
+import com.spring.jwt.Mobile.dto.MobileUpdateDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,7 +12,7 @@ public interface MobileService {
     MobileResponseDTO createMobile(MobileRequestDTO request);
     Page<MobileResponseDTO> listMobiles(int page, int size, Long sellerId);
     MobileResponseDTO getMobile(Long id);
-    MobileResponseDTO updateMobile(Long id, MobileRequestDTO request);
+    MobileResponseDTO updateMobile(Long id, MobileUpdateDTO request);
     void softDeleteMobile(Long id);
     List<String> addImages(Long mobileId, List<MultipartFile> files) ;
     void deleteImage(Long imageId);

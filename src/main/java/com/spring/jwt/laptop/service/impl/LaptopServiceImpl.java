@@ -6,7 +6,10 @@ import com.spring.jwt.exception.laptop.BlankFieldsException;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.exception.laptop.LaptopNotFoundException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
+import com.spring.jwt.laptop.dto.LaptopBookingDTO;
+import com.spring.jwt.laptop.dto.LaptopImageDTO;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
+import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.repository.SellerRepository;
@@ -142,20 +145,114 @@ public class LaptopServiceImpl implements LaptopService {
     }
 
 
-    public Laptop getById(Long laptopId) {
-        return laptopRepository.findById(laptopId)
-                .orElseThrow(() -> new LaptopNotFoundException("Laptop with ID " + laptopId + " not found"));
+    @Transactional(readOnly = true)
+    public LaptopResponseDTO getById(Long laptopId) {
+        Laptop laptop = laptopRepository.findByIdWithPhotos(laptopId);
+
+        if (laptop == null) {
+            throw new LaptopNotFoundException("Laptop with ID " + laptopId + " not found");
+        }
+
+        LaptopResponseDTO dto = new LaptopResponseDTO();
+        dto.setId(laptop.getId());
+        dto.setSerialNumber(laptop.getSerialNumber());
+//        dto.setDealer(laptop.getDealer());
+        dto.setModel(laptop.getModel());
+        dto.setBrand(laptop.getBrand());
+        dto.setPrice(laptop.getPrice());
+        dto.setWarrantyInYear(laptop.getWarrantyInYear());
+        dto.setProcessor(laptop.getProcessor());
+        dto.setProcessorBrand(laptop.getProcessorBrand());
+        dto.setMemoryType(laptop.getMemoryType());
+        dto.setScreenSize(laptop.getScreenSize());
+        dto.setColour(laptop.getColour());
+        dto.setRam(laptop.getRam());
+        dto.setStorage(laptop.getStorage());
+        dto.setBattery(laptop.getBattery());
+        dto.setBatteryLife(laptop.getBatteryLife());
+        dto.setGraphicsCard(laptop.getGraphicsCard());
+        dto.setGraphicBrand(laptop.getGraphicBrand());
+        dto.setWeight(laptop.getWeight());
+        dto.setManufacturer(laptop.getManufacturer());
+        dto.setUsbPorts(laptop.getUsbPorts());
+        dto.setStatus(laptop.getStatus());
+        dto.setDeleted(laptop.isDeleted());
+        dto.setDeletedAt(laptop.getDeletedAt());
+
+        dto.setPhotos(
+                laptop.getLaptopPhotos() == null ? List.of() :
+                        laptop.getLaptopPhotos().stream().map(p -> {
+                            LaptopImageDTO img = new LaptopImageDTO();
+                            img.setPhotoId(p.getPhotoId());
+                            img.setPhoto_link(p.getPhoto_link());
+                            return img;
+                        }).toList()
+        );
+
+        return dto;
     }
 
-    public List<Laptop> getAllLaptops() {
+    @Transactional(readOnly = true)
+    public List<LaptopResponseDTO> getAllLaptops() {
+
         List<Laptop> laptops = laptopRepository.findAll();
 
         if (laptops.isEmpty()) {
             throw new LaptopNotFoundException("No laptops found");
         }
 
-        return laptops;
+        return laptops.stream().map(laptop -> {
+
+            LaptopResponseDTO dto = new LaptopResponseDTO();
+            dto.setId(laptop.getId());
+            dto.setSerialNumber(laptop.getSerialNumber());
+//        dto.setsel(laptop.getDealer());
+            dto.setModel(laptop.getModel());
+            dto.setBrand(laptop.getBrand());
+            dto.setPrice(laptop.getPrice());
+            dto.setWarrantyInYear(laptop.getWarrantyInYear());
+            dto.setProcessor(laptop.getProcessor());
+            dto.setProcessorBrand(laptop.getProcessorBrand());
+            dto.setMemoryType(laptop.getMemoryType());
+            dto.setScreenSize(laptop.getScreenSize());
+            dto.setColour(laptop.getColour());
+            dto.setRam(laptop.getRam());
+            dto.setStorage(laptop.getStorage());
+            dto.setBattery(laptop.getBattery());
+            dto.setBatteryLife(laptop.getBatteryLife());
+            dto.setGraphicsCard(laptop.getGraphicsCard());
+            dto.setGraphicBrand(laptop.getGraphicBrand());
+            dto.setWeight(laptop.getWeight());
+            dto.setManufacturer(laptop.getManufacturer());
+            dto.setUsbPorts(laptop.getUsbPorts());
+            dto.setStatus(laptop.getStatus());
+            dto.setDeleted(laptop.isDeleted());
+            dto.setDeletedAt(laptop.getDeletedAt());
+            dto.setPhotos(
+                    laptop.getLaptopPhotos().stream().map(p -> {
+                        LaptopImageDTO pd = new LaptopImageDTO();
+                        pd.setPhotoId(p.getPhotoId());
+                        pd.setPhoto_link(p.getPhoto_link());
+                        return pd;
+                    }).toList()
+            );
+
+            dto.setBookings(
+                    laptop.getBookings().stream().map(b -> {
+                        LaptopBookingDTO bd = new LaptopBookingDTO();
+                        bd.setLaptopBookingId(b.getLaptopBookingId());
+                        bd.setBuyerId(b.getBuyer().getBuyerId());
+                        bd.setSellerId(b.getSeller().getSellerId());
+                        bd.setStatus(b.getPendingStatus().name());
+                        return bd;
+                    }).toList()
+            );
+
+            return dto;
+
+        }).toList();
     }
+
 
 
     @Override
@@ -198,6 +295,7 @@ public class LaptopServiceImpl implements LaptopService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Laptop> getBySellerIdAndStatus(Long sellerId, Status status, int page, int size, String sortBy) {
         sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new SellerNotFoundException(sellerId));
@@ -207,6 +305,7 @@ public class LaptopServiceImpl implements LaptopService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Laptop> getByStatus(Status status, int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page,size,Sort.by(sortBy).ascending());
         return laptopRepository.findByStatus(status, pageable);
@@ -222,9 +321,27 @@ public class LaptopServiceImpl implements LaptopService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
         return laptopRepository.findBySeller_SellerId(sellerId, pageable);
+    }
+
+
+    @Transactional
+    public LaptopResponseDTO updateLaptop(Long laptopId, LaptopRequestDTO laptopRequestDTO) {
+
+        Laptop laptop = update(laptopId, laptopRequestDTO);
+
+        LaptopResponseDTO dto = new LaptopResponseDTO();
+        dto.setId(laptop.getId());
+        dto.setSerialNumber(laptop.getSerialNumber());
+        dto.setModel(laptop.getModel());
+        dto.setBrand(laptop.getBrand());
+        dto.setPrice(laptop.getPrice());
+        dto.setStatus(laptop.getStatus());
+
+        return dto;
     }
 
 
