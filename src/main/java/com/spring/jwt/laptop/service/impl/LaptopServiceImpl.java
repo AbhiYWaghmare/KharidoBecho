@@ -146,21 +146,52 @@ public class LaptopServiceImpl implements LaptopService {
 
 
     @Transactional(readOnly = true)
-    public Laptop getById(Long laptopId) {
-        return laptopRepository.findById(laptopId)
-                .orElseThrow(() -> new LaptopNotFoundException("Laptop with ID " + laptopId + " not found"));
+    public LaptopResponseDTO getById(Long laptopId) {
+        Laptop laptop = laptopRepository.findByIdWithPhotos(laptopId);
+
+        if (laptop == null) {
+            throw new LaptopNotFoundException("Laptop with ID " + laptopId + " not found");
+        }
+
+        LaptopResponseDTO dto = new LaptopResponseDTO();
+        dto.setId(laptop.getId());
+        dto.setSerialNumber(laptop.getSerialNumber());
+//        dto.setDealer(laptop.getDealer());
+        dto.setModel(laptop.getModel());
+        dto.setBrand(laptop.getBrand());
+        dto.setPrice(laptop.getPrice());
+        dto.setWarrantyInYear(laptop.getWarrantyInYear());
+        dto.setProcessor(laptop.getProcessor());
+        dto.setProcessorBrand(laptop.getProcessorBrand());
+        dto.setMemoryType(laptop.getMemoryType());
+        dto.setScreenSize(laptop.getScreenSize());
+        dto.setColour(laptop.getColour());
+        dto.setRam(laptop.getRam());
+        dto.setStorage(laptop.getStorage());
+        dto.setBattery(laptop.getBattery());
+        dto.setBatteryLife(laptop.getBatteryLife());
+        dto.setGraphicsCard(laptop.getGraphicsCard());
+        dto.setGraphicBrand(laptop.getGraphicBrand());
+        dto.setWeight(laptop.getWeight());
+        dto.setManufacturer(laptop.getManufacturer());
+        dto.setUsbPorts(laptop.getUsbPorts());
+        dto.setStatus(laptop.getStatus());
+        dto.setDeleted(laptop.isDeleted());
+        dto.setDeletedAt(laptop.getDeletedAt());
+
+        dto.setPhotos(
+                laptop.getLaptopPhotos() == null ? List.of() :
+                        laptop.getLaptopPhotos().stream().map(p -> {
+                            LaptopImageDTO img = new LaptopImageDTO();
+                            img.setPhotoId(p.getPhotoId());
+                            img.setPhoto_link(p.getPhoto_link());
+                            return img;
+                        }).toList()
+        );
+
+        return dto;
     }
 
-//    @Transactional(readOnly = true)
-//    public List<Laptop> getAllLaptops() {
-//        List<Laptop> laptops = laptopRepository.findAll();
-//
-//        if (laptops.isEmpty()) {
-//            throw new LaptopNotFoundException("No laptops found");
-//        }
-//
-//        return laptops;
-//    }
 @Transactional(readOnly = true)
 public List<LaptopResponseDTO> getAllLaptops() {
 
@@ -175,17 +206,33 @@ public List<LaptopResponseDTO> getAllLaptops() {
         LaptopResponseDTO dto = new LaptopResponseDTO();
         dto.setId(laptop.getId());
         dto.setSerialNumber(laptop.getSerialNumber());
-//        dto.setSeller(laptop.getSeller());
+//        dto.setsel(laptop.getDealer());
         dto.setModel(laptop.getModel());
         dto.setBrand(laptop.getBrand());
         dto.setPrice(laptop.getPrice());
+        dto.setWarrantyInYear(laptop.getWarrantyInYear());
+        dto.setProcessor(laptop.getProcessor());
+        dto.setProcessorBrand(laptop.getProcessorBrand());
+        dto.setMemoryType(laptop.getMemoryType());
+        dto.setScreenSize(laptop.getScreenSize());
+        dto.setColour(laptop.getColour());
+        dto.setRam(laptop.getRam());
+        dto.setStorage(laptop.getStorage());
+        dto.setBattery(laptop.getBattery());
+        dto.setBatteryLife(laptop.getBatteryLife());
+        dto.setGraphicsCard(laptop.getGraphicsCard());
+        dto.setGraphicBrand(laptop.getGraphicBrand());
+        dto.setWeight(laptop.getWeight());
+        dto.setManufacturer(laptop.getManufacturer());
+        dto.setUsbPorts(laptop.getUsbPorts());
         dto.setStatus(laptop.getStatus());
-
+        dto.setDeleted(laptop.isDeleted());
+        dto.setDeletedAt(laptop.getDeletedAt());
         dto.setPhotos(
                 laptop.getLaptopPhotos().stream().map(p -> {
                     LaptopImageDTO pd = new LaptopImageDTO();
                     pd.setPhotoId(p.getPhotoId());
-                    pd.setPhotoLink(p.getPhoto_link());
+                    pd.setPhoto_link(p.getPhoto_link());
                     return pd;
                 }).toList()
         );
@@ -284,14 +331,11 @@ public List<LaptopResponseDTO> getAllLaptops() {
     @Transactional
     public LaptopResponseDTO updateLaptop(Long laptopId, LaptopRequestDTO laptopRequestDTO) {
 
-        // reuse existing logic
         Laptop laptop = update(laptopId, laptopRequestDTO);
 
-        // map entity → DTO
         LaptopResponseDTO dto = new LaptopResponseDTO();
         dto.setId(laptop.getId());
         dto.setSerialNumber(laptop.getSerialNumber());
-//        dto.setSellerId(laptop.getSeller().getSellerId());
         dto.setModel(laptop.getModel());
         dto.setBrand(laptop.getBrand());
         dto.setPrice(laptop.getPrice());

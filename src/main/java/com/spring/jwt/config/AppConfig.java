@@ -117,24 +117,22 @@ public class AppConfig {
                     "api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
+                    "/api/dropDown/**",
                     "/api/colours/**",
                     "api/v1/user/**",
+
                     "/api/v1/mobile-meta/**",
 
                     "api/v1/cars/**",
                     "/api/v1/car-images",
                     "/api/laptops/**",
                     "/api/laptop-photo/**",
-
                     "/bikes/**",
-
-
                     "api/v1/auth/**",
                     "api/v1/buyers/**",
                     "api/v1/sellers/**",
                     "api/v1/mobiles/**",
                     "/api/v1/mobile-images/**",
-
                     "/Auction/**",
                     "/Auction",
                     "/ws/**",
@@ -142,7 +140,6 @@ public class AppConfig {
                     "/sockjs/**",
                     "/laptop/auctions/live",
                     "/api/beadingLaptops/**",
-
                     "/api/v1/mobile/requests/**",
                     "/api/v1/auctions/**",
 
@@ -198,6 +195,7 @@ public class AppConfig {
 
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/laptop-photo/**").permitAll()
+                .requestMatchers( "/api/dropDown/**").permitAll()
 
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
@@ -208,7 +206,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/buyers/**").permitAll()
                 .requestMatchers("/api/v1/sellers/**").permitAll()
 
-                .requestMatchers("/api/v1/auctions/**").permitAll()
+                .requestMatchers("/api/v1/laptop-auctions/**").permitAll()
                 .requestMatchers("/api/laptopBookings/**").permitAll()
                 .requestMatchers("/api/colours/**").permitAll()
                 .requestMatchers("/Auction/**", "/Auction", "/ws/**", "/websocket/**", "/sockjs/**").permitAll()
@@ -255,26 +253,30 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/public/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
 
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
 
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobiles/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-images/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile/requests/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/mobile-meta/**"),
 
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/cars/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-images/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher( "/api/dropDown/**"),
 
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/users/password/**"),
 
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
-
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
@@ -295,7 +297,7 @@ public class AppConfig {
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getUrl()),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher(jwtConfig.getRefreshUrl()),
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws-auction/**")
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/ws-auction/**")
             );
 
 
