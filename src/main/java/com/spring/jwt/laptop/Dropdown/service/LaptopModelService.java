@@ -7,31 +7,13 @@ import com.spring.jwt.laptop.Dropdown.repository.LaptopModelRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class LaptopModelService {
     private final LaptopBrandRepository brandRepository;
     private final LaptopModelRepository modelRepository;
-
-//    // ===============================
-//    // 🔹 AUTOCOMPLETE MODELS BY BRAND
-//    // ===============================
-//    public List<String> searchModels(String brandName, String query) {
-//
-//        LaptopBrand brand = brandRepository
-//                .findByBrandNameIgnoreCase(brandName)
-//                .orElseThrow(() ->
-//                        new IllegalArgumentException("Brand not found: " + brandName)
-//                );
-//
-//        return modelRepository
-//                .findTop10ByBrandAndModelNameStartingWithIgnoreCase(
-//                        brand, query
-//                )
-//                .stream()
-//                .map(LaptopModel::getModelName)
-//                .toList();
-//    }
 
     // ===============================
     // 🔹 GET OR CREATE MODEL
@@ -52,4 +34,9 @@ public class LaptopModelService {
                     return modelRepository.save(model);
                 });
     }
+
+    public List<LaptopModel> getModelsByBrandId(Long brandId) {
+        return modelRepository.findByBrand_BrandId(brandId);
+    }
+
 }

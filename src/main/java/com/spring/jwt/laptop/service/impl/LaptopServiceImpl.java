@@ -71,6 +71,7 @@ public class LaptopServiceImpl implements LaptopService {
         laptop.setUsbPorts(requestDTO.getUsbPorts());
         laptop.setWeight(requestDTO.getWeight());
         laptop.setAddress(requestDTO.getAddress());
+        laptop.setColour(requestDTO.getColour());
         laptop.setStatus(
                 requestDTO.getStatus() == null ? Status.ACTIVE : requestDTO.getStatus()
         );
@@ -84,6 +85,8 @@ public class LaptopServiceImpl implements LaptopService {
 
         laptop.setBrand(brand);
         laptop.setModel(model);
+        laptop.setBrandName(requestDTO.getBrand());
+        laptop.setModelName(requestDTO.getModel());
         laptop.setRam(RamOption.fromDbValue(requestDTO.getRam()));
         laptop.setStorage(StorageOption.fromDbValue(requestDTO.getStorage()));
         laptop.setScreenSize(ScreenSize.fromDbValue(requestDTO.getScreenSize()));
@@ -186,6 +189,9 @@ public class LaptopServiceImpl implements LaptopService {
                         laptopBrandService.getOrCreateBrand(
                                 laptopRequestDTO.getBrand());
                 laptop.setBrand(brand);
+
+                laptop.setBrandName(laptopRequestDTO.getBrand());
+
             }
 
             if (laptopRequestDTO.getModel() != null) {
@@ -194,6 +200,8 @@ public class LaptopServiceImpl implements LaptopService {
                         laptopModelService.getOrCreateModel(
                                 laptopRequestDTO.getModel(), brand);
                 laptop.setModel(model);
+                laptop.setModelName(laptopRequestDTO.getModel());
+
             }
 
             if (laptopRequestDTO.getRam() != null)

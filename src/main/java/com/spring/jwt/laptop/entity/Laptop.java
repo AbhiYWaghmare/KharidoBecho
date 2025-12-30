@@ -38,11 +38,11 @@ public class Laptop {
     @Column(name = "dealer")
     private String dealer;
 
-//    @Column(name = "model")
-//    private String model;
-//
-//    @Column(name = "brand")
-//    private String brand;
+    @Column(name = "model")
+    private String modelName;
+
+    @Column(name = "brand")
+    private String brandName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)

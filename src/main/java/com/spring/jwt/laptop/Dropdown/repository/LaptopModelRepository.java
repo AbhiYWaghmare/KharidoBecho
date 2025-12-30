@@ -4,6 +4,7 @@ import com.spring.jwt.laptop.Dropdown.entity.LaptopBrand;
 import com.spring.jwt.laptop.Dropdown.entity.LaptopModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface LaptopModelRepository extends JpaRepository<LaptopModel,Long> {
@@ -13,5 +14,6 @@ public interface LaptopModelRepository extends JpaRepository<LaptopModel,Long> {
             String modelName
     );
 
-//    List<LaptopBrand> findTop10ByBrandNameStartingWithIgnoreCase(String brandName);
+    List<LaptopModel> findByBrand_BrandId(Long brandId);
+
 }

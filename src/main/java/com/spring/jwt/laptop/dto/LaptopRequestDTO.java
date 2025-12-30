@@ -136,11 +136,11 @@ public class LaptopRequestDTO {
     private String address;
 
 
-    @NotNull(message = "Brand is required")
-    private Long brandId;
-
-    @NotNull(message = "Model is required")
-    private Long modelId;
+//    @NotNull(message = "Brand is required")
+//    private Long brandId;
+//
+//    @NotNull(message = "Model is required")
+//    private Long modelId;
 
     private Status status;
 

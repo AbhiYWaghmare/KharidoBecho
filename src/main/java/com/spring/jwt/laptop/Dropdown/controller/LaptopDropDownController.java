@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,23 @@ public class LaptopDropDownController {
         LaptopBrand brandEntity = brandService.getOrCreateBrand(brand);
         return brandEntity.getBrandName();
     }
+
+    @GetMapping("/models/by-brand/{brandId}")
+    public List<Map<String, Object>> getModelsByBrand(
+            @PathVariable Long brandId
+    ) {
+        return modelService.getModelsByBrandId(brandId)
+                .stream()
+                .map(model -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", model.getModelId());
+                    map.put("name", model.getModelName());
+                    return map;
+                })
+                .toList();
+    }
+
+
 
     // =====================================================
     // 🔹 MODEL (GET OR CREATE BY BRAND)
