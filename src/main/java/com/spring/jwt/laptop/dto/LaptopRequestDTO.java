@@ -1,15 +1,12 @@
 package com.spring.jwt.laptop.dto;
 
 import com.spring.jwt.entity.Status;
-import com.spring.jwt.laptop.model.LaptopRequestStatus;
-import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.net.ssl.SSLSession;
 import java.time.LocalDate;
 
 @Data
@@ -129,6 +126,21 @@ public class LaptopRequestDTO {
     @NotNull(message= "Port is required")
     @Min(value = 1, message = "USB ports must be at least 1")
     private Integer usbPorts;
+
+    @NotBlank(message = "Address is required")
+    @Size(max = 500, message = "Address cannot exceed 500 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9\\s,./#\\-]+$",
+            message = "Address can contain letters, numbers, spaces, and , . / # - characters"
+    )
+    private String address;
+
+
+    @NotNull(message = "Brand is required")
+    private Long brandId;
+
+    @NotNull(message = "Model is required")
+    private Long modelId;
 
     private Status status;
 
