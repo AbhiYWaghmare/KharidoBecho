@@ -404,6 +404,18 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(BrandNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleBrandNotFound(BrandNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ModelAlreadyExistsException.class)
+    public ResponseEntity<Map<String, String>> handleModelExists(ModelAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("message", ex.getMessage()));
+    }
+
     @ExceptionHandler(SellerNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleSellerNotFound(
             SellerNotFoundException ex, WebRequest request) {

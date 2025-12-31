@@ -22,6 +22,9 @@ MobileResponseDTO {
     private String color;
     private Integer yearOfPurchase;
     private String status; //ACTIVE, SOLD, EXPIRED, DELETED
+    private String state;
+    private String city;
+    private String address;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private Long sellerId;
