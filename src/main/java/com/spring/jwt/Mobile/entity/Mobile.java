@@ -57,9 +57,19 @@ public class Mobile {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "model_id", nullable = false)
-    private MobileModel model;
+    @Column(nullable = false, length = 100)
+    private String state;
+
+    @Column(nullable = false, length = 100)
+    private String city;
+
+    @Column(nullable = false, length = 255)
+    private String address;
+
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "model_id", nullable = false)
+//    private MobileModel model;
 
 
     // Link With Seller

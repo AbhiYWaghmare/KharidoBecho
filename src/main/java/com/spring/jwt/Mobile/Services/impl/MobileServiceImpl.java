@@ -1,18 +1,18 @@
 package com.spring.jwt.Mobile.Services.impl;
 
 import com.spring.jwt.Mobile.Mapper.MobileMapper;
-import com.spring.jwt.Mobile.Repository.BrandRepository;
+//import com.spring.jwt.Mobile.Repository.BrandRepository;
 import com.spring.jwt.Mobile.Repository.MobileImageRepository;
-import com.spring.jwt.Mobile.Repository.MobileModelRepository;
+//import com.spring.jwt.Mobile.Repository.MobileModelRepository;
 import com.spring.jwt.Mobile.Repository.MobileRepository;
 import com.spring.jwt.Mobile.Services.MobileService;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
 import com.spring.jwt.Mobile.dto.MobileUpdateDTO;
-import com.spring.jwt.Mobile.entity.Brand;
+//import com.spring.jwt.Mobile.entity.Brand;
 import com.spring.jwt.Mobile.entity.Mobile;
 import com.spring.jwt.Mobile.entity.MobileImage;
-import com.spring.jwt.Mobile.entity.MobileModel;
+//import com.spring.jwt.Mobile.entity.MobileModel;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
@@ -48,8 +48,8 @@ import java.util.stream.Collectors;
 public class MobileServiceImpl implements MobileService {
 
     private final MobileRepository mobileRepository;
-    private final BrandRepository brandRepository;
-    private final MobileModelRepository mobileModelRepository;
+//    private final BrandRepository brandRepository;
+//    private final MobileModelRepository mobileModelRepository;
     private final MobileImageRepository mobileImageRepository;
     private final SellerRepository sellerRepository;
     private final CloudinaryService cloudinaryService;
@@ -80,29 +80,30 @@ public class MobileServiceImpl implements MobileService {
         validateCommonUpdateFields(req);
     }
 
-    private MobileModel resolveModel(String brandName, String modelName) {
-
-        String cleanBrand = brandName.trim().toUpperCase();
-        String cleanModel = modelName.trim().toUpperCase();
-
-        Brand brand = brandRepository.findByNameIgnoreCase(cleanBrand)
-                .orElseGet(() ->
-                        brandRepository.save(
-                                Brand.builder().name(cleanBrand).build()
-                        )
-                );
-
-        return mobileModelRepository
-                .findByNameIgnoreCaseAndBrand(cleanModel, brand)
-                .orElseGet(() ->
-                        mobileModelRepository.save(
-                                MobileModel.builder()
-                                        .name(cleanModel)
-                                        .brand(brand)
-                                        .build()
-                        )
-                );
-    }
+    //When we want suggestion from database in sorting order(Abhi W)
+//    private MobileModel resolveModel(String brandName, String modelName) {
+//
+//        String cleanBrand = brandName.trim().toUpperCase();
+//        String cleanModel = modelName.trim().toUpperCase();
+//
+//        Brand brand = brandRepository.findByNameIgnoreCase(cleanBrand)
+//                .orElseGet(() ->
+//                        brandRepository.save(
+//                                Brand.builder().name(cleanBrand).build()
+//                        )
+//                );
+//
+//        return mobileModelRepository
+//                .findByNameIgnoreCaseAndBrand(cleanModel, brand)
+//                .orElseGet(() ->
+//                        mobileModelRepository.save(
+//                                MobileModel.builder()
+//                                        .name(cleanModel)
+//                                        .brand(brand)
+//                                        .build()
+//                        )
+//                );
+//    }
 
 
 
@@ -195,7 +196,10 @@ public class MobileServiceImpl implements MobileService {
                 req.getDescription(),
                 req.getPrice(),
                 req.getCondition(),
-                req.getYearOfPurchase()
+                req.getYearOfPurchase(),
+                req.getState(),
+                req.getCity(),
+                req.getAddress()
         );
     }
 
@@ -206,7 +210,10 @@ public class MobileServiceImpl implements MobileService {
                 req.getDescription(),
                 req.getPrice(),
                 req.getCondition(),
-                req.getYearOfPurchase()
+                req.getYearOfPurchase(),
+                req.getState(),
+                req.getCity(),
+                req.getAddress()
         );
     }
 
@@ -215,7 +222,11 @@ public class MobileServiceImpl implements MobileService {
             String description,
             BigDecimal price,
             String condition,
-            Integer yearOfPurchase
+            Integer yearOfPurchase,
+            String state,
+            String city,
+            String address
+
     ) {
 
         // Year check
@@ -255,6 +266,19 @@ public class MobileServiceImpl implements MobileService {
             throw new MobileValidationException("Title too long. Max 150 characters allowed.");
         }
 
+        if (state != null && state.length() > 100) {
+            throw new MobileValidationException("State name too long.");
+        }
+
+        if (city != null && city.length() > 100) {
+            throw new MobileValidationException("City name too long.");
+        }
+
+        if (address != null && address.length() > 255) {
+            throw new MobileValidationException("Address too long.");
+        }
+
+
         // Description check
         if (description != null) {
             int words = description.trim().split("\\s+").length;
@@ -265,6 +289,7 @@ public class MobileServiceImpl implements MobileService {
                 throw new MobileValidationException("Description cannot exceed 70 words.");
             }
         }
+
     }
 
 
@@ -280,10 +305,10 @@ public class MobileServiceImpl implements MobileService {
                 .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
 
         Mobile m = new Mobile();
-//        MobileMapper.updateFromRequest(m, req);
-        MobileModel model = resolveModel(req.getBrand(), req.getModel());
         MobileMapper.updateFromRequest(m, req);
-        m.setModel(model);
+//        MobileModel model = resolveModel(req.getBrand(), req.getModel());
+        MobileMapper.updateFromRequest(m, req);
+//        m.setModel(model);
         m.setSeller(seller);
         m.setDeleted(false);
         m.setStatus(Mobile.Status.ACTIVE);
@@ -377,11 +402,11 @@ public class MobileServiceImpl implements MobileService {
             throw new MobileValidationException("Cannot update a deleted mobile.");
         }
 
-//        MobileMapper.updateFromRequest(m, req);
-        if (req.getBrand() != null && req.getModel() != null) {
-            MobileModel model = resolveModel(req.getBrand(), req.getModel());
-            m.setModel(model);
-        }
+        MobileMapper.updateFromRequest(m, req);
+//        if (req.getBrand() != null && req.getModel() != null) {
+//            MobileModel model = resolveModel(req.getBrand(), req.getModel());
+//            m.setModel(model);
+//        }
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
     }

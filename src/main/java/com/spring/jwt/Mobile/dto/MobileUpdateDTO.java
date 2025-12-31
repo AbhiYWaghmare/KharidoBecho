@@ -56,6 +56,19 @@ public class MobileUpdateDTO {
         )
         private String color;
 
+        // STATE
+        @Size(max = 100, message = "State cannot exceed 100 characters")
+        private String state;
+
+        // CITY
+        @Size(max = 100, message = "City cannot exceed 100 characters")
+        private String city;
+
+        // ADDRESS
+        @Size(max = 255, message = "Address cannot exceed 255 characters")
+        private String address;
+
+
         // YEAR
 //        @NotNull(message = "Year of purchase is required")
         @Min(value = 2000, message = "Year must be realistic (after 2000)")
