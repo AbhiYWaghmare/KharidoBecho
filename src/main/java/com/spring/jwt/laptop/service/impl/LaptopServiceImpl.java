@@ -6,11 +6,9 @@ import com.spring.jwt.exception.laptop.BlankFieldsException;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
 import com.spring.jwt.exception.laptop.LaptopNotFoundException;
 import com.spring.jwt.exception.mobile.SellerNotFoundException;
-import com.spring.jwt.laptop.Dropdown.entity.LaptopBrand;
-import com.spring.jwt.laptop.Dropdown.entity.LaptopModel;
+import com.spring.jwt.laptop.Dropdown.dto.LaptopBrandModelDTO;
 import com.spring.jwt.laptop.Dropdown.model.*;
-//import com.spring.jwt.laptop.Dropdown.service.LaptopBrandService;
-//import com.spring.jwt.laptop.Dropdown.service.LaptopModelService;
+import com.spring.jwt.laptop.Dropdown.service.LaptopBrandModelService;
 import com.spring.jwt.laptop.dto.LaptopBookingDTO;
 import com.spring.jwt.laptop.dto.LaptopImageDTO;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
@@ -40,8 +38,7 @@ public class LaptopServiceImpl implements LaptopService {
 
     private final LaptopRepository laptopRepository;
     private final SellerRepository sellerRepository;
-//    private final LaptopBrandService laptopBrandService;
-//    private final LaptopModelService laptopModelService;
+    private final LaptopBrandModelService laptopBrandModelService;
 
     public Laptop create(LaptopRequestDTO requestDTO) {
 
@@ -103,6 +100,13 @@ public class LaptopServiceImpl implements LaptopService {
             laptop.setWarrantyInYear(
                     Warranty.fromYears(requestDTO.getWarrantyInYear())
             );
+
+        laptopBrandModelService.add(
+                LaptopBrandModelDTO.builder()
+                        .brand(requestDTO.getBrand())
+                        .model(requestDTO.getModel())
+                        .build()
+        );
 
         return laptopRepository.save(laptop);
     }

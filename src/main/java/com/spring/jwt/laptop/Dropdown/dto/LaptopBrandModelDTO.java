@@ -1,10 +1,14 @@
 package com.spring.jwt.laptop.Dropdown.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-//@AllArgsConstructor
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class LaptopBrandModelDTO {
     private Long id;
     private String brand;

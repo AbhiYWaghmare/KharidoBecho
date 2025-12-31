@@ -12,9 +12,7 @@ import com.spring.jwt.laptop.Dropdown.entity.LaptopModel;
 import com.spring.jwt.laptop.Dropdown.model.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,7 +20,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "laptops")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler",
@@ -127,7 +126,8 @@ public class Laptop {
 
     @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
 //    @JsonIgnore
-    @JsonManagedReference
+//    @JsonManagedReference
+    @OrderBy("photoId ASC")
     private List<LaptopPhotos> laptopPhotos;
 
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
