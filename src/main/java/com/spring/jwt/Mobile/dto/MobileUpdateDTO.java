@@ -42,11 +42,14 @@ public class MobileUpdateDTO {
 
         // BRAND
 //        @NotBlank(message = "Brand is required")
-        private String brand;
+//        private String brand;
 
         //  MODEL
 //        @NotBlank(message = "Model is required")
-        private String model;
+//        private String model;
+
+        private Long modelId;
+
 
         // COLOR
 //        @NotBlank(message = "Color is required")

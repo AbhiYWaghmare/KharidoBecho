@@ -28,9 +28,9 @@ import java.util.Map;
 
 //********************************************************//
 
-    //Author : Sudhir Lokade
-    //Laptop Controller
-    //Date : 22/09/2025
+//Author : Sudhir Lokade
+//Laptop Controller
+//Date : 22/09/2025
 
 //*******************************************************//
 
@@ -94,7 +94,7 @@ public class LaptopController {
     //  Get /api/laptops/getById                          //
     //====================================================//
     @GetMapping("/getById")
-    public ResponseEntity<Laptop> getLaptopById(@RequestParam Long laptop_id) {
+    public ResponseEntity<LaptopResponseDTO> getLaptopById(@RequestParam Long laptop_id) {
         return ResponseEntity.ok(laptopService.getById(laptop_id));
     }
 
@@ -178,4 +178,3 @@ public class LaptopController {
     }
 
 }
-

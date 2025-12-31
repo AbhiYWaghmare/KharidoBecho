@@ -12,9 +12,11 @@ import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.repository.SellerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-//import com.spring.jwt.car.mapper.CarMapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -116,10 +118,11 @@ public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
         car.setDeleted(false);
         car.setStatus(Car.Status.ACTIVE);
         car = carRepository.save(car);
-        return com.spring.jwt.car.mapper.CarMapper.toDTO(car);
+        return CarMapper.toDTO(car);
     }
 
     @Override
+    @Transactional
     public Page<CarResponseDTO> listCars(int page, int size, Long sellerId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Car> pageResult = (sellerId != null)
@@ -131,10 +134,11 @@ public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
 
 
     @Override
+    @Transactional
     public CarResponseDTO getCar(Long id) {
         Car car = carRepository.findByCarIdAndDeletedFalse(id)
                 .orElseThrow(() -> new CarNotFoundException(id));
-        return com.spring.jwt.car.mapper.CarMapper.toDTO(car);
+        return CarMapper.toDTO(car);
     }
 
     @Override
@@ -149,9 +153,9 @@ public class CarServiceImpl implements com.spring.jwt.car.services.CarService {
             throw new CarValidationException("Cannot update a deleted car.");
         }
 
-        com.spring.jwt.car.mapper.CarMapper.updateFromRequest(car, req);
+        CarMapper.updateFromRequest(car, req);
         car = carRepository.save(car);
-        return com.spring.jwt.car.mapper.CarMapper.toDTO(car);
+        return CarMapper.toDTO(car);
     }
 
     @Override

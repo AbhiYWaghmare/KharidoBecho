@@ -13,9 +13,9 @@ import java.util.Map;
 
 //********************************************************//
 
-    //Author : Abhishek Waghmare
-    //Mobile Controller
-    //Date : 22/09/2025
+//Author : Abhishek Waghmare
+//Mobile Controller
+//Date : 22/09/2025
 
 //*******************************************************//
 
@@ -33,7 +33,7 @@ public class MobileController {
         // Convert condition to uppercase before mapping
         request.setCondition(request.getCondition().toUpperCase());
 
-       MobileResponseDTO savedMobile = mobileService.createMobile(request);
+        MobileResponseDTO savedMobile = mobileService.createMobile(request);
 
         MobileAddReqDTO response = MobileAddReqDTO.builder()
                 .code("201")
@@ -76,6 +76,4 @@ public class MobileController {
     }
 
 
-    }
-
-
+}

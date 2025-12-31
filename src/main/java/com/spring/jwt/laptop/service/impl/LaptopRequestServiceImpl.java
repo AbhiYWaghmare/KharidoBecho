@@ -212,7 +212,7 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         }
 
         return toResponse(req);
-        }
+    }
 
 
     @Override

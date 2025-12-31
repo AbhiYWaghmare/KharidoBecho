@@ -4,6 +4,7 @@ import com.spring.jwt.Mobile.Mapper.MobileMapper;
 //import com.spring.jwt.Mobile.Repository.BrandRepository;
 import com.spring.jwt.Mobile.Repository.MobileImageRepository;
 //import com.spring.jwt.Mobile.Repository.MobileModelRepository;
+import com.spring.jwt.Mobile.Repository.MobileModelRepository;
 import com.spring.jwt.Mobile.Repository.MobileRepository;
 import com.spring.jwt.Mobile.Services.MobileService;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
@@ -13,6 +14,7 @@ import com.spring.jwt.Mobile.dto.MobileUpdateDTO;
 import com.spring.jwt.Mobile.entity.Mobile;
 import com.spring.jwt.Mobile.entity.MobileImage;
 //import com.spring.jwt.Mobile.entity.MobileModel;
+import com.spring.jwt.Mobile.entity.MobileModel;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
@@ -49,14 +51,14 @@ public class MobileServiceImpl implements MobileService {
 
     private final MobileRepository mobileRepository;
 //    private final BrandRepository brandRepository;
-//    private final MobileModelRepository mobileModelRepository;
+    private final MobileModelRepository mobileModelRepository;
     private final MobileImageRepository mobileImageRepository;
     private final SellerRepository sellerRepository;
     private final CloudinaryService cloudinaryService;
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
 
-// This method is for Create mobile service
+    // This method is for Create mobile service
     private void validateCreateRequest(MobileRequestDTO req) {
         validateCommonCreateFields(req); //  all fields required
     }
@@ -69,8 +71,8 @@ public class MobileServiceImpl implements MobileService {
                 req.getPrice() == null &&
                 req.getNegotiable() == null &&
                 req.getCondition() == null &&
-                req.getBrand() == null &&
-                req.getModel() == null &&
+//                req.getBrand() == null &&
+//                req.getModel() == null &&
                 req.getColor() == null &&
                 req.getYearOfPurchase() == null) {
 
@@ -309,6 +311,11 @@ public class MobileServiceImpl implements MobileService {
 //        MobileModel model = resolveModel(req.getBrand(), req.getModel());
         MobileMapper.updateFromRequest(m, req);
 //        m.setModel(model);
+        MobileModel model = mobileModelRepository.findById(req.getModelId())
+                .orElseThrow(() -> new MobileValidationException("Invalid model selected"));
+
+        m.setModel(model);
+
         m.setSeller(seller);
         m.setDeleted(false);
         m.setStatus(Mobile.Status.ACTIVE);
@@ -407,6 +414,12 @@ public class MobileServiceImpl implements MobileService {
 //            MobileModel model = resolveModel(req.getBrand(), req.getModel());
 //            m.setModel(model);
 //        }
+        if (req.getModelId() != null) {
+            MobileModel model = mobileModelRepository.findById(req.getModelId())
+                    .orElseThrow(() -> new MobileValidationException("Invalid model selected"));
+            m.setModel(model);
+        }
+
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
     }
@@ -604,7 +617,7 @@ public class MobileServiceImpl implements MobileService {
 
     // ================================================= //
     // in this method the image size is not defined //
-  //==========================================================//
+    //==========================================================//
 
 //    @Override
 //    @Transactional

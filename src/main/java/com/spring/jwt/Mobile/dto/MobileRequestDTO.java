@@ -41,12 +41,16 @@ public class MobileRequestDTO {
     private String condition;
 
     // BRAND
-    @NotBlank(message = "Brand is required")
-    private String brand;
+//    @NotBlank(message = "Brand is required")
+//    private String brand;
+//
+//    //  MODEL
+//    @NotBlank(message = "Model is required")
+//    private String model;
 
-    //  MODEL
-    @NotBlank(message = "Model is required")
-    private String model;
+    @NotNull(message = "Model is required")
+    private Long modelId;
+
 
     // COLOR
     @NotBlank(message = "Color is required")

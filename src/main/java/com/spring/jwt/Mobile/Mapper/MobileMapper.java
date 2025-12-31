@@ -32,6 +32,10 @@ public class MobileMapper {
 //                m.getModel() != null ? m.getModel().getName() : null
 //        );
 
+//        dto.setBrand(m.getModel().getBrand().getName());
+//        dto.setModel(m.getModel().getName());
+
+
         dto.setColor(m.getColor());
         dto.setYearOfPurchase(m.getYearOfPurchase());
         dto.setStatus(m.getStatus() != null ? m.getStatus().name() : null);
