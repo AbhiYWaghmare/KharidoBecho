@@ -2,6 +2,7 @@ package com.spring.jwt.laptop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
@@ -24,7 +25,9 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler",
+        "seller",
+        "bookings"})
 public class Laptop {
 
     @Id
@@ -39,20 +42,20 @@ public class Laptop {
     private String dealer;
 
     @Column(name = "model")
-    private String modelName;
+    private String model;
 
     @Column(name = "brand")
-    private String brandName;
+    private String brand;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "brand_id", nullable = false)
-    @JsonIgnore
-    private LaptopBrand brand;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "model_id", nullable = false)
-    @JsonIgnore
-    private LaptopModel model;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "brand_id", nullable = false)
+//    @JsonIgnore
+//    private LaptopBrand brand;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "model_id", nullable = false)
+//    @JsonIgnore
+//    private LaptopModel model;
 
     @Column(name = "price")
     private double price;
@@ -123,32 +126,34 @@ public class Laptop {
     private Seller seller;
 
     @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
+//    @JsonIgnore
+    @JsonManagedReference
     private List<LaptopPhotos> laptopPhotos;
 
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+//    @JsonIgnore
     private List<LaptopBooking> bookings = new ArrayList<>();
 
     private boolean deleted = false;
     private LocalDateTime deletedAt;
 
-    @JsonProperty("brand")
-    public String getBrandName() {
-        return brand != null ? brand.getBrandName() : null;
-    }
+//    @JsonProperty("brand")
+//    public String getBrandName() {
+//        return brand != null ? brand.getBrandName() : null;
+//    }
+//
+//    @JsonProperty("model")
+//    public String getModelName() {
+//        return model != null ? model.getModelName() : null;
+//    }
 
-    @JsonProperty("model")
-    public String getModelName() {
-        return model != null ? model.getModelName() : null;
-    }
-
-    @JsonProperty("photos")
-    public List<String> getPhotoUrls() {
-        if (laptopPhotos == null) return List.of();
-        return laptopPhotos.stream()
-                .map(LaptopPhotos::getPhoto_link)
-                .toList();
-    }
+//    @JsonProperty("photos")
+//    public List<String> getPhotoUrls() {
+//        if (laptopPhotos == null) return List.of();
+//        return laptopPhotos.stream()
+//                .map(LaptopPhotos::getPhoto_link)
+//                .toList();
+//    }
 
 
 }

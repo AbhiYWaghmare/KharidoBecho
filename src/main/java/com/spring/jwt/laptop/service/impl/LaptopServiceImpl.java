@@ -48,10 +48,6 @@ public class LaptopServiceImpl implements LaptopService {
         Seller seller = sellerRepository.findById(requestDTO.getSellerId())
                 .orElseThrow(() -> new SellerNotFoundException(requestDTO.getSellerId()));
 
-        if (requestDTO.getAddress() == null || requestDTO.getAddress().trim().isEmpty()) {
-            throw new RuntimeException("Address is required");
-        }
-
         if (laptopRepository.existsBySerialNumber(requestDTO.getSerialNumber())) {
             throw new LaptopAlreadyExistsException(
                     "Laptop already exists with serial number " + requestDTO.getSerialNumber()
@@ -62,6 +58,9 @@ public class LaptopServiceImpl implements LaptopService {
 
         laptop.setSerialNumber(requestDTO.getSerialNumber());
         laptop.setDealer(requestDTO.getDealer());
+        laptop.setBrand(requestDTO.getBrand());
+        laptop.setModel(requestDTO.getModel());
+
         laptop.setPrice(requestDTO.getPrice());
         laptop.setProcessor(requestDTO.getProcessor());
         laptop.setBattery(requestDTO.getBattery());
@@ -70,36 +69,35 @@ public class LaptopServiceImpl implements LaptopService {
         laptop.setManufacturer(requestDTO.getManufacturer());
         laptop.setUsbPorts(requestDTO.getUsbPorts());
         laptop.setWeight(requestDTO.getWeight());
-        laptop.setAddress(requestDTO.getAddress());
         laptop.setColour(requestDTO.getColour());
-        laptop.setStatus(
-                requestDTO.getStatus() == null ? Status.ACTIVE : requestDTO.getStatus()
-        );
+        laptop.setStatus(requestDTO.getStatus());
         laptop.setSeller(seller);
+        if (requestDTO.getRam() != null)
+            laptop.setRam(RamOption.fromDbValue(requestDTO.getRam()));
 
-        LaptopBrand brand =
-                laptopBrandService.getOrCreateBrand(requestDTO.getBrand());
+        if (requestDTO.getStorage() != null)
+            laptop.setStorage(StorageOption.fromDbValue(requestDTO.getStorage()));
 
-        LaptopModel model =
-                laptopModelService.getOrCreateModel(requestDTO.getModel(), brand);
+        if (requestDTO.getScreenSize() != null)
+            laptop.setScreenSize(ScreenSize.fromDbValue(requestDTO.getScreenSize()));
 
-        laptop.setBrand(brand);
-        laptop.setModel(model);
-        laptop.setBrandName(requestDTO.getBrand());
-        laptop.setModelName(requestDTO.getModel());
-        laptop.setRam(RamOption.fromDbValue(requestDTO.getRam()));
-        laptop.setStorage(StorageOption.fromDbValue(requestDTO.getStorage()));
-        laptop.setScreenSize(ScreenSize.fromDbValue(requestDTO.getScreenSize()));
-        laptop.setMemoryType(MemoryType.fromDbValue(requestDTO.getMemoryType()));
-        laptop.setProcessorBrand(
-                ProcessorBrand.fromDbValue(requestDTO.getProcessorBrand())
-        );
-        laptop.setGraphicBrand(
-                GraphicsBrand.fromDbValue(requestDTO.getGraphicBrand())
-        );
-        laptop.setWarrantyInYear(
-                Warranty.fromYears(requestDTO.getWarrantyInYear())
-        );
+        if (requestDTO.getMemoryType() != null)
+            laptop.setMemoryType(MemoryType.fromDbValue(requestDTO.getMemoryType()));
+
+        if (requestDTO.getProcessorBrand() != null)
+            laptop.setProcessorBrand(
+                    ProcessorBrand.fromDbValue(requestDTO.getProcessorBrand())
+            );
+
+        if (requestDTO.getGraphicBrand() != null)
+            laptop.setGraphicBrand(
+                    GraphicsBrand.fromDbValue(requestDTO.getGraphicBrand())
+            );
+
+        if (requestDTO.getWarrantyInYear() != null)
+            laptop.setWarrantyInYear(
+                    Warranty.fromYears(requestDTO.getWarrantyInYear())
+            );
 
         return laptopRepository.save(laptop);
     }
@@ -129,8 +127,8 @@ public class LaptopServiceImpl implements LaptopService {
             validateBlankFields(laptopRequestDTO);
 
             Laptop laptop = laptopRepository.findById(laptopId)
-                    .orElseThrow(() -> new LaptopNotFoundException(
-                            "Laptop not found with ID " + laptopId));
+                    .orElseThrow(() ->
+                            new LaptopNotFoundException("Laptop not found with ID " + laptopId));
 
             if (laptopRequestDTO.getSerialNumber() != null
                     && !laptopRequestDTO.getSerialNumber().equals(laptop.getSerialNumber())) {
@@ -138,15 +136,18 @@ public class LaptopServiceImpl implements LaptopService {
                 if (laptopRepository.existsBySerialNumber(
                         laptopRequestDTO.getSerialNumber())) {
                     throw new LaptopAlreadyExistsException(
-                            "Laptop with serial number "
-                                    + laptopRequestDTO.getSerialNumber()
-                                    + " already exists");
+                            "Laptop with serial number " + laptopRequestDTO.getSerialNumber() + " already exists");
                 }
                 laptop.setSerialNumber(laptopRequestDTO.getSerialNumber());
             }
 
             if (laptopRequestDTO.getDealer() != null)
                 laptop.setDealer(laptopRequestDTO.getDealer());
+            if (laptopRequestDTO.getBrand() != null)
+                laptop.setBrand(laptopRequestDTO.getBrand());
+
+            if (laptopRequestDTO.getModel() != null)
+                laptop.setModel(laptopRequestDTO.getModel());
 
             if (laptopRequestDTO.getPrice() != null) {
                 if (laptopRequestDTO.getPrice() < 0) {
@@ -179,31 +180,6 @@ public class LaptopServiceImpl implements LaptopService {
             if (laptopRequestDTO.getStatus() != null)
                 laptop.setStatus(laptopRequestDTO.getStatus());
 
-            if (laptopRequestDTO.getAddress() != null
-                    && !laptopRequestDTO.getAddress().isBlank()) {
-                laptop.setAddress(laptopRequestDTO.getAddress());
-            }
-
-            if (laptopRequestDTO.getBrand() != null) {
-                LaptopBrand brand =
-                        laptopBrandService.getOrCreateBrand(
-                                laptopRequestDTO.getBrand());
-                laptop.setBrand(brand);
-
-                laptop.setBrandName(laptopRequestDTO.getBrand());
-
-            }
-
-            if (laptopRequestDTO.getModel() != null) {
-                LaptopBrand brand = laptop.getBrand(); // already resolved above
-                LaptopModel model =
-                        laptopModelService.getOrCreateModel(
-                                laptopRequestDTO.getModel(), brand);
-                laptop.setModel(model);
-                laptop.setModelName(laptopRequestDTO.getModel());
-
-            }
-
             if (laptopRequestDTO.getRam() != null)
                 laptop.setRam(RamOption.fromDbValue(laptopRequestDTO.getRam()));
 
@@ -218,25 +194,20 @@ public class LaptopServiceImpl implements LaptopService {
 
             if (laptopRequestDTO.getProcessorBrand() != null)
                 laptop.setProcessorBrand(
-                        ProcessorBrand.fromDbValue(
-                                laptopRequestDTO.getProcessorBrand()));
+                        ProcessorBrand.fromDbValue(laptopRequestDTO.getProcessorBrand()));
 
             if (laptopRequestDTO.getGraphicBrand() != null)
                 laptop.setGraphicBrand(
-                        GraphicsBrand.fromDbValue(
-                                laptopRequestDTO.getGraphicBrand()));
+                        GraphicsBrand.fromDbValue(laptopRequestDTO.getGraphicBrand()));
 
             if (laptopRequestDTO.getWarrantyInYear() != null)
                 laptop.setWarrantyInYear(
-                        Warranty.fromYears(
-                                laptopRequestDTO.getWarrantyInYear()));
+                        Warranty.fromYears(laptopRequestDTO.getWarrantyInYear()));
 
             if (laptopRequestDTO.getSellerId() != null) {
-                Seller seller = sellerRepository.findById(
-                                laptopRequestDTO.getSellerId())
+                Seller seller = sellerRepository.findById(laptopRequestDTO.getSellerId())
                         .orElseThrow(() ->
-                                new SellerNotFoundException(
-                                        laptopRequestDTO.getSellerId()));
+                                new SellerNotFoundException(laptopRequestDTO.getSellerId()));
                 laptop.setSeller(seller);
             }
 
@@ -258,17 +229,8 @@ public class LaptopServiceImpl implements LaptopService {
 
         dto.setId(laptop.getId());
         dto.setSerialNumber(laptop.getSerialNumber());
-        dto.setBrand(
-                laptop.getBrand() != null
-                        ? laptop.getBrand().getBrandName()
-                        : null
-        );
-
-        dto.setModel(
-                laptop.getModel() != null
-                        ? laptop.getModel().getModelName()
-                        : null
-        );
+        dto.setBrand(laptop.getBrand());
+        dto.setModel(laptop.getModel());
 
         dto.setPrice(laptop.getPrice());
         dto.setProcessor(laptop.getProcessor());
@@ -282,41 +244,23 @@ public class LaptopServiceImpl implements LaptopService {
         dto.setDeleted(laptop.isDeleted());
         dto.setDeletedAt(laptop.getDeletedAt());
         dto.setRam(
-                laptop.getRam() != null
-                        ? laptop.getRam().getDbValue()
-                        : null
+                laptop.getRam() != null ? laptop.getRam().getDbValue() : null
         );
-
         dto.setStorage(
-                laptop.getStorage() != null
-                        ? laptop.getStorage().getDbValue()
-                        : null
+                laptop.getStorage() != null ? laptop.getStorage().getDbValue() : null
         );
-
         dto.setScreenSize(
-                laptop.getScreenSize() != null
-                        ? laptop.getScreenSize().getDbValue()
-                        : null
+                laptop.getScreenSize() != null ? laptop.getScreenSize().getDbValue() : null
         );
-
         dto.setMemoryType(
-                laptop.getMemoryType() != null
-                        ? laptop.getMemoryType().getDbValue()
-                        : null
+                laptop.getMemoryType() != null ? laptop.getMemoryType().getDbValue() : null
         );
-
         dto.setProcessorBrand(
-                laptop.getProcessorBrand() != null
-                        ? laptop.getProcessorBrand().getDbValue()
-                        : null
+                laptop.getProcessorBrand() != null ? laptop.getProcessorBrand().getDbValue() : null
         );
-
         dto.setGraphicBrand(
-                laptop.getGraphicBrand() != null
-                        ? laptop.getGraphicBrand().getDbValue()
-                        : null
+                laptop.getGraphicBrand() != null ? laptop.getGraphicBrand().getDbValue() : null
         );
-
         dto.setWarrantyInYear(
                 laptop.getWarrantyInYear() != null
                         ? Long.parseLong(laptop.getWarrantyInYear().getDbValue())
@@ -326,15 +270,12 @@ public class LaptopServiceImpl implements LaptopService {
         dto.setPhotos(
                 laptop.getLaptopPhotos() == null
                         ? List.of()
-                        : laptop.getLaptopPhotos()
-                        .stream()
-                        .map(p -> {
-                            LaptopImageDTO img = new LaptopImageDTO();
-                            img.setPhotoId(p.getPhotoId());
-                            img.setPhoto_link(p.getPhoto_link());
-                            return img;
-                        })
-                        .toList()
+                        : laptop.getLaptopPhotos().stream().map(p -> {
+                    LaptopImageDTO img = new LaptopImageDTO();
+                    img.setPhotoId(p.getPhotoId());
+                    img.setPhoto_link(p.getPhoto_link());
+                    return img;
+                }).toList()
         );
 
         return dto;
@@ -355,17 +296,8 @@ public List<LaptopResponseDTO> getAllLaptops() {
 
         dto.setId(laptop.getId());
         dto.setSerialNumber(laptop.getSerialNumber());
-        dto.setBrand(
-                laptop.getBrand() != null
-                        ? laptop.getBrand().getBrandName()
-                        : null
-        );
-
-        dto.setModel(
-                laptop.getModel() != null
-                        ? laptop.getModel().getModelName()
-                        : null
-        );
+        dto.setBrand(laptop.getBrand());
+        dto.setModel(laptop.getModel());
 
         dto.setPrice(laptop.getPrice());
         dto.setProcessor(laptop.getProcessor());
@@ -378,47 +310,18 @@ public List<LaptopResponseDTO> getAllLaptops() {
         dto.setStatus(laptop.getStatus());
         dto.setDeleted(laptop.isDeleted());
         dto.setDeletedAt(laptop.getDeletedAt());
-        dto.setRam(
-                laptop.getRam() != null
-                        ? laptop.getRam().getDbValue()
-                        : null
-        );
-
-        dto.setStorage(
-                laptop.getStorage() != null
-                        ? laptop.getStorage().getDbValue()
-                        : null
-        );
-
-        dto.setScreenSize(
-                laptop.getScreenSize() != null
-                        ? laptop.getScreenSize().getDbValue()
-                        : null
-        );
-
-        dto.setMemoryType(
-                laptop.getMemoryType() != null
-                        ? laptop.getMemoryType().getDbValue()
-                        : null
-        );
-
-        dto.setProcessorBrand(
-                laptop.getProcessorBrand() != null
-                        ? laptop.getProcessorBrand().getDbValue()
-                        : null
-        );
-
-        dto.setGraphicBrand(
-                laptop.getGraphicBrand() != null
-                        ? laptop.getGraphicBrand().getDbValue()
-                        : null
-        );
-
+        dto.setRam(laptop.getRam() != null ? laptop.getRam().getDbValue() : null);
+        dto.setStorage(laptop.getStorage() != null ? laptop.getStorage().getDbValue() : null);
+        dto.setScreenSize(laptop.getScreenSize() != null ? laptop.getScreenSize().getDbValue() : null);
+        dto.setMemoryType(laptop.getMemoryType() != null ? laptop.getMemoryType().getDbValue() : null);
+        dto.setProcessorBrand(laptop.getProcessorBrand() != null ? laptop.getProcessorBrand().getDbValue() : null);
+        dto.setGraphicBrand(laptop.getGraphicBrand() != null ? laptop.getGraphicBrand().getDbValue() : null);
         dto.setWarrantyInYear(
                 laptop.getWarrantyInYear() != null
                         ? Long.parseLong(laptop.getWarrantyInYear().getDbValue())
                         : null
         );
+
         dto.setPhotos(
                 laptop.getLaptopPhotos().stream().map(p -> {
                     LaptopImageDTO pd = new LaptopImageDTO();
@@ -427,6 +330,7 @@ public List<LaptopResponseDTO> getAllLaptops() {
                     return pd;
                 }).toList()
         );
+
         dto.setBookings(
                 laptop.getBookings().stream().map(b -> {
                     LaptopBookingDTO bd = new LaptopBookingDTO();
@@ -490,8 +394,19 @@ public List<LaptopResponseDTO> getAllLaptops() {
         sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new SellerNotFoundException(sellerId));
 
-        Pageable pageable = PageRequest.of(page,size, Sort.by(sortBy).ascending());
-        return laptopRepository.findBySellerIdAndStatus(sellerId,status,pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+
+        Page<Laptop> laptopPage =
+                laptopRepository.findBySellerIdAndStatus(sellerId, status, pageable);
+
+        laptopPage.getContent().forEach(laptop -> {
+            if (laptop.getLaptopPhotos() != null) {
+                laptop.getLaptopPhotos().size();
+            }
+        });
+
+        return laptopPage;
+
     }
 
     @Override
@@ -526,23 +441,13 @@ public List<LaptopResponseDTO> getAllLaptops() {
         LaptopResponseDTO dto = new LaptopResponseDTO();
         dto.setId(laptop.getId());
         dto.setSerialNumber(laptop.getSerialNumber());
-        dto.setBrand(
-                laptop.getBrand() != null
-                        ? laptop.getBrand().getBrandName()
-                        : null
-        );
-
-        dto.setModel(
-                laptop.getModel() != null
-                        ? laptop.getModel().getModelName()
-                        : null
-        );
+        dto.setBrand(laptop.getBrand());
+        dto.setModel(laptop.getModel());
 
         dto.setPrice(laptop.getPrice());
         dto.setStatus(laptop.getStatus());
 
         return dto;
+
     }
-
-
 }

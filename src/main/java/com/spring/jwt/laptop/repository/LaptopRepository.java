@@ -19,7 +19,6 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
     boolean existsBySerialNumber(String serialNumber);
 
     @Query("SELECT l FROM Laptop l WHERE l.seller.sellerId = :sellerId AND l.status = :status")
-    @EntityGraph(attributePaths = "laptopPhotos")
     Page<Laptop> findBySellerIdAndStatus(@Param("sellerId") Long sellerId,
                                        @Param("status") Status status,
                                        Pageable pageable);
@@ -34,7 +33,7 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
 
     Optional<Laptop> findByIdAndDeletedFalse(Long id);
 
-    @EntityGraph(attributePaths = "laptopPhotos")
+//    @EntityGraph(attributePaths = "laptopPhotos")
     Page<Laptop> findBySeller_SellerId(Long sellerId, Pageable pageable);
 
     @Query("""

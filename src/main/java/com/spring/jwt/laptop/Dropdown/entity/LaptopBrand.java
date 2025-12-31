@@ -24,4 +24,5 @@ public class LaptopBrand {
     private String brandName;
 
 
+
 }
