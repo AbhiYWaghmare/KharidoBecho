@@ -9,8 +9,8 @@ import com.spring.jwt.exception.mobile.SellerNotFoundException;
 import com.spring.jwt.laptop.Dropdown.entity.LaptopBrand;
 import com.spring.jwt.laptop.Dropdown.entity.LaptopModel;
 import com.spring.jwt.laptop.Dropdown.model.*;
-import com.spring.jwt.laptop.Dropdown.service.LaptopBrandService;
-import com.spring.jwt.laptop.Dropdown.service.LaptopModelService;
+//import com.spring.jwt.laptop.Dropdown.service.LaptopBrandService;
+//import com.spring.jwt.laptop.Dropdown.service.LaptopModelService;
 import com.spring.jwt.laptop.dto.LaptopBookingDTO;
 import com.spring.jwt.laptop.dto.LaptopImageDTO;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
@@ -40,8 +40,8 @@ public class LaptopServiceImpl implements LaptopService {
 
     private final LaptopRepository laptopRepository;
     private final SellerRepository sellerRepository;
-    private final LaptopBrandService laptopBrandService;
-    private final LaptopModelService laptopModelService;
+//    private final LaptopBrandService laptopBrandService;
+//    private final LaptopModelService laptopModelService;
 
     public Laptop create(LaptopRequestDTO requestDTO) {
 
@@ -70,7 +70,12 @@ public class LaptopServiceImpl implements LaptopService {
         laptop.setUsbPorts(requestDTO.getUsbPorts());
         laptop.setWeight(requestDTO.getWeight());
         laptop.setColour(requestDTO.getColour());
-        laptop.setStatus(requestDTO.getStatus());
+        laptop.setStatus(
+                requestDTO.getStatus() != null
+                        ? requestDTO.getStatus()
+                        : Status.ACTIVE
+        );
+
         laptop.setSeller(seller);
         if (requestDTO.getRam() != null)
             laptop.setRam(RamOption.fromDbValue(requestDTO.getRam()));
@@ -284,7 +289,7 @@ public class LaptopServiceImpl implements LaptopService {
 @Transactional(readOnly = true)
 public List<LaptopResponseDTO> getAllLaptops() {
 
-    List<Laptop> laptops = laptopRepository.findAll();
+    List<Laptop> laptops = laptopRepository.findAllWithPhotos();
 
     if (laptops.isEmpty()) {
         throw new LaptopNotFoundException("No laptops found");

@@ -44,4 +44,13 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
 """)
     Laptop findByIdWithPhotos(@Param("laptopId") Long laptopId);
 
+    @Query("""
+    SELECT DISTINCT l
+    FROM Laptop l
+    LEFT JOIN FETCH l.laptopPhotos
+    WHERE l.deleted = false
+""")
+    List<Laptop> findAllWithPhotos();
+
+
 }

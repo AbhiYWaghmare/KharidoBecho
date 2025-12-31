@@ -137,23 +137,12 @@ public class Laptop {
     private boolean deleted = false;
     private LocalDateTime deletedAt;
 
-//    @JsonProperty("brand")
-//    public String getBrandName() {
-//        return brand != null ? brand.getBrandName() : null;
-//    }
-//
-//    @JsonProperty("model")
-//    public String getModelName() {
-//        return model != null ? model.getModelName() : null;
-//    }
 
-//    @JsonProperty("photos")
-//    public List<String> getPhotoUrls() {
-//        if (laptopPhotos == null) return List.of();
-//        return laptopPhotos.stream()
-//                .map(LaptopPhotos::getPhoto_link)
-//                .toList();
+//    @PrePersist
+//    public void setDefaultValues() {
+//        if (this.status == null) {
+//            this.status = Status.PENDING; // or ACTIVE / AVAILABLE
+//        }
 //    }
-
 
 }
