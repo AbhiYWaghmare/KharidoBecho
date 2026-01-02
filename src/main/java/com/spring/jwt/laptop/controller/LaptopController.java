@@ -2,6 +2,7 @@ package com.spring.jwt.laptop.controller;
 
 import com.spring.jwt.entity.Status;
 import com.spring.jwt.exception.laptop.LaptopAlreadyExistsException;
+import com.spring.jwt.laptop.dto.LaptopAddReqDTO;
 import com.spring.jwt.laptop.dto.LaptopRequestDTO;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.laptop.entity.Laptop;
@@ -27,9 +28,9 @@ import java.util.Map;
 
 //********************************************************//
 
-    //Author : Sudhir Lokade
-    //Laptop Controller
-    //Date : 22/09/2025
+//Author : Sudhir Lokade
+//Laptop Controller
+//Date : 22/09/2025
 
 //*******************************************************//
 
@@ -49,58 +50,51 @@ public class LaptopController {
     //  Post /api/laptops/create                          //
     //====================================================//
     @PostMapping("/create")
-    public ResponseEntity<LaptopResponseDTO> create(@Valid @RequestBody LaptopRequestDTO laptopRequestDTO, HttpServletRequest request){
-        if (laptopRepository.existsBySerialNumber(laptopRequestDTO.getSerialNumber())) {
-            throw new LaptopAlreadyExistsException(
-                    "Laptop with serial number " + laptopRequestDTO.getSerialNumber() + " already exists"
-            );
-        }
+    public ResponseEntity<LaptopAddReqDTO> createLaptop(
+            @Valid @RequestBody LaptopRequestDTO request) {
 
-        Laptop laptop = laptopService.create(laptopRequestDTO);
-        String apiPath = request.getRequestURI();
-//        String imageUrl = laptopPhotos.getPhoto_link();
-        Long laptopId = laptop.getId();
-//        Long bookingId = booking.getLaptopBookingId();
+        Laptop laptop = laptopService.create(request);
 
-       return ResponseEntity.status(HttpStatus.CREATED)
-               .body(new LaptopResponseDTO("success","Laptop added successfully with id " +laptop.getId(),"CREATED",200, LocalDateTime.now(),"NULL", apiPath,laptopResponseDTO.getImageUrl(),laptopId));
-    }  
+        LaptopAddReqDTO response = LaptopAddReqDTO.builder()
+                .code("201")
+                .message("Laptop Added Successfully !!")
+                .laptopId(laptop.getId())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
     //====================================================//
     //  Update Laptop                                     //
     //  Patch /api/laptops/update                         //
     //====================================================//
-    @PatchMapping("/update")
-    public ResponseEntity<LaptopResponseDTO> update(
-            @RequestParam Long laptopId,
-            @RequestBody LaptopRequestDTO requestDTO,
-            HttpServletRequest request) {
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<LaptopResponseDTO> updateLaptop(
+            @PathVariable Long id,
+            @RequestBody LaptopRequestDTO request) {
 
-
-            Laptop laptop = laptopService.update(laptopId, requestDTO);
-            String apiPath = request.getRequestURI();
-//            String imageUrl = laptopPhotos.getPhoto_link();
-            Long laptop_Id = laptop.getId();
-//            Long bookingId = booking.getLaptopBookingId();
-            return ResponseEntity.ok(new LaptopResponseDTO("success","Laptop updated successfully with id " +laptop.getId() ,"UPDATED",200, LocalDateTime.now(),"NULL", apiPath, laptopResponseDTO.getImageUrl(),laptop_Id));
+        return ResponseEntity.ok(laptopService.updateLaptop(id, request));
     }
+
+
 
     //====================================================//
     //  Get All Laptops                                   //
     //  Get /api/laptops/getAll                           //
     //====================================================//
     @GetMapping("/getAll")
-    public ResponseEntity<List<Laptop>> getAllLaptops() {
-        List<Laptop> laptops = laptopService.getAllLaptops();
+    public ResponseEntity<List<LaptopResponseDTO>> getAllLaptops() {
+        List<LaptopResponseDTO> laptops = laptopService.getAllLaptops();
         return ResponseEntity.ok(laptops);
     }
+
 
     //====================================================//
     //  Get Laptop By Id                                  //
     //  Get /api/laptops/getById                          //
     //====================================================//
     @GetMapping("/getById")
-    public ResponseEntity<Laptop> getLaptopById(@RequestParam Long laptop_id) {
+    public ResponseEntity<LaptopResponseDTO> getLaptopById(@RequestParam Long laptop_id) {
         return ResponseEntity.ok(laptopService.getById(laptop_id));
     }
 
@@ -184,4 +178,3 @@ public class LaptopController {
     }
 
 }
-

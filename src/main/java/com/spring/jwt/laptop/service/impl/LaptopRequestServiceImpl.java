@@ -103,7 +103,9 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         laptopRepo.findById(laptopId)
                 .orElseThrow(() -> new LaptopRequestException("Laptop with ID " + laptopId + " not found."));
 
-        List<LaptopBooking> requests = requestRepo.findByLaptop_IdOrderByCreatedAtAsc(laptopId);
+        List<LaptopBooking> requests =
+                requestRepo.findByLaptopWithDetails(laptopId);
+
 
         if (requests.isEmpty()) {
             throw new LaptopRequestException("No requests found for laptop ID " + laptopId + ".");
@@ -113,18 +115,27 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LaptopRequestResponseDTO> listRequestsForBuyer(Long buyerId) {
+
         buyerRepo.findById(buyerId)
-                .orElseThrow(() -> new LaptopRequestException("Buyer with ID " + buyerId + " not found."));
+                .orElseThrow(() -> new LaptopRequestException(
+                        "Buyer not found with id: " + buyerId
+                ));
 
-        List<LaptopBooking> requests = requestRepo.findByBuyer_BuyerId(buyerId);
+        List<LaptopBooking> bookings = requestRepo.findByBuyerWithDetails(buyerId);
 
-        if (requests.isEmpty()) {
-            throw new LaptopRequestException("No requests found for buyer ID " + buyerId + ".");
+        if (bookings.isEmpty()) {
+            throw new LaptopRequestException(
+                    "No booking requests found for buyer ID: " + buyerId
+            );
         }
 
-        return requests.stream().map(this::toResponse).toList();
+        return bookings.stream()
+                .map(this::toResponse)
+                .toList();
     }
+
 
     @Override
     @Transactional
@@ -201,7 +212,7 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
         }
 
         return toResponse(req);
-        }
+    }
 
 
     @Override
@@ -302,12 +313,15 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public LaptopRequestResponseDTO getRequestById(Long requestId) {
-        LaptopBooking entity = requestRepo.findById(requestId)
+
+        LaptopBooking entity = requestRepo.findByIdWithDetails(requestId)
                 .orElseThrow(() -> new LaptopRequestNotFoundException(requestId));
 
         return toResponse(entity);
     }
+
 
 
     @Override
@@ -316,6 +330,7 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<LaptopRequestResponseDTO> listRequestsForSeller(Long sellerId) {
 
 
@@ -325,7 +340,8 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                 ));
 
 
-        List<LaptopBooking> bookings = requestRepo.findBySellerSellerId(sellerId);
+        List<LaptopBooking> bookings = requestRepo.findBySellerWithDetails(sellerId);
+
 
         if (bookings.isEmpty()) {
             throw new LaptopRequestException("No booking requests found for seller ID: " + sellerId);
@@ -335,6 +351,18 @@ public class LaptopRequestServiceImpl implements LaptopRequestService {
                 .map(this::toResponse)
                 .toList();
 
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<LaptopRequestResponseDTO> listRequestByBooking(Long bookingId) {
+
+        LaptopBooking booking = requestRepo.findByIdWithDetails(bookingId)
+                .orElseThrow(() -> new LaptopRequestNotFoundException(bookingId));
+
+
+        return List.of(toResponse(booking));
     }
 
 }

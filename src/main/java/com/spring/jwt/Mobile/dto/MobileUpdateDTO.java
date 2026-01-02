@@ -12,9 +12,6 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class MobileUpdateDTO {
 
-
-    public class MobileRequestDTO {
-
         //  TITLE
 //        @NotBlank(message = "Title is required")
         @Size(max = 150, message = "Title cannot exceed 150 characters")
@@ -45,11 +42,14 @@ public class MobileUpdateDTO {
 
         // BRAND
 //        @NotBlank(message = "Brand is required")
-        private String brand;
+//        private String brand;
 
         //  MODEL
 //        @NotBlank(message = "Model is required")
-        private String model;
+//        private String model;
+
+        private Long modelId;
+
 
         // COLOR
 //        @NotBlank(message = "Color is required")
@@ -58,6 +58,19 @@ public class MobileUpdateDTO {
                 message = "Color must be a valid hex code or alphabetic name (2–30 characters)"
         )
         private String color;
+
+        // STATE
+        @Size(max = 100, message = "State cannot exceed 100 characters")
+        private String state;
+
+        // CITY
+        @Size(max = 100, message = "City cannot exceed 100 characters")
+        private String city;
+
+        // ADDRESS
+        @Size(max = 255, message = "Address cannot exceed 255 characters")
+        private String address;
+
 
         // YEAR
 //        @NotNull(message = "Year of purchase is required")
@@ -69,4 +82,4 @@ public class MobileUpdateDTO {
         private Long sellerId;
     }
 
-}
+

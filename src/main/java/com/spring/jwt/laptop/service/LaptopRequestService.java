@@ -26,4 +26,6 @@ public interface LaptopRequestService {
 
     List<LaptopRequestResponseDTO> listRequestsForSeller(Long sellerId);
 
+    List<LaptopRequestResponseDTO> listRequestByBooking(Long bookingId);
+
 }

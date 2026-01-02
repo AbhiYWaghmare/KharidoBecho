@@ -1,13 +1,20 @@
 package com.spring.jwt.Mobile.Services.impl;
 
 import com.spring.jwt.Mobile.Mapper.MobileMapper;
+//import com.spring.jwt.Mobile.Repository.BrandRepository;
 import com.spring.jwt.Mobile.Repository.MobileImageRepository;
+//import com.spring.jwt.Mobile.Repository.MobileModelRepository;
+import com.spring.jwt.Mobile.Repository.MobileModelRepository;
 import com.spring.jwt.Mobile.Repository.MobileRepository;
 import com.spring.jwt.Mobile.Services.MobileService;
 import com.spring.jwt.Mobile.dto.MobileRequestDTO;
 import com.spring.jwt.Mobile.dto.MobileResponseDTO;
+import com.spring.jwt.Mobile.dto.MobileUpdateDTO;
+//import com.spring.jwt.Mobile.entity.Brand;
 import com.spring.jwt.Mobile.entity.Mobile;
 import com.spring.jwt.Mobile.entity.MobileImage;
+//import com.spring.jwt.Mobile.entity.MobileModel;
+import com.spring.jwt.Mobile.entity.MobileModel;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.exception.mobile.MobileImageException;
 import com.spring.jwt.exception.mobile.MobileNotFoundException;
@@ -17,10 +24,7 @@ import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.utils.CloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import com.spring.jwt.utils.ByteArrayMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,101 +43,255 @@ import java.time.OffsetDateTime;
 import java.time.Year;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MobileServiceImpl implements MobileService {
 
     private final MobileRepository mobileRepository;
+//    private final BrandRepository brandRepository;
+    private final MobileModelRepository mobileModelRepository;
     private final MobileImageRepository mobileImageRepository;
     private final SellerRepository sellerRepository;
     private final CloudinaryService cloudinaryService;
     private static final long MAX_IMAGE_BYTES = 400 * 1024L; // 400 KB
 
 
-// This method is for Create mobile service
+    // This method is for Create mobile service
     private void validateCreateRequest(MobileRequestDTO req) {
-        validateCommonFields(req, true); //  all fields required
+        validateCommonCreateFields(req); //  all fields required
     }
 
     // This method is for Update mobile service
-    private void validateUpdateRequest(MobileRequestDTO req) {
+    private void validateUpdateRequest(MobileUpdateDTO req) {
 
-        if (req.getTitle() == null && req.getDescription() == null &&
-                req.getPrice() == null && req.getNegotiable() == null &&
-                req.getCondition() == null && req.getBrand() == null &&
-                req.getModel() == null && req.getColor() == null &&
-                req.getYearOfPurchase() == null && req.getSellerId() == null) {
+        if (req.getTitle() == null &&
+                req.getDescription() == null &&
+                req.getPrice() == null &&
+                req.getNegotiable() == null &&
+                req.getCondition() == null &&
+//                req.getBrand() == null &&
+//                req.getModel() == null &&
+                req.getColor() == null &&
+                req.getYearOfPurchase() == null) {
+
             throw new MobileValidationException("Update request body cannot be empty.");
         }
 
-        validateCommonFields(req, false); //  but still must remain valid
+        validateCommonUpdateFields(req);
     }
+
+    //When we want suggestion from database in sorting order(Abhi W)
+//    private MobileModel resolveModel(String brandName, String modelName) {
+//
+//        String cleanBrand = brandName.trim().toUpperCase();
+//        String cleanModel = modelName.trim().toUpperCase();
+//
+//        Brand brand = brandRepository.findByNameIgnoreCase(cleanBrand)
+//                .orElseGet(() ->
+//                        brandRepository.save(
+//                                Brand.builder().name(cleanBrand).build()
+//                        )
+//                );
+//
+//        return mobileModelRepository
+//                .findByNameIgnoreCaseAndBrand(cleanModel, brand)
+//                .orElseGet(() ->
+//                        mobileModelRepository.save(
+//                                MobileModel.builder()
+//                                        .name(cleanModel)
+//                                        .brand(brand)
+//                                        .build()
+//                        )
+//                );
+//    }
+
+
 
     //============We create this method because we have to validate this common fileds
     // in both cenarios for Adding Also & for Updating Also so we create common method and implement
     // this in there separte method that we passing in createmobile and updatemobile time method ==========//
 
-    private void validateCommonFields(MobileRequestDTO req, boolean isCreate) {
+//    private void validateCommonFields(MobileRequestDTO req, boolean isCreate) {
+//
+//        //  Seller Check
+//        if (isCreate || req.getSellerId() != null) {
+//            Seller seller = sellerRepository.findById(req.getSellerId())
+//                    .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
+//
+//            if (Boolean.TRUE.equals(seller.isDeleted())) {
+//                throw new MobileValidationException("Seller is deleted or inactive.");
+//            }
+//        }
+//
+//        //  Year Check
+//        if (req.getYearOfPurchase() != null) {
+//            int currentYear = Year.now().getValue();
+//            if (req.getYearOfPurchase() > currentYear) {
+//                throw new MobileValidationException("Year of purchase cannot be in the future.");
+//            }
+//            if (req.getYearOfPurchase() < 2000) {
+//                throw new MobileValidationException("Year of purchase must be after 2000.");
+//            }
+//        }
+//
+//        //  Price Check
+//        if (req.getPrice() != null) {
+//            BigDecimal price = req.getPrice();
+//            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+//                throw new MobileValidationException("Price must be greater than zero.");
+//            }
+//            if (price.compareTo(BigDecimal.valueOf(10_000_000)) > 0) {
+//                throw new MobileValidationException("Price cannot exceed 1 crore.");
+//            }
+//            req.setPrice(price.setScale(2, RoundingMode.HALF_UP));
+//        }
+//
+//        // Condition Check
+//        if (req.getCondition() != null) {
+//            try {
+//                Mobile.Condition.valueOf(req.getCondition().toUpperCase());
+//            } catch (IllegalArgumentException e) {
+//                throw new MobileValidationException("Invalid condition value. Use NEW, USED, or REFURBISHED.");
+//            }
+//        }
+//
+//        // Duplicate Check
+//        if (isCreate && mobileRepository.existsByTitleAndSeller_SellerId(req.getTitle(), req.getSellerId())) {
+//            throw new MobileValidationException("Duplicate listing: same title already exists for this seller.");
+//        }
+//
+//        //  Title Check
+//        if (req.getTitle() != null && req.getTitle().length() > 150) {
+//            throw new MobileValidationException("Title too long. Max 150 characters allowed.");
+//        }
+//
+//        // Description Check
+//        if (req.getDescription() != null) {
+//            int words = req.getDescription().trim().split("\\s+").length;
+//            if (words < 5) throw new MobileValidationException("Description must have at least 5 words.");
+//            if (words > 70) throw new MobileValidationException("Description cannot exceed 70 words.");
+//        }
+//    }
 
-        //  Seller Check
-        if (isCreate || req.getSellerId() != null) {
-            Seller seller = sellerRepository.findById(req.getSellerId())
-                    .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
+    private void validateCommonCreateFields(MobileRequestDTO req) {
 
-            if (Boolean.TRUE.equals(seller.isDeleted())) {
-                throw new MobileValidationException("Seller is deleted or inactive.");
-            }
+        // Seller check (CREATE ONLY)
+        Seller seller = sellerRepository.findById(req.getSellerId())
+                .orElseThrow(() -> new SellerNotFoundException(req.getSellerId()));
+
+        if (Boolean.TRUE.equals(seller.isDeleted())) {
+            throw new MobileValidationException("Seller is deleted or inactive.");
         }
 
-        //  Year Check
-        if (req.getYearOfPurchase() != null) {
+        // Duplicate check (CREATE ONLY)
+        if (mobileRepository.existsByTitleAndSeller_SellerId(
+                req.getTitle(), req.getSellerId())) {
+            throw new MobileValidationException(
+                    "Duplicate listing: same title already exists for this seller."
+            );
+        }
+
+        validateSharedFields(
+                req.getTitle(),
+                req.getDescription(),
+                req.getPrice(),
+                req.getCondition(),
+                req.getYearOfPurchase(),
+                req.getState(),
+                req.getCity(),
+                req.getAddress()
+        );
+    }
+
+    private void validateCommonUpdateFields(MobileUpdateDTO req) {
+
+        validateSharedFields(
+                req.getTitle(),
+                req.getDescription(),
+                req.getPrice(),
+                req.getCondition(),
+                req.getYearOfPurchase(),
+                req.getState(),
+                req.getCity(),
+                req.getAddress()
+        );
+    }
+
+    private void validateSharedFields(
+            String title,
+            String description,
+            BigDecimal price,
+            String condition,
+            Integer yearOfPurchase,
+            String state,
+            String city,
+            String address
+
+    ) {
+
+        // Year check
+        if (yearOfPurchase != null) {
             int currentYear = Year.now().getValue();
-            if (req.getYearOfPurchase() > currentYear) {
+            if (yearOfPurchase > currentYear) {
                 throw new MobileValidationException("Year of purchase cannot be in the future.");
             }
-            if (req.getYearOfPurchase() < 2000) {
+            if (yearOfPurchase < 2000) {
                 throw new MobileValidationException("Year of purchase must be after 2000.");
             }
         }
 
-        //  Price Check
-        if (req.getPrice() != null) {
-            BigDecimal price = req.getPrice();
+        // Price check
+        if (price != null) {
             if (price.compareTo(BigDecimal.ZERO) <= 0) {
                 throw new MobileValidationException("Price must be greater than zero.");
             }
             if (price.compareTo(BigDecimal.valueOf(10_000_000)) > 0) {
                 throw new MobileValidationException("Price cannot exceed 1 crore.");
             }
-            req.setPrice(price.setScale(2, RoundingMode.HALF_UP));
         }
 
-        // Condition Check
-        if (req.getCondition() != null) {
+        // Condition check
+        if (condition != null) {
             try {
-                Mobile.Condition.valueOf(req.getCondition().toUpperCase());
+                Mobile.Condition.valueOf(condition.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new MobileValidationException("Invalid condition value. Use NEW, USED, or REFURBISHED.");
+                throw new MobileValidationException(
+                        "Invalid condition value. Use NEW, USED, or REFURBISHED."
+                );
             }
         }
 
-        // Duplicate Check
-        if (isCreate && mobileRepository.existsByTitleAndSeller_SellerId(req.getTitle(), req.getSellerId())) {
-            throw new MobileValidationException("Duplicate listing: same title already exists for this seller.");
-        }
-
-        //  Title Check
-        if (req.getTitle() != null && req.getTitle().length() > 150) {
+        // Title check
+        if (title != null && title.length() > 150) {
             throw new MobileValidationException("Title too long. Max 150 characters allowed.");
         }
 
-        // Description Check
-        if (req.getDescription() != null) {
-            int words = req.getDescription().trim().split("\\s+").length;
-            if (words < 5) throw new MobileValidationException("Description must have at least 5 words.");
-            if (words > 70) throw new MobileValidationException("Description cannot exceed 70 words.");
+        if (state != null && state.length() > 100) {
+            throw new MobileValidationException("State name too long.");
         }
+
+        if (city != null && city.length() > 100) {
+            throw new MobileValidationException("City name too long.");
+        }
+
+        if (address != null && address.length() > 255) {
+            throw new MobileValidationException("Address too long.");
+        }
+
+
+        // Description check
+        if (description != null) {
+            int words = description.trim().split("\\s+").length;
+            if (words < 5) {
+                throw new MobileValidationException("Description must have at least 5 words.");
+            }
+            if (words > 70) {
+                throw new MobileValidationException("Description cannot exceed 70 words.");
+            }
+        }
+
     }
 
 
@@ -150,27 +308,87 @@ public class MobileServiceImpl implements MobileService {
 
         Mobile m = new Mobile();
         MobileMapper.updateFromRequest(m, req);
+//        MobileModel model = resolveModel(req.getBrand(), req.getModel());
+        MobileMapper.updateFromRequest(m, req);
+//        m.setModel(model);
+        MobileModel model = mobileModelRepository.findById(req.getModelId())
+                .orElseThrow(() -> new MobileValidationException("Invalid model selected"));
+
+        m.setModel(model);
+
         m.setSeller(seller);
         m.setDeleted(false);
         m.setStatus(Mobile.Status.ACTIVE);
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
+
     }
 
 
 
 
+//    @Override
+//    public Page<MobileResponseDTO> listMobiles(int page, int size, Long sellerId) {
+//        Pageable p = PageRequest.of(page, size, Sort.by("createdAt").descending());
+//        Page<Mobile> pageResult = (sellerId != null) ? mobileRepository.findBySeller_SellerIdAndDeletedFalse(sellerId, p)
+//                : mobileRepository.findByDeletedFalse(p);
+//        return pageResult.map(MobileMapper::toDTO);
+//    }
+
     @Override
+    @Transactional
     public Page<MobileResponseDTO> listMobiles(int page, int size, Long sellerId) {
-        Pageable p = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Mobile> pageResult = (sellerId != null) ? mobileRepository.findBySeller_SellerIdAndDeletedFalse(sellerId, p)
-                : mobileRepository.findByDeletedFalse(p);
-        return pageResult.map(MobileMapper::toDTO);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Mobile> pageResult = (sellerId != null)
+                ? mobileRepository.findBySeller_SellerIdAndDeletedFalse(sellerId, pageable)
+                : mobileRepository.findByDeletedFalse(pageable);
+
+        // Collect IDs
+        List<Long> ids = pageResult.getContent()
+                .stream()
+                .map(Mobile::getMobileId)
+                .toList();
+
+        // Fetch mobiles WITH images
+        List<Mobile> mobilesWithImages = ids.isEmpty()
+                ? List.of()
+                : mobileRepository.findWithImagesByIds(ids);
+
+        // Map by ID
+        Map<Long, Mobile> mobileMap = mobilesWithImages.stream()
+                .collect(Collectors.toMap(Mobile::getMobileId, m -> m));
+
+        // Map to DTOs with SAFETY CHECK
+        List<MobileResponseDTO> dtoList = pageResult.getContent().stream()
+                .map(m -> {
+                    Mobile fullMobile = mobileMap.get(m.getMobileId());
+                    if (fullMobile == null) {
+                        throw new MobileNotFoundException(
+                                "Mobile not found while mapping images. ID=" + m.getMobileId()
+                        );
+                    }
+                    return MobileMapper.toDTO(fullMobile);
+                })
+                .toList();
+
+        return new PageImpl<>(dtoList, pageable, pageResult.getTotalElements());
     }
 
+
+
+//    @Override
+//    public MobileResponseDTO getMobile(Long id) {
+//        Mobile m = mobileRepository.findByMobileIdAndDeletedFalse(id)
+//                .orElseThrow(() -> new MobileNotFoundException(id));
+//        return MobileMapper.toDTO(m);
+//    }
+
     @Override
+    @Transactional
     public MobileResponseDTO getMobile(Long id) {
-        Mobile m = mobileRepository.findByMobileIdAndDeletedFalse(id)
+        Mobile m = mobileRepository.findOneWithImages(id)
                 .orElseThrow(() -> new MobileNotFoundException(id));
         return MobileMapper.toDTO(m);
     }
@@ -180,7 +398,7 @@ public class MobileServiceImpl implements MobileService {
 
     @Override
     @Transactional
-    public MobileResponseDTO updateMobile(Long id, MobileRequestDTO req) {
+    public MobileResponseDTO updateMobile(Long id, MobileUpdateDTO req) {
 
         validateUpdateRequest(req);
 
@@ -192,6 +410,16 @@ public class MobileServiceImpl implements MobileService {
         }
 
         MobileMapper.updateFromRequest(m, req);
+//        if (req.getBrand() != null && req.getModel() != null) {
+//            MobileModel model = resolveModel(req.getBrand(), req.getModel());
+//            m.setModel(model);
+//        }
+        if (req.getModelId() != null) {
+            MobileModel model = mobileModelRepository.findById(req.getModelId())
+                    .orElseThrow(() -> new MobileValidationException("Invalid model selected"));
+            m.setModel(model);
+        }
+
         m = mobileRepository.save(m);
         return MobileMapper.toDTO(m);
     }
@@ -389,7 +617,7 @@ public class MobileServiceImpl implements MobileService {
 
     // ================================================= //
     // in this method the image size is not defined //
-  //==========================================================//
+    //==========================================================//
 
 //    @Override
 //    @Transactional

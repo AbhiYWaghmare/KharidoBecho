@@ -42,8 +42,8 @@ public class Mobile {
     @Column(name = "mobile_condition",nullable = false)
     private Condition condition;
 
-    private String brand;
-    private String model;
+    //    private String brand;
+//    private String model;
     private String color;
     private Integer yearOfPurchase;
 
@@ -56,6 +56,21 @@ public class Mobile {
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+    @Column(nullable = false, length = 100)
+    private String state;
+
+    @Column(nullable = false, length = 100)
+    private String city;
+
+    @Column(nullable = false, length = 255)
+    private String address;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "model_id", nullable = false)
+    private MobileModel model;
+
 
     // Link With Seller
     @ManyToOne(fetch = FetchType.LAZY)

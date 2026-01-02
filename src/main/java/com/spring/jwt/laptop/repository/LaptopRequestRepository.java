@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LaptopRequestRepository extends JpaRepository<LaptopBooking, Long> {
-    List<LaptopBooking> findByLaptop_Id(Long laptopId);
+//    List<LaptopBooking> findByLaptop_Id(Long laptopId);
 
     List<LaptopBooking> findByLaptop_IdOrderByCreatedAtAsc(Long laptopId);
 
@@ -24,7 +24,46 @@ public interface LaptopRequestRepository extends JpaRepository<LaptopBooking, Lo
 
     List<LaptopBooking> findByLaptop_IdAndPendingStatus(Long laptopId, LaptopRequestStatus pendingStatus);
 
-    List<LaptopBooking> findBySellerSellerId(Long sellerId);
+//    List<LaptopBooking> findBySellerSellerId(Long sellerId);
+//
+//    List<LaptopBooking> findByLaptopBookingId(Long bookingId);
 
+    @Query("""
+   SELECT lb FROM LaptopBooking lb
+   JOIN FETCH lb.buyer b
+   JOIN FETCH lb.laptop l
+   JOIN FETCH l.seller s
+   WHERE lb.laptopBookingId = :id
+""")
+    Optional<LaptopBooking> findByIdWithDetails(@Param("id") Long id);
+
+    @Query("""
+   SELECT lb FROM LaptopBooking lb
+   JOIN FETCH lb.buyer b
+   JOIN FETCH lb.seller s
+   JOIN FETCH lb.laptop l
+   WHERE b.buyerId = :buyerId
+""")
+    List<LaptopBooking> findByBuyerWithDetails(@Param("buyerId") Long buyerId);
+
+
+    @Query("""
+   SELECT lb FROM LaptopBooking lb
+   JOIN FETCH lb.buyer b
+   JOIN FETCH lb.seller s
+   JOIN FETCH lb.laptop l
+   WHERE s.sellerId = :sellerId
+""")
+    List<LaptopBooking> findBySellerWithDetails(Long sellerId);
+
+    @Query("""
+   SELECT lb FROM LaptopBooking lb
+   JOIN FETCH lb.buyer b
+   JOIN FETCH lb.seller s
+   JOIN FETCH lb.laptop l
+   WHERE l.id = :laptopId
+   ORDER BY lb.createdAt ASC
+""")
+    List<LaptopBooking> findByLaptopWithDetails(@Param("laptopId") Long laptopId);
 
 }

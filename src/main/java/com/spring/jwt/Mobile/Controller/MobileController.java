@@ -1,10 +1,7 @@
 package com.spring.jwt.Mobile.Controller;
 
 import com.spring.jwt.Mobile.Services.MobileService;
-import com.spring.jwt.Mobile.dto.MobileAddReqDTO;
-import com.spring.jwt.Mobile.dto.MobileRequestCreateDTO;
-import com.spring.jwt.Mobile.dto.MobileRequestDTO;
-import com.spring.jwt.Mobile.dto.MobileResponseDTO;
+import com.spring.jwt.Mobile.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,9 +13,9 @@ import java.util.Map;
 
 //********************************************************//
 
-    //Author : Abhishek Waghmare
-    //Mobile Controller
-    //Date : 22/09/2025
+//Author : Abhishek Waghmare
+//Mobile Controller
+//Date : 22/09/2025
 
 //*******************************************************//
 
@@ -36,7 +33,7 @@ public class MobileController {
         // Convert condition to uppercase before mapping
         request.setCondition(request.getCondition().toUpperCase());
 
-       MobileResponseDTO savedMobile = mobileService.createMobile(request);
+        MobileResponseDTO savedMobile = mobileService.createMobile(request);
 
         MobileAddReqDTO response = MobileAddReqDTO.builder()
                 .code("201")
@@ -67,7 +64,7 @@ public class MobileController {
 
     //To update the details of mobile by id
     @PatchMapping("/update/{id}")
-    public ResponseEntity<MobileResponseDTO> update(@PathVariable Long id,@Valid @RequestBody MobileRequestDTO req) {
+    public ResponseEntity<MobileResponseDTO> update(@PathVariable Long id, @Valid @RequestBody MobileUpdateDTO req) {
         return ResponseEntity.ok(mobileService.updateMobile(id, req));
     }
 
@@ -79,6 +76,4 @@ public class MobileController {
     }
 
 
-    }
-
-
+}
