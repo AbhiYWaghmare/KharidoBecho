@@ -16,9 +16,9 @@ import java.util.List;
 
 //********************************************************//
 
-    //Author : Sudhir Lokade
-    //Laptop Photo Controller
-    //Date : 24/09/2025
+//Author : Sudhir Lokade
+//Laptop Photo Controller
+//Date : 24/09/2025
 
 //*******************************************************//
 

@@ -43,6 +43,7 @@ public class LaptopBooking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "laptop_id", nullable = false)
+    @JsonIgnore
     @JsonBackReference
     private Laptop laptop;
 

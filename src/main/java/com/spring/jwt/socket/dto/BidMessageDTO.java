@@ -1,9 +1,3 @@
-//package com.spring.jwt.socket.dto;
-//
-//import java.math.BigDecimal;
-//
-//public record BidMessageDTO(Long auctionId, BigDecimal bidAmount) { }
-// com.spring.jwt.socket.dto.BidMessageDTO
 package com.spring.jwt.socket.dto;
 
 import java.math.BigDecimal;
