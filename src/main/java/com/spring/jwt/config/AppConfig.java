@@ -394,8 +394,8 @@ public class AppConfig {
 //                config.setAllowedOrigins(allowedOrigins); // now includes 63342
                 config.setAllowedOrigins(allowedOrigins);
 
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH","DELETE", "OPTIONS"));
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH","PUT", "DELETE", "OPTIONS"));
-//                config.setAllowCredentials(true);
                 config.setAllowCredentials(true);
 
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
