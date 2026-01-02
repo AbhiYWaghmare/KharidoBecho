@@ -39,7 +39,7 @@ public class LaptopBrandModelController {
         );
     }
 
-    // 🔽 DROPDOWN 1
+    // DROPDOWN 1
     @GetMapping("/only-brands")
     public ResponseEntity<?> onlyBrands() {
         return ResponseEntity.ok(
@@ -51,7 +51,7 @@ public class LaptopBrandModelController {
         );
     }
 
-    // 🔽 DROPDOWN 2
+    // DROPDOWN 2
     @GetMapping("/models")
     public ResponseEntity<?> models(@RequestParam String brand) {
         List<String> models = service.getModelsByBrand(brand)

@@ -21,15 +21,16 @@ public class LaptopBrandModelServiceImpl implements LaptopBrandModelService {
     @Override
     public LaptopBrandModelDTO add(LaptopBrandModelDTO dto) {
 
-        repository.findByBrandAndModel(
-                dto.getBrand().trim(),
-                dto.getModel().trim()
-        ).orElseGet(() -> {
-            LaptopBrandModel entity = new LaptopBrandModel();
-            entity.setBrand(dto.getBrand().trim());
-            entity.setModel(dto.getModel().trim());
-            return repository.save(entity);
-        });
+        String brand = dto.getBrand().trim().toUpperCase();
+        String model = dto.getModel().trim().toUpperCase();
+
+        repository.findByBrandAndModel(brand, model)
+                .orElseGet(() -> {
+                    LaptopBrandModel entity = new LaptopBrandModel();
+                    entity.setBrand(brand);
+                    entity.setModel(model);
+                    return repository.save(entity);
+                });
 
         return dto;
     }

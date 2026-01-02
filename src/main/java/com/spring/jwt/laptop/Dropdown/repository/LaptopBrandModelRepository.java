@@ -14,4 +14,7 @@ public interface LaptopBrandModelRepository extends JpaRepository<LaptopBrandMod
     @Query("SELECT DISTINCT lbm.brand FROM LaptopBrandModel lbm")
     List<String> findDistinctBrands();
 
+    List<LaptopBrandModel> findByBrandIgnoreCase(String brand);
+
+
 }
