@@ -121,6 +121,7 @@ public class AppConfig {
                     "/cars/**",
                     "/api/v1/cars/**",
 
+
                     "/api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
@@ -166,6 +167,7 @@ public class AppConfig {
                     "/api/v1/auctions/**",
                     "/api/v1/car-auctions/**",
                     "/api/carBookings/**",
+                    "/car/brands/**",
 
 
 
@@ -223,6 +225,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/mobile-meta/**").permitAll()
 
                 .requestMatchers("/api/v1/cars/**").permitAll()
+                .requestMatchers( "/car/brands/**").permitAll()
                 .requestMatchers("/api/v1/car-images/**").permitAll()
 
 
@@ -304,6 +307,7 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-auctions/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher( "/car/brands/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),

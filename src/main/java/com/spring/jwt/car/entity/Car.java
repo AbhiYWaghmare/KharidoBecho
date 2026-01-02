@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -151,10 +153,22 @@ public class Car {
     private Integer numberOfOwners;
 
     // ADDRESS
-    @Column(nullable = false, length = 255)
+    @Column(name = "address", length = 255)
+    @Size(max = 255, message = "Address must be at most 255 characters")
     private String address;
+
+    @Column(name = "city")
+
+    @Size(min = 2, max = 50, message = "City must be between 2 and 50 characters")
+    @Pattern(
+            regexp = "^[A-Za-z\\s]+$",
+            message = "City must contain only letters and spaces"
+    )
     private String city;
-    private String state;
+    @Column(name = "state")
+
+    @Size(max = 50, message = "State must be at most 50 characters")
+    private String state;;
 
     @Column(length = 6)
     private String pincode;
@@ -187,5 +201,6 @@ public class Car {
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<CarImage> images;
+
 
 }
