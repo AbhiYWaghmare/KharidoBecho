@@ -4,7 +4,6 @@ import com.spring.jwt.Bike.BrandData.Dto.BrandDataDto;
 import com.spring.jwt.Bike.BrandData.Dto.onlyBrandDto;
 import com.spring.jwt.Bike.BrandData.Entity.BikeBrandData;
 import com.spring.jwt.Bike.BrandData.Repository.BrandDataRepository;
-import com.spring.jwt.entity.BrandData;
 import com.spring.jwt.exception.Bike.BrandNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
