@@ -357,7 +357,7 @@ public BikeAuction createAuction(CreateBikeAuctionRequestDto dto) {
             }
 
 
-            // CASE 2: NEXT HIGHEST BIDDER BECOMES NEW WINNING OFFER
+            // NEXT HIGHEST BIDDER BECOMES NEW WINNING OFFER
 
             BikeBid newWinner = candidates.get(0);
             newWinner.setStatus(BikeBid.BidStatus.WINNING_OFFER);
@@ -388,8 +388,6 @@ public BikeAuction createAuction(CreateBikeAuctionRequestDto dto) {
             messagingTemplate.convertAndSend("/topic/bike-auction/" + a.getAuctionId(), msg);
         }
     }
-
-
     // =================================================================
 //                   WINNER ACCEPT (BIKE)
 // =================================================================
@@ -617,58 +615,8 @@ public void saveChatMessage(Long bookingId, BikeChatMessageDto message) {
 }
 
  */
-    /*
-    @Override
-    @Transactional
-    public void saveChatMessage(Long bookingId, BikeChatMessageDto message) {
 
-        Bike_booking booking = bikeBookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        try {
-
-            // ---- AUTO SET SENDER TYPE ----
-            Long buyerUserId = booking.getBuyer().getUser().getId();
-            Long sellerUserId = booking.getBike().getSeller().getUser().getId();
-
-            if (message.getUserId().equals(buyerUserId)) {
-                message.setSenderType("BUYER");
-            } else if (message.getUserId().equals(sellerUserId)) {
-                message.setSenderType("SELLER");
-            } else {
-                message.setSenderType("UNKNOWN");
-            }
-
-            // ---- SET TIMESTAMP ----
-            message.setTimestamp(java.time.OffsetDateTime.now().toString());
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            List<BikeChatMessageDto> conversation;
-
-            if (booking.getConversation() == null || booking.getConversation().isEmpty()) {
-                conversation = new ArrayList<>();
-            } else {
-                conversation = mapper.readValue(
-                        booking.getConversation(),
-                        new TypeReference<List<BikeChatMessageDto>>() {}
-                );
-            }
-
-            // Add message
-            conversation.add(message);
-
-            // List → JSON
-            booking.setConversation(mapper.writeValueAsString(conversation));
-
-            bikeBookingRepository.save(booking);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error while saving chat message", e);
-        }
-    }
-
-     */
 @Override
 @Transactional
 public void saveChatMessage(Long bookingId, BikeChatMessageDto incomingMsg) {
@@ -680,9 +628,7 @@ public void saveChatMessage(Long bookingId, BikeChatMessageDto incomingMsg) {
         ObjectMapper mapper = new ObjectMapper();
 
 
-//        Long buyerUserId = booking.getBuyer().getUser().getUserId();
-//
-//        Long sellerUserId = booking.getBike().getSeller().getUser().getUserId();
+
         Long buyerUserId = booking.getBuyer().getUser().getId();
 
         Long sellerUserId = booking.getBike().getSeller().getUser().getId();

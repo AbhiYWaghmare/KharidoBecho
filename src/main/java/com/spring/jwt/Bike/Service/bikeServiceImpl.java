@@ -197,6 +197,60 @@ public class bikeServiceImpl implements bikeService {
             if (desc.length() > 500) throw new InvalidBikeData("Description must be at most 500 characters");
             existingBike.setDescription(desc);
         }
+        // ===== Title update =====
+        if (bikedto.getTitle() != null) {
+            String title = bikedto.getTitle().trim();
+            if (title.isBlank()) throw new InvalidBikeData("Title must not be blank");
+            if (title.length() < 10 || title.length() > 100)
+                throw new InvalidBikeData("Title must be between 10 and 100 characters");
+            existingBike.setTitle(title);
+        }
+        // ===== State =====
+        if (bikedto.getState() != null) {
+            String state = bikedto.getState().trim();
+
+            if (state.isBlank())
+                throw new InvalidBikeData("State must not be blank");
+
+            if (state.length() > 50)
+                throw new InvalidBikeData("State must be at most 50 characters");
+
+            if (!state.matches("^[A-Za-z\\s]+$"))
+                throw new InvalidBikeData("State must contain only letters and spaces");
+
+            existingBike.setState(state);
+        }
+
+// ===== City =====
+        if (bikedto.getCity() != null) {
+            String city = bikedto.getCity().trim();
+
+            if (city.isBlank())
+                throw new InvalidBikeData("City must not be blank");
+
+            if (city.length() > 50)
+                throw new InvalidBikeData("City must be at most 50 characters");
+
+            if (!city.matches("^[A-Za-z\\s]+$"))
+                throw new InvalidBikeData("City must contain only letters and spaces");
+
+            existingBike.setCity(city);
+        }
+
+// ===== Address =====
+        if (bikedto.getAddress() != null) {
+            String address = bikedto.getAddress().trim();
+
+            if (address.isBlank())
+                throw new InvalidBikeData("Address must not be blank");
+
+            if (address.length() > 255)
+                throw new InvalidBikeData("Address must be at most 255 characters");
+
+            existingBike.setAddress(address);
+        }
+
+
 
         // ===== Enum validations =====
         if (bikedto.getFuelType() != null) {

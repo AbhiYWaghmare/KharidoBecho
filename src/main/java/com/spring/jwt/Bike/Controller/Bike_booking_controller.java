@@ -123,5 +123,15 @@ public class Bike_booking_controller {
         );
     }
 
+    @GetMapping("/bike/{bikeId}")
+    public ResponseEntity<List<Bike_booking>> getBookingsByBikeId(
+            @PathVariable Long bikeId) {
+
+        return ResponseEntity.ok(
+                bikeBookingService.getBookingsByBikeId(bikeId)
+        );
+    }
+
+
 
 }

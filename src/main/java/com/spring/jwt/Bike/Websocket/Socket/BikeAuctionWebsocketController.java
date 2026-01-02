@@ -57,7 +57,7 @@ public void sendChat(
                          @Payload BikeBidMessageDto bidMessage) {
 
         Long userId = bidMessage.userId();
-        BigDecimal amount = bidMessage.bidAmount();
+        BigDecimal amount = bidMessage.amount();
 
         // Call the service to place the bid
         bikeAuctionService.placeBid(auctionId, userId, amount);
