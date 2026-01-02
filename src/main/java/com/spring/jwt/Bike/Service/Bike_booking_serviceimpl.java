@@ -295,6 +295,26 @@ public List<Bike_booking> getBookingsBySellerId(Long sellerId) {
 //        return bikeBookingRepository.save(booking);
 //    }
 
+    @Override
+    public List<Bike_booking> getBookingsByBikeId(Long bikeId) {
+
+        // check bike exists
+        bikeRepository.findById(bikeId)
+                .orElseThrow(() ->
+                        new bikeNotFoundException("Bike not found with id: " + bikeId));
+
+        List<Bike_booking> bookings =
+                bikeBookingRepository.findByBikeId(bikeId);
+
+
+        if (bookings.isEmpty()) {
+            throw new BookingNotFoundException(
+                    "No bookings found for bikeId: " + bikeId
+            );
+        }
+
+        return bookings;
+    }
 
 
 

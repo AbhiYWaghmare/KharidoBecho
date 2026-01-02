@@ -4,6 +4,7 @@ package com.spring.jwt.exception;
 
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.exception.Bike.AuctionNotFoundException;
 import com.spring.jwt.exception.bookings.LaptopRequestException;
 import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
@@ -812,7 +813,14 @@ public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFound
         body.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
-
+//    @ExceptionHandler(AuctionNotFoundException.class)
+//    public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFoundException ex) {
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("timestamp", OffsetDateTime.now());
+//        body.put("error", "Auction not found");
+//        body.put("message", ex.getMessage());
+//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+//    }
 
 }
 

@@ -96,4 +96,31 @@ private List<BikeImage> images = new ArrayList<>();
     @NotNull(message = "Bike status must not be null")
     @Enumerated(EnumType.STRING)
     private bikeStatus status; // only ACTIVE, INACTIVE, DELETED
+
+    @NotBlank(message = "Title must not be blank")
+    @Size(min = 10, max = 100, message = "Title must be between 10 and 100 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9\\s-]+$",
+            message = "Title can contain letters, numbers, spaces, and hyphens only"
+    )
+    private String title;
+
+    @Column(name = "state")
+    @Size(max = 50, message = "State must be at most 50 characters")
+    private String state;
+
+    @Column(name = "city")
+
+    @Size(min = 2, max = 50, message = "City must be between 2 and 50 characters")
+    @Pattern(
+            regexp = "^[A-Za-z\\s]+$",
+            message = "City must contain only letters and spaces"
+    )
+    private String city;
+
+    @Column(name = "address", length = 255)
+    @Size(max = 255, message = "Address must be at most 255 characters")
+    private String address;
+
+
 }
