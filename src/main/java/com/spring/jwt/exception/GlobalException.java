@@ -1,6 +1,29 @@
 
 package com.spring.jwt.exception;
 
+
+
+
+
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.spring.jwt.exception.Bike.AuctionNotFoundException;
+import com.spring.jwt.exception.Bike.BookingNotFoundException;
+import com.spring.jwt.exception.Bike.BrandNotFoundException;
+import com.spring.jwt.exception.bookings.LaptopRequestException;
+import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
+import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
+import com.spring.jwt.exception.colour.ColourNotFoundException;
+//import com.spring.jwt.laptop.dto.AuctionErrReponse;
+import com.spring.jwt.laptop.dto.LaptopErrorResponse;
+import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
+import com.spring.jwt.exception.laptop.*;
+
+
+//import com.spring.jwt.auction.exception.AuctionException;
+import com.spring.jwt.auction.exception.*;
+//import com.spring.jwt.auction.exception.BidException;
+import com.spring.jwt.exception.Bike.*;
+
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.spring.jwt.car.auction.exception.CarAuctionNotFoundException;
 import com.spring.jwt.car.auction.exception.CarInvalidAuctionStateException;
@@ -556,6 +579,16 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 
+//    @ExceptionHandler(AuctionNotFoundException.class)
+//    public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFoundException ex) {
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("timestamp", OffsetDateTime.now());
+//        body.put("error", "Auction not found");
+//        body.put("message", ex.getMessage());
+//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+//    }
+
+
     @ExceptionHandler(InvalidBookingOperationException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidBookingOperation(
             InvalidBookingOperationException ex, WebRequest request) {
@@ -600,6 +633,7 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 
 }
 

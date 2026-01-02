@@ -79,4 +79,20 @@ public class bikeDto {
     @NotNull(message = "Bike status must not be null")
     private bikeStatus status;
     private List<BikeImage> images;
+
+    @NotBlank(message = "Title must not be blank")
+    @Size(min = 10, max = 100, message = "Title must be between 10 and 100 characters")
+    @Pattern(
+            regexp = "^[A-Za-z0-9\\s-]+$",
+            message = "Title can contain letters, numbers, spaces, and hyphens only"
+    )
+    private String title;
+
+    private String state;
+
+    private String city;
+
+    private String address;
+
+
 }
