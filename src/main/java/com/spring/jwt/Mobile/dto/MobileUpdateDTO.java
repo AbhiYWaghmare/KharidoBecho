@@ -12,56 +12,74 @@ import java.math.BigDecimal;
 @JsonIgnoreProperties(ignoreUnknown = false)
 public class MobileUpdateDTO {
 
-    //  TITLE
+        //  TITLE
 //        @NotBlank(message = "Title is required")
-    @Size(max = 150, message = "Title cannot exceed 150 characters")
-    private String title;
+        @Size(max = 150, message = "Title cannot exceed 150 characters")
+        private String title;
 
-    // DESCRIPTION
+        // DESCRIPTION
 //        @NotBlank(message = "Description is required")
 //    @Size(min = 20, max = 1000, message = "Description must be between 20 and 1000 characters")
-    @MaxWords(value = 70, message = "Description cannot exceed 70 words")
-    @MinWords(value = 5, message = "Description must have at least 5 words")
-    private String description;
+        @MaxWords(value = 70, message = "Description cannot exceed 70 words")
+        @MinWords(value = 5, message = "Description must have at least 5 words")
+        private String description;
 
-    // PRICE
+        // PRICE
 //        @NotNull(message = "Price is required")
-    @DecimalMin(value = "1", inclusive = true, message = "Price must be greater than zero")
-    @DecimalMax(value = "10000000", inclusive = true, message = "Price cannot exceed 1 crore")
-    @Digits(integer = 8, fraction = 2, message = "Price must have up to 2 decimal places")
-    private BigDecimal price;
+        @DecimalMin(value = "1", inclusive = true, message = "Price must be greater than zero")
+        @DecimalMax(value = "10000000", inclusive = true, message = "Price cannot exceed 1 crore")
+        @Digits(integer = 8, fraction = 2, message = "Price must have up to 2 decimal places")
+        private BigDecimal price;
 
-    // NEGOTIABLE
+        // NEGOTIABLE
 //        @NotNull(message = "Negotiable must be specified")
-    private Boolean negotiable;
+        private Boolean negotiable;
 
-    // CONDITION
+        // CONDITION
 //        @NotBlank(message = "Condition is required")
-    @Pattern(regexp = "NEW|USED|REFURBISHED", message = "Condition must be NEW, USED, or REFURBISHED")
-    private String condition;
+        @Pattern(regexp = "NEW|USED|REFURBISHED", message = "Condition must be NEW, USED, or REFURBISHED")
+        private String condition;
 
-    // BRAND
+        // BRAND
 //        @NotBlank(message = "Brand is required")
-    private String brand;
+//        private String brand;
 
-    //  MODEL
+        //  MODEL
 //        @NotBlank(message = "Model is required")
-    private String model;
+//        private String model;
 
-    // COLOR
+        private Long modelId;
+
+
+        // COLOR
 //        @NotBlank(message = "Color is required")
-    @Pattern(
-            regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^[A-Za-z ]{2,30}$",
-            message = "Color must be a valid hex code or alphabetic name (2–30 characters)"
-    )
-    private String color;
+        @Pattern(
+                regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$|^[A-Za-z ]{2,30}$",
+                message = "Color must be a valid hex code or alphabetic name (2–30 characters)"
+        )
+        private String color;
 
-    // YEAR
+        // STATE
+        @Size(max = 100, message = "State cannot exceed 100 characters")
+        private String state;
+
+        // CITY
+        @Size(max = 100, message = "City cannot exceed 100 characters")
+        private String city;
+
+        // ADDRESS
+        @Size(max = 255, message = "Address cannot exceed 255 characters")
+        private String address;
+
+
+        // YEAR
 //        @NotNull(message = "Year of purchase is required")
-    @Min(value = 2000, message = "Year must be realistic (after 2000)")
-    private Integer yearOfPurchase;
+        @Min(value = 2000, message = "Year must be realistic (after 2000)")
+        private Integer yearOfPurchase;
 
-    // SELLER
+        // SELLER
 //        @NotNull(message = "SellerId is required")
-    private Long sellerId;
-}
+        private Long sellerId;
+    }
+
+

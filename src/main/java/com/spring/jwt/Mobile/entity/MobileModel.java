@@ -24,5 +24,7 @@ public class MobileModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
-    private Brand brand;
+    private MobileBrand brand;
+
+    private boolean deleted = false;
 }

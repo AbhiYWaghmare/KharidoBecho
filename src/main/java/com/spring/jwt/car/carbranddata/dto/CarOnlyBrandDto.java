@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class OnlyBrandDto {
+public class CarOnlyBrandDto {
     private String brand;
 }

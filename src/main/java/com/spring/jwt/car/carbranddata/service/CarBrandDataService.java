@@ -1,31 +1,31 @@
 package com.spring.jwt.car.carbranddata.service;
 
-import com.spring.jwt.car.carbranddata.dto.BrandDataDto;
-import com.spring.jwt.car.carbranddata.dto.OnlyBrandDto;
+import com.spring.jwt.car.carbranddata.dto.CarBrandDataDto;
+import com.spring.jwt.car.carbranddata.dto.CarOnlyBrandDto;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
-public interface BrandDataService {
+public interface CarBrandDataService {
 
     // Add brand should return the saved DTO (for ResponseDto in controller)
-    BrandDataDto addBrand(BrandDataDto dto) throws SQLIntegrityConstraintViolationException;
+    CarBrandDataDto addBrand(CarBrandDataDto dto) throws SQLIntegrityConstraintViolationException;
 
     // Get all brands
-    List<BrandDataDto> getAllBrands(Integer pageNo, Integer pageSize);
+    List<CarBrandDataDto> getAllBrands(Integer pageNo, Integer pageSize);
 
     // Edit brand
-    String editBrand(Integer id, BrandDataDto dto);
+    String editBrand(Integer id, CarBrandDataDto dto);
 
     // Delete brand
     String deleteBrand(Integer id);
 
     // Get only brand names
-    List<OnlyBrandDto> onlyBrands();
+    List<CarOnlyBrandDto> onlyBrands();
 
     // Get variants by brand
-    List<BrandDataDto> variants(String brand);
+    List<CarBrandDataDto> variants(String brand);
 
     // Get sub-variants by brand and variant
-    List<BrandDataDto> subVariant(String brand, String variant);
+    List<CarBrandDataDto> subVariant(String brand, String variant);
 }

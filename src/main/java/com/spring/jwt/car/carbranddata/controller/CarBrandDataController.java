@@ -1,8 +1,8 @@
 package com.spring.jwt.car.carbranddata.controller;
 
-import com.spring.jwt.car.carbranddata.dto.BrandDataDto;
-import com.spring.jwt.car.carbranddata.dto.OnlyBrandDto;
-import com.spring.jwt.car.carbranddata.service.BrandDataService;
+import com.spring.jwt.car.carbranddata.dto.CarBrandDataDto;
+import com.spring.jwt.car.carbranddata.dto.CarOnlyBrandDto;
+import com.spring.jwt.car.carbranddata.service.CarBrandDataService;
 import com.spring.jwt.dto.ResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,15 +17,15 @@ import java.util.List;
 public class CarBrandDataController {
 
     @Autowired
-    private BrandDataService brandDataService;
+    private CarBrandDataService carbrandDataService;
 
     // ================= ADD BRAND =================
     @PostMapping("/add")
-    public ResponseEntity<ResponseDto<BrandDataDto>> addBrand(
-            @RequestBody BrandDataDto brandDataDto)
+    public ResponseEntity<ResponseDto<CarBrandDataDto>> addBrand(
+            @RequestBody CarBrandDataDto brandDataDto)
             throws SQLIntegrityConstraintViolationException {
 
-        BrandDataDto saved = brandDataService.addBrand(brandDataDto);
+        CarBrandDataDto saved = carbrandDataService.addBrand(brandDataDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ResponseDto<>(
@@ -37,12 +37,12 @@ public class CarBrandDataController {
 
     // ================= GET ALL =================
     @GetMapping("/all")
-    public ResponseEntity<ResponseDto<List<BrandDataDto>>> getAllBrands(
+    public ResponseEntity<ResponseDto<List<CarBrandDataDto>>> getAllBrands(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "50") Integer pageSize) {
 
-        List<BrandDataDto> data =
-                brandDataService.getAllBrands(pageNo, pageSize);
+        List<CarBrandDataDto> data =
+                carbrandDataService.getAllBrands(pageNo, pageSize);
 
         return ResponseEntity.ok(
                 new ResponseDto<>(
@@ -57,9 +57,9 @@ public class CarBrandDataController {
     @PatchMapping("/edit")
     public ResponseEntity<ResponseDto<String>> editBrand(
             @RequestParam Integer id,
-            @RequestBody BrandDataDto dto) {
+            @RequestBody CarBrandDataDto dto) {
 
-        String message = brandDataService.editBrand(id, dto);
+        String message = carbrandDataService.editBrand(id, dto);
 
         return ResponseEntity.ok(
                 new ResponseDto<>(
@@ -75,7 +75,7 @@ public class CarBrandDataController {
     public ResponseEntity<ResponseDto<String>> deleteBrand(
             @RequestParam Integer id) {
 
-        String message = brandDataService.deleteBrand(id);
+        String message = carbrandDataService.deleteBrand(id);
 
         return ResponseEntity.ok(
                 new ResponseDto<>(
@@ -87,8 +87,8 @@ public class CarBrandDataController {
     }
     // ================= ONLY BRANDS =================
     @GetMapping("/only-brands")
-    public ResponseEntity<ResponseDto<List<OnlyBrandDto>>> onlyBrands() {
-        List<OnlyBrandDto> brands = brandDataService.onlyBrands();
+    public ResponseEntity<ResponseDto<List<CarOnlyBrandDto>>> onlyBrands() {
+        List<CarOnlyBrandDto> brands = carbrandDataService.onlyBrands();
 
         return ResponseEntity.ok(
                 new ResponseDto<>(
@@ -104,9 +104,9 @@ public class CarBrandDataController {
         // ================= VARIANTS =================
         @GetMapping("/variants")
         public ResponseEntity<ResponseDto<List<String>>> variants(@RequestParam String brand) {
-            List<String> variants = brandDataService.variants(brand)
+            List<String> variants = carbrandDataService.variants(brand)
                     .stream()
-                    .map(BrandDataDto::getVariant)
+                    .map(CarBrandDataDto::getVariant)
                     .distinct()
                     .toList();
 
@@ -125,9 +125,9 @@ public class CarBrandDataController {
                 @RequestParam String brand,
                 @RequestParam String variant) {
 
-            List<String> subVariants = brandDataService.subVariant(brand, variant)
+            List<String> subVariants = carbrandDataService.subVariant(brand, variant)
                     .stream()
-                    .map(BrandDataDto::getSubVariant)
+                    .map(CarBrandDataDto::getSubVariant)
                     .distinct()
                     .toList();
 

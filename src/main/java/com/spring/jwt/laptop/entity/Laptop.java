@@ -4,14 +4,16 @@ package com.spring.jwt.laptop.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
-import com.spring.jwt.laptop.model.LaptopRequestStatus;
+import com.spring.jwt.laptop.Dropdown.converter.*;
+import com.spring.jwt.laptop.Dropdown.entity.LaptopBrand;
+import com.spring.jwt.laptop.Dropdown.entity.LaptopModel;
+import com.spring.jwt.laptop.Dropdown.model.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,10 +21,13 @@ import java.util.List;
 
 @Entity
 @Table(name = "laptops")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler",
+        "seller",
+        "bookings"})
 public class Laptop {
 
     @Id
@@ -30,7 +35,6 @@ public class Laptop {
     @Column(name = "laptop_id")
     private Long id;
 
-    @NotBlank
     @Column(name = "serial_Number", nullable = false, unique = true)
     private String serialNumber;
 
@@ -43,32 +47,48 @@ public class Laptop {
     @Column(name = "brand")
     private String brand;
 
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "brand_id", nullable = false)
+//    @JsonIgnore
+//    private LaptopBrand brand;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "model_id", nullable = false)
+//    @JsonIgnore
+//    private LaptopModel model;
+
     @Column(name = "price")
     private double price;
 
+    @Convert(converter = WarrantyConverter.class)
     @Column(name = "warranty_In_Year")
-    private Long warrantyInYear;
+    private Warranty warrantyInYear;
 
     @Column(name = "processor")
     private String processor;
 
-    @Column(name = "processor_brand")
-    private String processorBrand;
+    @Convert(converter = ProcessorBrandConverter.class)
+    @Column(name = "processor_brand", length = 50)
+    private ProcessorBrand processorBrand;
 
-    @Column(name = "memory_type")
-    private String memoryType;
+    @Convert(converter = MemoryTypeConverter.class)
+    @Column(name = "memory_type", length = 50)
+    private MemoryType memoryType;
 
-    @Column(name = "screen_size")
-    private String screenSize;
+    @Convert(converter = ScreenSizeConverter.class)
+    @Column(name = "screen_size", length = 50)
+    private ScreenSize screenSize;
 
     @Column(name = "colour")
     private String colour;
 
-    @Column(name = "ram")
-    private String ram;
+    @Convert(converter = RamOptionConverter.class)
+    @Column(name = "ram", length = 50)
+    private RamOption ram;
 
-    @Column(name = "storage")
-    private String storage;
+    @Convert(converter = StorageOptionConverter.class)
+    @Column(name = "storage", length = 50)
+    private StorageOption storage;
 
     @Column(name = "battery")
     private String battery;
@@ -79,8 +99,10 @@ public class Laptop {
     @Column(name = "graphics_card")
     private String graphicsCard;
 
-    @Column(name = "graphics_brand")
-    private String graphicBrand;
+    @Convert(converter = GraphicsBrandConverter.class)
+    @Column(name = "graphics_brand", length = 50)
+    private GraphicsBrand graphicBrand;
+
 
     @Column(name = "weight")
     private String weight;
@@ -95,6 +117,9 @@ public class Laptop {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
+    @Column(name = "address", length = 500)
+    private String address;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
@@ -102,13 +127,24 @@ public class Laptop {
 
     //    @JsonIgnore
     @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
+//    @JsonIgnore
+//    @JsonManagedReference
+    @OrderBy("photoId ASC")
     private List<LaptopPhotos> laptopPhotos;
 
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+//    @JsonIgnore
     private List<LaptopBooking> bookings = new ArrayList<>();
 
     private boolean deleted = false;
     private LocalDateTime deletedAt;
+
+
+//    @PrePersist
+//    public void setDefaultValues() {
+//        if (this.status == null) {
+//            this.status = Status.PENDING; // or ACTIVE / AVAILABLE
+//        }
+//    }
 
 }
