@@ -107,14 +107,12 @@ public class CarRequestDTO {
     @Max(value = 10, message = "Number of owners cannot exceed 10")
     private Integer numberOfOwners;
 
-    @NotBlank(message = "Address is required")
-    @Size(max = 255, message = "Address max length is 255")
+//    @NotBlank(message = "Address is required")
+//    @Size(max = 255, message = "Address max length is 255")
     private String address;
 
-    @NotBlank(message = "City must be provided")
     private String city;
 
-    @NotBlank(message = "State must be provided")
     private String state;
 
     @NotBlank(message = "Pincode must be provided")
