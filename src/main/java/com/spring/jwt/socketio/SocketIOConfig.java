@@ -58,6 +58,7 @@ public class SocketIOConfig {
                                                LaptopRequestService laptopRequestService) {
         return new ChatSocketHandler(server, laptopRequestService);
     }
+
 //
 //    @Bean
 //    public CommandLineRunner runner(SocketIOServer server) {
