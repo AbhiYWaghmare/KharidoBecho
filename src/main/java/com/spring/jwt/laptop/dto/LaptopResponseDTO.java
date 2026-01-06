@@ -1,5 +1,6 @@
 package com.spring.jwt.laptop.dto;
 
+import com.spring.jwt.Location.Dto.LocationDto;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
 import lombok.AllArgsConstructor;
@@ -40,4 +41,6 @@ public class LaptopResponseDTO {
 
     private List<LaptopImageDTO> photos;
     private List<LaptopBookingDTO> bookings;
+    private LocationDto location;
+
 }

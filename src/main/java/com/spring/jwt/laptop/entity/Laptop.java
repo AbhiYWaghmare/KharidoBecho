@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.spring.jwt.Location.Entity.LocationMaster;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
 import com.spring.jwt.laptop.Dropdown.converter.*;
@@ -101,7 +102,7 @@ public class Laptop {
 
     @Convert(converter = GraphicsBrandConverter.class)
     @Column(name = "graphics_brand", length = 50)
-    private GraphicsBrand graphicBrand;
+    private GraphicsBrand graphicsBrand;
 
 
     @Column(name = "weight")
@@ -110,41 +111,32 @@ public class Laptop {
     @Column(name = "manufacturer")
     private String manufacturer;
 
-    @Column(name = "usb_port")
+    @Column(name = "usb_ports11")
     private Integer usbPorts;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
-    @Column(name = "address", length = 500)
-    private String address;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", nullable = false)
+    private LocationMaster location;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     @JsonIgnore
     private Seller seller;
 
-    //    @JsonIgnore
+
     @OneToMany(mappedBy = "laptop", fetch = FetchType.LAZY)
-//    @JsonIgnore
-//    @JsonManagedReference
     @OrderBy("photoId ASC")
     private List<LaptopPhotos> laptopPhotos;
 
     @OneToMany(mappedBy = "laptop", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
     private List<LaptopBooking> bookings = new ArrayList<>();
 
     private boolean deleted = false;
     private LocalDateTime deletedAt;
-
-
-//    @PrePersist
-//    public void setDefaultValues() {
-//        if (this.status == null) {
-//            this.status = Status.PENDING; // or ACTIVE / AVAILABLE
-//        }
-//    }
 
 }

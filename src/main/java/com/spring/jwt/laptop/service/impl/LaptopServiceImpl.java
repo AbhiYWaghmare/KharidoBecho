@@ -1,5 +1,8 @@
 package com.spring.jwt.laptop.service.impl;
 
+import com.spring.jwt.Location.Dto.LocationDto;
+import com.spring.jwt.Location.Entity.LocationMaster;
+import com.spring.jwt.Location.Service.LocationService;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
 import com.spring.jwt.exception.laptop.BlankFieldsException;
@@ -39,6 +42,8 @@ public class LaptopServiceImpl implements LaptopService {
     private final LaptopRepository laptopRepository;
     private final SellerRepository sellerRepository;
     private final LaptopBrandModelService laptopBrandModelService;
+    private final LocationService locationService;
+
 
     public Laptop create(LaptopRequestDTO requestDTO) {
 
@@ -92,7 +97,7 @@ public class LaptopServiceImpl implements LaptopService {
             );
 
         if (requestDTO.getGraphicBrand() != null)
-            laptop.setGraphicBrand(
+            laptop.setGraphicsBrand(
                     GraphicsBrand.fromDbValue(requestDTO.getGraphicBrand())
             );
 
@@ -107,6 +112,21 @@ public class LaptopServiceImpl implements LaptopService {
                         .model(requestDTO.getModel())
                         .build()
         );
+
+        // ===== LOCATION HANDLING =====
+        LocationDto locationDto = new LocationDto();
+        locationDto.setState(requestDTO.getState());
+        locationDto.setCity(requestDTO.getCity());
+        locationDto.setLocality(requestDTO.getLocality());
+
+        // use EXISTING service method
+        LocationDto savedLocation = locationService.saveLocation(locationDto);
+
+        // attach only ID
+        LocationMaster location = new LocationMaster();
+        location.setLocationId(savedLocation.getLocationId());
+
+        laptop.setLocation(location);
 
         return laptopRepository.save(laptop);
     }
@@ -198,7 +218,7 @@ public class LaptopServiceImpl implements LaptopService {
             laptop.setProcessorBrand(ProcessorBrand.fromDbValue(dto.getProcessorBrand()));
 
         if (dto.getGraphicBrand() != null)
-            laptop.setGraphicBrand(GraphicsBrand.fromDbValue(dto.getGraphicBrand()));
+            laptop.setGraphicsBrand(GraphicsBrand.fromDbValue(dto.getGraphicBrand()));
 
         if (dto.getWarrantyInYear() != null)
             laptop.setWarrantyInYear(Warranty.fromYears(dto.getWarrantyInYear()));
@@ -216,6 +236,22 @@ public class LaptopServiceImpl implements LaptopService {
                             .model(laptop.getModel())
                             .build()
             );
+        }
+
+        // ===== LOCATION UPDATE =====
+        if (dto.getState() != null && dto.getCity() != null && dto.getLocality() != null) {
+
+            LocationDto locationDto = new LocationDto();
+            locationDto.setState(dto.getState());
+            locationDto.setCity(dto.getCity());
+            locationDto.setLocality(dto.getLocality());
+
+            LocationDto savedLocation = locationService.saveLocation(locationDto);
+
+            LocationMaster location = new LocationMaster();
+            location.setLocationId(savedLocation.getLocationId());
+
+            laptop.setLocation(location);
         }
 
         return laptopRepository.save(laptop);
@@ -237,7 +273,6 @@ public class LaptopServiceImpl implements LaptopService {
         dto.setSerialNumber(laptop.getSerialNumber());
         dto.setBrand(laptop.getBrand());
         dto.setModel(laptop.getModel());
-
         dto.setPrice(laptop.getPrice());
         dto.setProcessor(laptop.getProcessor());
         dto.setBattery(laptop.getBattery());
@@ -265,7 +300,7 @@ public class LaptopServiceImpl implements LaptopService {
                 laptop.getProcessorBrand() != null ? laptop.getProcessorBrand().getDbValue() : null
         );
         dto.setGraphicBrand(
-                laptop.getGraphicBrand() != null ? laptop.getGraphicBrand().getDbValue() : null
+                laptop.getGraphicsBrand() != null ? laptop.getGraphicsBrand().getDbValue() : null
         );
         dto.setWarrantyInYear(
                 laptop.getWarrantyInYear() != null
@@ -283,6 +318,18 @@ public class LaptopServiceImpl implements LaptopService {
                     return img;
                 }).toList()
         );
+
+        if (laptop.getLocation() != null) {
+            LocationDto loc = new LocationDto(
+                    laptop.getLocation().getLocationId(),
+                    laptop.getLocation().getState(),
+                    laptop.getLocation().getCity(),
+                    laptop.getLocation().getLocality()
+            );
+            dto.setLocation(loc);
+        }
+
+
 
         return dto;
     }
@@ -314,7 +361,7 @@ public class LaptopServiceImpl implements LaptopService {
             dto.setScreenSize(laptop.getScreenSize() != null ? laptop.getScreenSize().getDbValue() : null);
             dto.setMemoryType(laptop.getMemoryType() != null ? laptop.getMemoryType().getDbValue() : null);
             dto.setProcessorBrand(laptop.getProcessorBrand() != null ? laptop.getProcessorBrand().getDbValue() : null);
-            dto.setGraphicBrand(laptop.getGraphicBrand() != null ? laptop.getGraphicBrand().getDbValue() : null);
+            dto.setGraphicBrand(laptop.getGraphicsBrand() != null ? laptop.getGraphicsBrand().getDbValue() : null);
 
             dto.setWarrantyInYear(
                     laptop.getWarrantyInYear() != null
@@ -341,6 +388,16 @@ public class LaptopServiceImpl implements LaptopService {
                         return bd;
                     }).toList()
             );
+
+            if (laptop.getLocation() != null) {
+                LocationDto loc = new LocationDto(
+                        laptop.getLocation().getLocationId(),
+                        laptop.getLocation().getState(),
+                        laptop.getLocation().getCity(),
+                        laptop.getLocation().getLocality()
+                );
+                dto.setLocation(loc);
+            }
 
             return dto;
         }).toList();
