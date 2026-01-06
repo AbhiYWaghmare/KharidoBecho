@@ -118,13 +118,9 @@ public class LaptopRequestDTO {
     @Min(value = 1, message = "USB ports must be at least 1")
     private Integer usbPorts;
 
-    @NotBlank(message = "Address is required")
-    @Size(max = 500, message = "Address cannot exceed 500 characters")
-    @Pattern(
-            regexp = "^[A-Za-z0-9\\s,./#\\-]+$",
-            message = "Address can contain letters, numbers, spaces, and , . / # - characters"
-    )
-    private String address;
+    private String state;
+    private String city;
+    private String locality;
 
     private Status status;
 
