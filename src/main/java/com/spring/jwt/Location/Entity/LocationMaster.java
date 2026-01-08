@@ -1,5 +1,6 @@
 package com.spring.jwt.Location.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import lombok.Setter;
                 @UniqueConstraint(columnNames = {"state", "city", "locality"})
         }
 )
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class LocationMaster {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +34,5 @@ public class LocationMaster {
 
     public LocationMaster() {
     }
-
 
 }
