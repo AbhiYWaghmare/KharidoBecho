@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LocationRepository extends JpaRepository<LocationMaster, Integer> {
 
@@ -16,4 +17,11 @@ public interface LocationRepository extends JpaRepository<LocationMaster, Intege
 
     @Query("SELECT DISTINCT l.locality FROM LocationMaster l WHERE l.state = :state AND l.city = :city")
     List<String> findLocalitiesByStateAndCity(String state, String city);
+
+    Optional<LocationMaster> findByStateAndCityAndLocality(
+            String state,
+            String city,
+            String locality
+    );
+
 }

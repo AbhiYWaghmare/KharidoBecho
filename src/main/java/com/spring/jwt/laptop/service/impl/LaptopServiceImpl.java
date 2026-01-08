@@ -2,6 +2,7 @@ package com.spring.jwt.laptop.service.impl;
 
 import com.spring.jwt.Location.Dto.LocationDto;
 import com.spring.jwt.Location.Entity.LocationMaster;
+import com.spring.jwt.Location.Repository.LocationRepository;
 import com.spring.jwt.Location.Service.LocationService;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.Status;
@@ -20,6 +21,8 @@ import com.spring.jwt.laptop.entity.Laptop;
 import com.spring.jwt.laptop.repository.LaptopRepository;
 import com.spring.jwt.repository.SellerRepository;
 import com.spring.jwt.laptop.service.LaptopService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -43,6 +46,11 @@ public class LaptopServiceImpl implements LaptopService {
     private final SellerRepository sellerRepository;
     private final LaptopBrandModelService laptopBrandModelService;
     private final LocationService locationService;
+    private final LocationRepository locationRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
 
     public Laptop create(LaptopRequestDTO requestDTO) {
@@ -113,20 +121,21 @@ public class LaptopServiceImpl implements LaptopService {
                         .build()
         );
 
-        // ===== LOCATION HANDLING =====
-        LocationDto locationDto = new LocationDto();
-        locationDto.setState(requestDTO.getState());
-        locationDto.setCity(requestDTO.getCity());
-        locationDto.setLocality(requestDTO.getLocality());
-
-        // use EXISTING service method
-        LocationDto savedLocation = locationService.saveLocation(locationDto);
-
-        // attach only ID
-        LocationMaster location = new LocationMaster();
-        location.setLocationId(savedLocation.getLocationId());
-
+        LocationMaster location = locationRepository
+                .findByStateAndCityAndLocality(
+                        requestDTO.getState(),
+                        requestDTO.getCity(),
+                        requestDTO.getLocality()
+                )
+                .orElseGet(() -> {
+                    LocationMaster newLocation = new LocationMaster();
+                    newLocation.setState(requestDTO.getState());
+                    newLocation.setCity(requestDTO.getCity());
+                    newLocation.setLocality(requestDTO.getLocality());
+                    return locationRepository.save(newLocation);
+                });
         laptop.setLocation(location);
+
 
         return laptopRepository.save(laptop);
     }
@@ -241,15 +250,19 @@ public class LaptopServiceImpl implements LaptopService {
         // ===== LOCATION UPDATE =====
         if (dto.getState() != null && dto.getCity() != null && dto.getLocality() != null) {
 
-            LocationDto locationDto = new LocationDto();
-            locationDto.setState(dto.getState());
-            locationDto.setCity(dto.getCity());
-            locationDto.setLocality(dto.getLocality());
-
-            LocationDto savedLocation = locationService.saveLocation(locationDto);
-
-            LocationMaster location = new LocationMaster();
-            location.setLocationId(savedLocation.getLocationId());
+            LocationMaster location = locationRepository
+                    .findByStateAndCityAndLocality(
+                            dto.getState(),
+                            dto.getCity(),
+                            dto.getLocality()
+                    )
+                    .orElseGet(() -> {
+                        LocationMaster newLocation = new LocationMaster();
+                        newLocation.setState(dto.getState());
+                        newLocation.setCity(dto.getCity());
+                        newLocation.setLocality(dto.getLocality());
+                        return locationRepository.save(newLocation);
+                    });
 
             laptop.setLocation(location);
         }
@@ -484,8 +497,20 @@ public class LaptopServiceImpl implements LaptopService {
     @Override
     @Transactional(readOnly = true)
     public Page<Laptop> getAllBySellerId(Long sellerId, int page, int size, String sortBy) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).descending());
-        return laptopRepository.findBySeller_SellerId(sellerId, pageable);
+        Pageable pageable =
+                PageRequest.of(page, size, Sort.by(sortBy).descending());
+
+        Page<Laptop> result =
+                laptopRepository.findBySeller_SellerId(sellerId, pageable);
+
+        result.getContent().forEach(laptop -> {
+            if (laptop.getLocation() != null) {
+                org.hibernate.Hibernate.initialize(laptop.getLocation());
+            }
+
+        });
+
+        return result;
     }
 
 

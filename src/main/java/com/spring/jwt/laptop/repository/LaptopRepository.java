@@ -34,7 +34,6 @@ public interface LaptopRepository extends JpaRepository<Laptop,Long> {
 
     Optional<Laptop> findByIdAndDeletedFalse(Long id);
 
-//    @EntityGraph(attributePaths = "laptopPhotos")
     Page<Laptop> findBySeller_SellerId(Long sellerId, Pageable pageable);
 
     @Query("""
