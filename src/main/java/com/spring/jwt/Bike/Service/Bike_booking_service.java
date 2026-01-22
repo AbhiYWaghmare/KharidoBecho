@@ -22,6 +22,9 @@ public interface Bike_booking_service {
     List<Bike_booking> getBookingsByBuyerId(Long buyerId);
 
     List<Bike_booking> getBookingsBySellerId(Long sellerId);
+    List<Bike_booking> getBookingsByBikeId(Long bikeId);
+
+
 
 
 }

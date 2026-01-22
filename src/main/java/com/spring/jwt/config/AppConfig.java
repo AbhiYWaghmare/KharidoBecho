@@ -121,6 +121,7 @@ public class AppConfig {
                     "/cars/**",
                     "/api/v1/cars/**",
 
+
                     "/api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
@@ -167,6 +168,7 @@ public class AppConfig {
                     "/api/v1/auctions/**",
                     "/api/v1/car-auctions/**",
                     "/api/carBookings/**",
+                    "/car/brands/**",
 
 
 
@@ -191,7 +193,8 @@ public class AppConfig {
                                         "style-src 'self' 'unsafe-inline'; " +
                                         "img-src 'self' data:; " +
                                         "font-src 'self'; " +
-                                        "connect-src 'self' ws: wss: http://localhost:8087;"
+                                        "connect-src 'self' http://localhost:5173 http://localhost:3000 http://localhost:8087 ws: wss:;"
+
                         ))
 
 //                        .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';" +
@@ -211,6 +214,7 @@ public class AppConfig {
         http.authorizeHttpRequests(authorize -> authorize
 
                 //For testing All API are permitted
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
@@ -225,6 +229,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/mobile-meta/**").permitAll()
 
                 .requestMatchers("/api/v1/cars/**").permitAll()
+                .requestMatchers( "/car/brands/**").permitAll()
                 .requestMatchers("/api/v1/car-images/**").permitAll()
 
 
@@ -254,13 +259,6 @@ public class AppConfig {
                 .requestMatchers("/laptop/auctions/live").permitAll()
                 .requestMatchers("/api/beadingLaptops/**").permitAll()
                 .requestMatchers("/api/carBookings/**").permitAll()
-
-
-
-
-
-
-//                .requestMatchers("/ws-auction/**").permitAll()   //  add this
                 .requestMatchers(
                         "/ws-auction/**",
                         "/ws/**",
@@ -306,6 +304,7 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/car-auctions/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher( "/car/brands/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
@@ -397,11 +396,7 @@ public class AppConfig {
 //                config.setAllowedOrigins(allowedOrigins); // now includes 63342
                 config.setAllowedOrigins(allowedOrigins);
 
-                config.setAllowedMethods(Arrays.asList("GET", "POST", "PATCH","PUT", "DELETE", "OPTIONS"));
-//                config.setAllowCredentials(true);
-                config.setAllowCredentials(true);
-
-                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH","DELETE", "OPTIONS"));
                 config.setAllowCredentials(true);
                 config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
                 config.setExposedHeaders(Arrays.asList("Authorization"));

@@ -1,15 +1,12 @@
 package com.spring.jwt.laptop.dto;
 
 import com.spring.jwt.entity.Status;
-import com.spring.jwt.laptop.model.LaptopRequestStatus;
-import com.spring.jwt.laptop.model.LaptopRequestStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.net.ssl.SSLSession;
 import java.time.LocalDate;
 
 @Data
@@ -53,28 +50,23 @@ public class LaptopRequestDTO {
     @NotNull(message= "warranty is required")
     private Long warrantyInYear;
 
-    @NotBlank(message= "Processor is required")
     @Size(max = 50, message = "Processor cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "Processor must contain at least one letter and no special characters")
     private String processor;
 
-    @NotBlank(message= "Processor Brand is required")
     @Size(max = 50, message = "Processor Brand cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$", message = "Processor Brand must contain letters only and cannot have digits or special characters")
     private String processorBrand;
 
-    @NotBlank(message= "Memory type is required")
     @Size(max = 50, message = "Memory type cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "Memory type must contain at least one letter and no special characters")
     private String memoryType;
 
-    @NotBlank(message= "Screen size is required")
     @Size(max = 20, message = "Screen size cannot exceed 20 characters")
     private String screenSize;
 
-    @NotBlank(message= "Colour is required")
     @Size(max = 50, message = "Colour cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "Colour must contain at least one letter and no special characters")
@@ -91,23 +83,19 @@ public class LaptopRequestDTO {
             message = "Storage must contains digits and letters only and no special characters")
     private String storage;
 
-    @NotBlank(message= "Battery is required")
     private String battery;
 
-    @NotBlank(message= "Battery Life is required")
     @Pattern(
             regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "Battery life must contain letters and digits only and cannot have special characters"
     )
     private String batteryLife;
 
-    @NotBlank(message= "Graphics card is required")
     @Size(max = 30, message = "Graphics card cannot exceed 30 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z0-9\\s\\-\\.]+$",
             message = "Graphics card must contain at least one letter and no special characters")
     private String graphicsCard;
 
-    @NotBlank(message= "Graphics brand is required")
     @Size(max = 50, message = "Graphics brand cannot exceed 50 characters")
     @Pattern(regexp = "^(?=.*[A-Za-z])[A-Za-z\\s\\-\\.]+$",
             message = "Graphics brand must contain letters only and cannot have digits or special characters")
@@ -129,6 +117,10 @@ public class LaptopRequestDTO {
     @NotNull(message= "Port is required")
     @Min(value = 1, message = "USB ports must be at least 1")
     private Integer usbPorts;
+
+    private String state;
+    private String city;
+    private String locality;
 
     private Status status;
 
