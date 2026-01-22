@@ -1,9 +1,9 @@
 package com.spring.jwt.Mobile.entity;
 
 public enum RequestStatus {
-    PENDING,
-    IN_NEGOTIATION,
-    ACCEPTED,
-    REJECTED,
-    COMPLETED
+    PENDING,          // Buyer created request
+    IN_NEGOTIATION,   // Seller accepted (Socket.IO active)
+    REJECTED,         // Seller rejected
+    COMPLETED         // Deal completed
 }
+

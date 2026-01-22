@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Buyer–Seller Chat (Socket.IO)</title>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        gap: 20px;
+    }
+    .chat-box {
+        width: 45%;
+        border: 1px solid #ccc;
+        padding: 10px;
+    }
+    .messages {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+    .connected {
+        color: green;
+    }
+    .disconnected {
+        color: red;
+    }
+  </style>
+</head>
+<body>
+
+<!-- BUYER -->
+<div class="chat-box">
+  <h3>Buyer (UserId: 10003)</h3>
+  <div id="buyer-status" class="disconnected">Disconnected</div>
+  <div id="buyer-messages" class="messages"></div>
+  <input id="buyer-input" placeholder="Buyer message"/>
+  <button onclick="sendBuyer()">Send</button>
+</div>
+
+<!-- SELLER -->
+<div class="chat-box">
+  <h3>Seller (UserId: 10001)</h3>
+  <div id="seller-status" class="disconnected">Disconnected</div>
+  <div id="seller-messages" class="messages"></div>
+  <input id="seller-input" placeholder="Seller message"/>
+  <button onclick="sendSeller()">Send</button>
+</div>
+
+<script>
+  const REQUEST_ID = 9;
+
+  /* ---------------- BUYER SOCKET ---------------- */
+  const buyerSocket = io("http://localhost:9092", {
+      query: { userId: 10003 }
+  });
+
+  buyerSocket.on("connect", () => {
+      document.getElementById("buyer-status").innerText = "Connected";
+      document.getElementById("buyer-status").className = "connected";
+  });
+
+  buyerSocket.on("disconnect", () => {
+      document.getElementById("buyer-status").innerText = "Disconnected";
+      document.getElementById("buyer-status").className = "disconnected";
+  });
+
+  buyerSocket.on("receive_chat_message", msg => {
+      document.getElementById("buyer-messages")
+          .innerHTML += `<div><b>${msg.senderRole}:</b> ${msg.message}</div>`;
+  });
+
+  function sendBuyer() {
+      const text = document.getElementById("buyer-input").value;
+
+      buyerSocket.emit("send_chat_message", {
+          requestId: REQUEST_ID,
+          senderUserId: 10003,
+          message: text
+      });
+
+      document.getElementById("buyer-input").value = "";
+  }
+
+  /* ---------------- SELLER SOCKET ---------------- */
+  const sellerSocket = io("http://localhost:9092", {
+      query: { userId: 10001 }
+  });
+
+  sellerSocket.on("connect", () => {
+      document.getElementById("seller-status").innerText = "Connected";
+      document.getElementById("seller-status").className = "connected";
+  });
+
+  sellerSocket.on("disconnect", () => {
+      document.getElementById("seller-status").innerText = "Disconnected";
+      document.getElementById("seller-status").className = "disconnected";
+  });
+
+  sellerSocket.on("receive_chat_message", msg => {
+      document.getElementById("seller-messages")
+          .innerHTML += `<div><b>${msg.senderRole}:</b> ${msg.message}</div>`;
+  });
+
+  function sendSeller() {
+      const text = document.getElementById("seller-input").value;
+
+      sellerSocket.emit("send_chat_message", {
+          requestId: REQUEST_ID,
+          senderUserId: 10001,
+          message: text
+      });
+
+      document.getElementById("seller-input").value = "";
+  }
+</script>
+
+</body>
+</html>

@@ -2,13 +2,17 @@
 package com.spring.jwt.exception;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.spring.jwt.car.auction.exception.CarAuctionNotFoundException;
-import com.spring.jwt.car.auction.exception.CarInvalidAuctionStateException;
+//import com.spring.jwt.car.auction.exception.CarAuctionNotFoundException;
+//import com.spring.jwt.car.auction.exception.CarInvalidAuctionStateException;
 import com.spring.jwt.exception.car.*;
 import com.spring.jwt.exception.car.BuyerNotFoundException;
 import com.spring.jwt.exception.car.SellerNotFoundException;
 import com.spring.jwt.exception.mobile.*;
 import com.spring.jwt.exception.laptop.*;
+import com.spring.jwt.exception.mobilechat.ChatNotAllowedException;
+import com.spring.jwt.exception.mobilechat.ChatRequestNotFoundException;
+import com.spring.jwt.exception.mobilechat.ChatSenderNotFoundException;
+import com.spring.jwt.exception.mobilechat.ChatUnauthorizedSenderException;
 import com.spring.jwt.laptop.dto.LaptopResponseDTO;
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ErrorResponseDTO1;
@@ -458,6 +462,21 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MobileRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleMobileRequestException(
+            MobileRequestException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Mobile Request Error");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false).replace("uri=", ""));
+
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+
     // CAR
     @ExceptionHandler(CarNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleCarNotFound(
@@ -523,23 +542,23 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 //        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 //    }
 
-    @ExceptionHandler(CarInvalidAuctionStateException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCarAuctionState(CarInvalidAuctionStateException ex, WebRequest req) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        error.put("timeStamp", LocalDateTime.now());
-        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(CarAuctionNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCarAuctionNotFound(CarAuctionNotFoundException ex, WebRequest req) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        error.put("timeStamp", LocalDateTime.now());
-        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
+//    @ExceptionHandler(CarInvalidAuctionStateException.class)
+//    public ResponseEntity<Map<String, Object>> handleInvalidCarAuctionState(CarInvalidAuctionStateException ex, WebRequest req) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put("message", ex.getMessage());
+//        error.put("timeStamp", LocalDateTime.now());
+//        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
+//        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+//    }
+//
+//    @ExceptionHandler(CarAuctionNotFoundException.class)
+//    public ResponseEntity<Map<String, Object>> handleCarAuctionNotFound(CarAuctionNotFoundException ex, WebRequest req) {
+//        Map<String, Object> error = new HashMap<>();
+//        error.put("message", ex.getMessage());
+//        error.put("timeStamp", LocalDateTime.now());
+//        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
+//        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+//    }
 
 
     @ExceptionHandler(DuplicateBookingException.class)
@@ -585,21 +604,83 @@ public class GlobalException extends ResponseEntityExceptionHandler {
     }
 
     // FALLBACK EXCEPTION
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleAllUncaughtException(
-            Exception exception, WebRequest webRequest) {
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ErrorResponseDto> handleAllUncaughtException(
+//            Exception exception, WebRequest webRequest) {
+//
+//        log.error("Uncaught error: ", exception);
+//
+//        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+//                webRequest.getDescription(false),
+//                HttpStatus.INTERNAL_SERVER_ERROR,
+//                "An unexpected error occurred",
+//                LocalDateTime.now()
+//        );
+//
+//        return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
-        log.error("Uncaught error: ", exception);
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                webRequest.getDescription(false),
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred",
-                LocalDateTime.now()
-        );
+//    Mobile Chat Message Exception
 
-        return new ResponseEntity<>(errorResponseDto, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    @ExceptionHandler(ChatRequestNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleChatRequestNotFound(
+            ChatRequestNotFoundException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Chat Request Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(ChatNotAllowedException.class)
+    public ResponseEntity<Map<String, Object>> handleChatNotAllowed(
+            ChatNotAllowedException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("error", "Chat Not Allowed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(ChatSenderNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSenderNotFound(
+            ChatSenderNotFoundException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Sender Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ChatUnauthorizedSenderException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedSender(
+            ChatUnauthorizedSenderException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.UNAUTHORIZED.value());
+        body.put("error", "Unauthorized Sender");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+
 
 }
 

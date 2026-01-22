@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Chat Test</title>
+
+  <!-- Socket.IO client -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+    }
+    .box {
+        background: #fff;
+        padding: 15px;
+        width: 420px;
+        margin: 20px auto;
+        border-radius: 6px;
+        box-shadow: 0 0 5px rgba(0,0,0,.2);
+    }
+    input, button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 6px;
+    }
+    #log {
+        height: 180px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        margin-top: 10px;
+        padding: 5px;
+        background: #fafafa;
+    }
+    .msg {
+        margin: 4px 0;
+    }
+    .error {
+        color: red;
+    }
+    .system {
+        color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h3>Socket.IO Chat Test</h3>
+
+  <label>User ID (must exist in DB)</label>
+  <input id="userId" placeholder="10001">
+
+  <label>Mobile Request ID</label>
+  <input id="requestId" placeholder="9">
+
+  <button onclick="connect()">Connect</button>
+  <button onclick="disconnect()">Disconnect</button>
+
+  <hr>
+
+  <label>Message</label>
+  <input id="message" placeholder="Type message">
+  <button onclick="sendMessage()">Send Message</button>
+
+  <div id="log"></div>
+</div>
+
+<script>
+  let socket = null;
+
+  function log(msg, cls = "system") {
+      const div = document.createElement("div");
+      div.className = "msg " + cls;
+      div.innerText = msg;
+      document.getElementById("log").appendChild(div);
+      document.getElementById("log").scrollTop = 9999;
+  }
+
+  function connect() {
+      const userId = document.getElementById("userId").value.trim();
+
+      if (!userId) {
+          alert("Enter userId");
+          return;
+      }
+
+      socket = io("http://localhost:9092", {
+          query: { userId },
+          reconnection: false   // 🔥 IMPORTANT
+      });
+
+      socket.on("connect", () => {
+          log("✅ Connected to socket");
+      });
+
+      socket.on("disconnect", () => {
+          log("❌ Disconnected");
+      });
+
+      socket.on("receive_chat_message", data => {
+          log(
+              `📩 ${data.senderRole} (${data.senderUserId}) : ${data.message}`
+          );
+      });
+
+      socket.on("socket_error", msg => {
+          log("❌ ERROR: " + msg, "error");
+          socket.disconnect(); // stop loop
+      });
+  }
+
+  function sendMessage() {
+      if (!socket || !socket.connected) {
+          alert("Not connected");
+          return;
+      }
+
+      const requestId = document.getElementById("requestId").value;
+      const userId = document.getElementById("userId").value;
+      const message = document.getElementById("message").value;
+
+      if (!message) return;
+
+      socket.emit("send_chat_message", {
+          requestId: requestId,
+          senderUserId: userId,
+          message: message
+      });
+
+      log("📤 You: " + message);
+      document.getElementById("message").value = "";
+  }
+
+  function disconnect() {
+      if (socket) {
+          socket.disconnect();
+          socket = null;
+      }
+  }
+</script>
+
+</body>
+</html>
