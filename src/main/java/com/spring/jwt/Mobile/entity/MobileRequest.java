@@ -40,7 +40,7 @@ public class MobileRequest {
      * JSON column storing an array of ConversationMessage objects.
      * Use columnDefinition = "json" on MySQL (or use TEXT/LONGTEXT if your DB doesn't support json typed column).
      */
-//    @Lob
+    @Lob
     @Column(name = "conversation", columnDefinition = "JSON")
     private String conversation; // JSON array string
 
@@ -54,7 +54,7 @@ public class MobileRequest {
     public void prePersist() {
         this.createdAt = OffsetDateTime.now();
         if (this.status == null) this.status = RequestStatus.PENDING;
-        if (this.conversation == null) this.conversation = "[]";
+//        if (this.conversation == null) this.conversation = "[]";
     }
 
     @PreUpdate
