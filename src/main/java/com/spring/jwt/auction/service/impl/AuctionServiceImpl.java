@@ -131,7 +131,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public void startDueAuctions() {
         LocalDateTime now = LocalDateTime.now();
-        log.info("startDueAuctions at {}", now);
+//        log.info("startDueAuctions at {}", now);
         List<Auction> toStart = auctionRepository.findByStatusAndStartTimeLessThanEqual(
                 Auction.Status.SCHEDULED, now);
 
@@ -159,7 +159,7 @@ public class AuctionServiceImpl implements AuctionService {
     @Transactional
     public void endDueAuctions() {
         LocalDateTime now = LocalDateTime.now();
-        log.info("endDueAuctions at {}", now);
+//        log.info("endDueAuctions at {}", now);
         List<Auction> toEnd = auctionRepository.findExpiredAuctions(Auction.Status.RUNNING, now);
 
         for (Auction a : toEnd) {

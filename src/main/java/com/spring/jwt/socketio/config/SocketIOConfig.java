@@ -1,8 +1,9 @@
-package com.spring.jwt.socketio;
+package com.spring.jwt.socketio.config;
 
 import com.corundumstudio.socketio.SocketConfig;
 import com.corundumstudio.socketio.SocketIOServer;
-import com.spring.jwt.laptop.laptopAuction.laptopSocket.handler.ChatSocketHandler;
+//import com.spring.jwt.laptop.laptopAuction.laptopSocket.handler.ChatSocketHandler;
+import com.corundumstudio.socketio.Transport;
 import com.spring.jwt.laptop.service.LaptopRequestService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -33,7 +34,8 @@ public class SocketIOConfig {
 
 
     @Bean
-    public SocketIOServer socketIOServer(){
+    public SocketIOServer socketIOServer() {
+
         SocketConfig socketConfig = new SocketConfig();
         socketConfig.setTcpNoDelay(true);
         socketConfig.setReuseAddress(true);
@@ -43,28 +45,20 @@ public class SocketIOConfig {
 
         config.setHostname(host);
         config.setPort(port);
+
+        // 🔑 REQUIRED FIXES
+        config.setOrigin("http://localhost:8087"); // exact frontend origin
+        config.setAllowCustomRequests(true);        // REQUIRED for XHR polling
+        config.setTransports(Transport.POLLING, Transport.WEBSOCKET);
+
         config.setSocketConfig(socketConfig);
         config.setBossThreads(bossCount);
         config.setWorkerThreads(workCount);
         config.setPingTimeout(pingTimeOut);
         config.setPingInterval(pingInterval);
-        config.setOrigin("*"); // allow all frontend origins
 
         return new SocketIOServer(config);
     }
 
-    @Bean
-    public ChatSocketHandler chatSocketHandler(SocketIOServer server,
-                                               LaptopRequestService laptopRequestService) {
-        return new ChatSocketHandler(server, laptopRequestService);
-    }
 
-//
-//    @Bean
-//    public CommandLineRunner runner(SocketIOServer server) {
-//        return args -> {
-//            server.start();
-//            Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-//        };
-//    }
 }

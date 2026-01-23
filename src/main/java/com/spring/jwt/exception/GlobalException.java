@@ -14,6 +14,10 @@ import com.spring.jwt.exception.bookings.LaptopRequestNotFoundException;
 import com.spring.jwt.exception.colour.ColourAlreadyExistsException;
 import com.spring.jwt.exception.colour.ColourNotFoundException;
 //import com.spring.jwt.laptop.dto.AuctionErrReponse;
+import com.spring.jwt.exception.laptopChat.LaptopChatNotAllowedException;
+import com.spring.jwt.exception.laptopChat.LaptopChatRequestNotFoundException;
+import com.spring.jwt.exception.laptopChat.LaptopChatSenderNotFoundException;
+import com.spring.jwt.exception.laptopChat.LaptopChatUnauthorizedSenderException;
 import com.spring.jwt.laptop.dto.LaptopErrorResponse;
 import com.spring.jwt.utils.Colours.dto.ColourResponseDTO;
 import com.spring.jwt.exception.laptop.*;
@@ -25,8 +29,7 @@ import com.spring.jwt.auction.exception.*;
 import com.spring.jwt.exception.Bike.*;
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.spring.jwt.car.auction.exception.CarAuctionNotFoundException;
-import com.spring.jwt.car.auction.exception.CarInvalidAuctionStateException;
+
 import com.spring.jwt.exception.car.*;
 import com.spring.jwt.exception.car.BuyerNotFoundException;
 import com.spring.jwt.exception.car.SellerNotFoundException;
@@ -342,7 +345,8 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
-    // LAPTOP
+    //========================= LAPTOP EXCEPTIONS =========================
+
     @ExceptionHandler(LaptopAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleLaptopAlreadyExists(
             LaptopAlreadyExistsException ex, WebRequest request) {
@@ -481,6 +485,66 @@ public class GlobalException extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    //========================= LAPTOP CHAT EXCEPTIONS =========================
+
+    @ExceptionHandler(LaptopChatRequestNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopChatRequestNotFound(
+            LaptopChatRequestNotFoundException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Laptop Chat Request Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(LaptopChatNotAllowedException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopChatNotAllowed(
+            LaptopChatNotAllowedException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("error", "Laptop Chat Not Allowed");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(LaptopChatSenderNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopSenderNotFound(
+            LaptopChatSenderNotFoundException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("error", "Laptop Chat Sender Not Found");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(LaptopChatUnauthorizedSenderException.class)
+    public ResponseEntity<Map<String, Object>> handleLaptopUnauthorizedSender(
+            LaptopChatUnauthorizedSenderException ex, WebRequest request) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.UNAUTHORIZED.value());
+        body.put("error", "Laptop Chat Unauthorized Sender");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+
+        return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
+    }
+
+
+
     // CAR
     @ExceptionHandler(CarNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleCarNotFound(
@@ -537,32 +601,6 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
-//    @ExceptionHandler(CarAuctionException.class)
-//    public ResponseEntity<Map<String, Object>> handleCarAuctionException(CarAuctionException ex, WebRequest req) {
-//        Map<String, Object> error = new HashMap<>();
-//        error.put("message", ex.getMessage());
-//        error.put("timeStamp", LocalDateTime.now());
-//        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
-//        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-//    }
-
-    @ExceptionHandler(CarInvalidAuctionStateException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCarAuctionState(CarInvalidAuctionStateException ex, WebRequest req) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        error.put("timeStamp", LocalDateTime.now());
-        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(CarAuctionNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleCarAuctionNotFound(CarAuctionNotFoundException ex, WebRequest req) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        error.put("timeStamp", LocalDateTime.now());
-        error.put("apiPath", req.getDescription(false).replace("uri=", ""));
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
 
 
     @ExceptionHandler(DuplicateBookingException.class)
@@ -578,15 +616,6 @@ public class GlobalException extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
-
-//    @ExceptionHandler(AuctionNotFoundException.class)
-//    public ResponseEntity<Map<String, Object>> handleAuctionNotFound(AuctionNotFoundException ex) {
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("timestamp", OffsetDateTime.now());
-//        body.put("error", "Auction not found");
-//        body.put("message", ex.getMessage());
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-//    }
 
 
     @ExceptionHandler(InvalidBookingOperationException.class)

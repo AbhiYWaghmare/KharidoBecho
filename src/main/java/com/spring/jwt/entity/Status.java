@@ -5,7 +5,9 @@ public enum Status {
     PENDING("Pending"),
     ACTIVE("Active"),
     SOLD("Sold"),
-    DELETE("Deactivate");
+    DELETE("Deactivate"),
+    CLOSED("Closed"),
+    COMPLETED("Completed");
 
 
     private final String status;

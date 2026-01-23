@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Laptop Socket.IO Chat Test</title>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 6px;
+            width: 300px;
+        }
+        #log {
+            border: 1px solid #ccc;
+            height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .msg {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Laptop Socket.IO Chat Test</h2>
+
+<label>User ID (must exist in DB)</label><br>
+<input type="number" id="userId" placeholder="Example: 10001"><br>
+
+<label>Laptop Request ID</label><br>
+<input type="number" id="requestId" placeholder="Example: 12"><br>
+
+<button onclick="connect()">Connect</button>
+<button onclick="disconnect()">Disconnect</button>
+
+<hr>
+
+<label>Message</label><br>
+<input type="text" id="message" placeholder="Type message here"><br>
+<button onclick="sendMessage()">Send Message</button>
+
+<div id="log"></div>
+
+<script>
+    let socket = null;
+
+    function log(msg) {
+        const div = document.createElement("div");
+        div.className = "msg";
+        div.innerText = msg;
+        document.getElementById("log").appendChild(div);
+    }
+
+    function connect() {
+        const userId = document.getElementById("userId").value;
+
+        if (!userId) {
+            alert("User ID is required");
+            return;
+        }
+
+        socket = io("http://localhost:9092", {
+            query: { userId: userId }
+        });
+
+        socket.on("connect", () => {
+            log("✅ Connected. Socket ID: " + socket.id);
+        });
+
+        socket.on("disconnect", () => {
+            log("❌ Disconnected");
+        });
+
+        socket.on("receive_laptop_chat_message", (data) => {
+            log("📩 Incoming: " + JSON.stringify(data));
+        });
+
+        socket.on("socket_error", (err) => {
+            log("⚠️ Error: " + err);
+        });
+    }
+
+    function disconnect() {
+        if (socket) {
+            socket.disconnect();
+            socket = null;
+        }
+    }
+
+    function sendMessage() {
+        if (!socket) {
+            alert("Connect first");
+            return;
+        }
+
+        const requestId = document.getElementById("requestId").value;
+        const senderUserId = document.getElementById("userId").value;
+        const message = document.getElementById("message").value;
+
+        if (!requestId || !senderUserId || !message) {
+            alert("All fields are required");
+            return;
+        }
+
+        const payload = {
+            requestId: Number(requestId),
+            senderUserId: Number(senderUserId),
+            message: message
+        };
+
+        socket.emit("send_laptop_chat_message", payload);
+        log("📤 Sent: " + JSON.stringify(payload));
+
+        document.getElementById("message").value = "";
+    }
+</script>
+
+</body>
+</html>
