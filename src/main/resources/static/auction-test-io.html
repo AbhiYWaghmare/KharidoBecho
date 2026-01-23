@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Laptop Auction - Socket.IO</title>
+
+    <!-- Socket.IO v2 client (REQUIRED for Netty) -->
+    <script src="https://cdn.socket.io/2.3.0/socket.io.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        h2 {
+            margin-top: 30px;
+        }
+
+        input {
+            padding: 6px;
+            margin: 5px;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        #status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        .log {
+            font-size: 12px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+
+<h1>💻 Laptop Auction (Socket.IO)</h1>
+
+<!-- ================= CONNECTION ================= -->
+<div class="box">
+    <h2>1️⃣ Connection</h2>
+    <button onclick="connectSocket()">Connect</button>
+    <div id="status">Status: Disconnected</div>
+    <div class="log" id="debugLog"></div>
+</div>
+
+<!-- ================= JOIN AUCTION ================= -->
+<div class="box">
+    <h2>2️⃣ Join Auction</h2>
+    <input type="number" id="auctionId" placeholder="Auction ID">
+    <button onclick="joinAuction()">Join Auction</button>
+</div>
+
+<!-- ================= PLACE BID ================= -->
+<div class="box">
+    <h2>3️⃣ Place Bid</h2>
+    <input type="number" id="bidderId" placeholder="Your User ID">
+    <input type="number" id="bidAmount" placeholder="Bid Amount">
+    <button onclick="placeBid()">Place Bid</button>
+
+    <div id="bidResponse"></div>
+</div>
+
+<!-- ================= TOP BID ================= -->
+<div class="box">
+    <h2>🏆 Top Bid</h2>
+    <div id="topBid">No bids yet</div>
+</div>
+
+<!-- ================= TOP 3 BIDS ================= -->
+<div class="box">
+    <h2>🔥 Top 3 Bids</h2>
+    <ul id="topThreeBids"></ul>
+</div>
+
+<script>
+    let socket = null;
+    let currentAuctionId = null;
+
+    function log(msg) {
+        const el = document.getElementById("debugLog");
+        el.innerHTML += msg + "<br/>";
+        console.log(msg);
+    }
+
+    // ================= CONNECT =================
+    function connectSocket() {
+
+        if (socket && socket.connected) {
+            alert("Already connected");
+            return;
+        }
+
+        log("Attempting connection...");
+
+        socket = io("http://localhost:3000"); // DO NOT force websocket
+
+        socket.on("connect", () => {
+            log("CONNECTED: " + socket.id);
+            document.getElementById("status").innerText =
+                "Status: Connected (" + socket.id + ")";
+            document.getElementById("status").style.color = "green";
+        });
+
+        socket.on("disconnect", (reason) => {
+            log("DISCONNECTED: " + reason);
+            document.getElementById("status").innerText =
+                "Status: Disconnected";
+            document.getElementById("status").style.color = "red";
+        });
+
+        socket.on("connect_error", (err) => {
+            log("CONNECT ERROR: " + err);
+        });
+
+        socket.on("error", (err) => {
+            log("SOCKET ERROR: " + err);
+        });
+
+        socket.on("placeLaptopBidResponse", (msg) => {
+            document.getElementById("bidResponse").innerText = msg;
+        });
+
+        // ===== TOP BID EVENT =====
+        socket.on("laptopTopBid", (data) => {
+            if (!data) {
+                document.getElementById("topBid").innerText = "No bids yet";
+                return;
+            }
+
+            document.getElementById("topBid").innerText =
+                "Bidder: " + data.bidderId +
+                " | Amount: ₹" + data.bidAmount;
+        });
+
+        // ===== TOP 3 BIDS EVENT =====
+        socket.on("laptopTopThreeBids", (list) => {
+            const ul = document.getElementById("topThreeBids");
+            ul.innerHTML = "";
+
+            if (!list || list.length === 0) {
+                ul.innerHTML = "<li>No bids yet</li>";
+                return;
+            }
+
+            list.forEach((bid, index) => {
+                const li = document.createElement("li");
+                li.innerText =
+                    (index + 1) + ". Bidder " + bid.bidderId +
+                    " → ₹" + bid.bidAmount;
+                ul.appendChild(li);
+            });
+        });
+    }
+
+    // ================= JOIN AUCTION =================
+    function joinAuction() {
+
+        if (!socket || !socket.connected) {
+            alert("Please connect first");
+            return;
+        }
+
+        currentAuctionId = document.getElementById("auctionId").value;
+
+        if (!currentAuctionId) {
+            alert("Enter auction ID");
+            return;
+        }
+
+        log("Joining auction " + currentAuctionId);
+
+        socket.emit("joinAuction", Number(currentAuctionId));
+        socket.emit("getLaptopTopBid", Number(currentAuctionId));
+        socket.emit("getLaptopTopThreeBids", Number(currentAuctionId));
+    }
+
+    // ================= PLACE BID =================
+    function placeBid() {
+
+        if (!socket || !socket.connected) {
+            alert("Please connect first");
+            return;
+        }
+
+        if (!currentAuctionId) {
+            alert("Join auction first");
+            return;
+        }
+
+        const bidderId = document.getElementById("bidderId").value;
+        const bidAmount = document.getElementById("bidAmount").value;
+
+        if (!bidderId || !bidAmount) {
+            alert("Enter bidder ID and bid amount");
+            return;
+        }
+
+        const payload = {
+            auctionId: Number(currentAuctionId),
+            bidderUserId: Number(bidderId),
+            amount: Number(bidAmount)
+        };
+
+        log("Placing bid: " + JSON.stringify(payload));
+
+        socket.emit("placeLaptopBid", payload);
+    }
+</script>
+
+</body>
+</html>
