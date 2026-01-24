@@ -28,6 +28,7 @@ public class LaptopBidSocketController {
     private final SocketIOService socketIOService;
     private final LaptopAuctionRepository auctionRepo;
 
+
     // ================= CONNECT =================
     @OnConnect
     public void onConnect(SocketIOClient client) {
@@ -158,4 +159,5 @@ public class LaptopBidSocketController {
                 "Left auction " + auctionId
         );
     }
+
 }

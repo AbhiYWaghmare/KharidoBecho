@@ -1,5 +1,6 @@
 package com.spring.jwt.Mobile.dto;
 
+//import com.spring.jwt.Mobile.entity.ConversationMessage;
 import com.spring.jwt.Mobile.entity.ConversationMessage;
 import lombok.Data;
 

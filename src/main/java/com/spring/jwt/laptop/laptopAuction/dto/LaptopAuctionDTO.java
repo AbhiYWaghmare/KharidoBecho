@@ -30,6 +30,7 @@
 ////        @FutureOrPresent(message = "Start time cannot be in the past")
 //        LocalDateTime startTime,
 ////        @NotNull(message = "End time is required")
+//        @NotNull(message = "End time is required")
 ////        @FutureOrPresent(message = "End time cannot be in the past")
 //        LocalDateTime endTime,
 //        Long highestBidderUserId

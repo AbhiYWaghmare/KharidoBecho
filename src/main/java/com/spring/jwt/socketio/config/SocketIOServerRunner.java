@@ -4,7 +4,6 @@ import com.corundumstudio.socketio.SocketIOServer;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -40,5 +39,4 @@ public class SocketIOServerRunner {
         log.info("🛑 Stopping Socket.IO server...");
         socketIOServer.stop();
     }
-
 }

@@ -46,9 +46,9 @@ public class SocketIOConfig {
         config.setHostname(host);
         config.setPort(port);
 
-        // 🔑 REQUIRED FIXES
-        config.setOrigin("http://localhost:8087"); // exact frontend origin
-        config.setAllowCustomRequests(true);        // REQUIRED for XHR polling
+        // keep your existing settings
+        config.setOrigin("*");
+        config.setAllowCustomRequests(true);
         config.setTransports(Transport.POLLING, Transport.WEBSOCKET);
 
         config.setSocketConfig(socketConfig);
@@ -56,9 +56,13 @@ public class SocketIOConfig {
         config.setWorkerThreads(workCount);
         config.setPingTimeout(pingTimeOut);
         config.setPingInterval(pingInterval);
+        config.setUpgradeTimeout(10000);
+        config.setHttpCompression(true);
 
         return new SocketIOServer(config);
+
     }
+
 
 
 }

@@ -147,6 +147,7 @@ public class AppConfig {
                     "/api/laptops/**",
                     "/api/laptop-photo/**",
                     "/bikes/**",
+                    "/api/chat/**",
 
 
                     "/api/v1/auth/**",
@@ -228,6 +229,7 @@ public class AppConfig {
                 .requestMatchers("/api/v1/buyers/**").permitAll()
                 .requestMatchers("/api/v1/sellers/**").permitAll()
                 .requestMatchers("/api/v1/users/password/**").permitAll()
+                .requestMatchers("/api/chat/**").permitAll()
 
                 .requestMatchers("/api/v1/mobiles/**").permitAll()
                 .requestMatchers("/api/v1/mobile-images/**").permitAll()
@@ -317,6 +319,8 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/laptop-auction/**"),
+                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/chat/**"),
+
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/sellers/**"),
 

@@ -63,12 +63,36 @@ public class MobileRequestController {
 
 
 
-    @PatchMapping("/{requestId}/status")
-    public ResponseEntity<MobileRequestResponseDTO> updateStatus(
-            @PathVariable Long requestId,
-            @RequestParam String status) {
-        return ResponseEntity.ok(service.updateRequestStatus(requestId, status));
+//    @PatchMapping("/{requestId}/status")
+//    public ResponseEntity<MobileRequestResponseDTO> updateStatus(
+//            @PathVariable Long requestId,
+//            @RequestParam String status) {
+//        return ResponseEntity.ok(service.updateRequestStatus(requestId, status));
+//    }
+
+    @PostMapping("/{requestId}/accept")
+    public ResponseEntity<MobileRequestResponseDTO> accept(@PathVariable Long requestId) {
+        return ResponseEntity.ok(service.acceptRequest(requestId));
     }
+
+    @PostMapping("/{requestId}/reject")
+    public ResponseEntity<MobileRequestResponseDTO> reject(@PathVariable Long requestId) {
+        return ResponseEntity.ok(service.rejectRequest(requestId));
+    }
+
+    @PostMapping("/{requestId}/complete")
+    public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
+
+        service.completeRequest(requestId);
+
+        return ResponseEntity.ok(
+                BaseResponseDTO.builder()
+                        .code("200")
+                        .message("Deal completed successfully")
+                        .build()
+        );
+    }
+
 
     /**
      * Append a chat message to a mobile request conversation
@@ -87,14 +111,5 @@ public class MobileRequestController {
      * Returns 200 OK
      */
 
-    @PostMapping("/{requestId}/complete")
-    public ResponseEntity<BaseResponseDTO> complete(@PathVariable Long requestId) {
-        service.markRequestCompletedAndMarkSold(requestId);
-        return ResponseEntity.ok(
-                BaseResponseDTO.builder()
-                        .code("200")
-                        .message("Marked sold and others rejected")
-                        .build()
-        );
-    }
+
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.spring.jwt.Mobile.Mapper.MobileMapper;
 import com.spring.jwt.Mobile.entity.ConversationMessage;
+import com.spring.jwt.Mobile.entity.Mobile;
 import com.spring.jwt.entity.Buyer;
 import com.spring.jwt.entity.Seller;
 import com.spring.jwt.entity.User;
@@ -52,12 +53,13 @@ public class MobileRequestServiceImpl implements MobileRequestService {
         var mobile = mobileRepo.findByMobileIdAndDeletedFalse(dto.getMobileId())
                 .orElseThrow(() -> new MobileRequestException("Mobile not found: " + dto.getMobileId()));
 
-        if (mobile.getStatus() != null && mobile.getStatus().name().equalsIgnoreCase("SOLD")) {
-            throw new MobileRequestException("Product already sold.");
+        if (mobile.getStatus() == Mobile.Status.SOLD) {
+            throw new MobileRequestException("Cannot create request. Mobile already SOLD.");
         }
 
+
         User buyerUser = userRepo.findById(dto.getBuyerUserId())
-                .orElseThrow(() -> new MobileRequestException("Buyer (user) not found: " + dto.getBuyerUserId()));
+                .orElseThrow(() -> new MobileRequestException("Buyer not found: " + dto.getBuyerUserId()));
 
         // verify buyer has a Buyer record
         Buyer buyer = buyerRepo.findByUser_IdAndDeletedFalse(dto.getBuyerUserId())
@@ -79,7 +81,7 @@ public class MobileRequestServiceImpl implements MobileRequestService {
                 .buyer(buyer)
                 .seller(seller)
                 .status(RequestStatus.PENDING)
-                .conversation("[]")
+//                .conversation("[]")
                 .build();
 
         // append initial message if provided
@@ -129,69 +131,221 @@ public class MobileRequestServiceImpl implements MobileRequestService {
 //    }
 
 
+//    @Override
+//    @Transactional
+//    public MobileRequestResponseDTO updateRequestStatus(Long requestId, String statusStr) {
+//        MobileRequest req = requestRepo.findById(requestId)
+//                .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
+//
+//        RequestStatus newStatus;
+//        try {
+//            newStatus = RequestStatus.valueOf(statusStr.toUpperCase());
+//        } catch (IllegalArgumentException ex) {
+//            throw new MobileRequestException("Invalid status: " + statusStr);
+//        }
+//
+//        //  In production multi-instance use DB constraint or distributed lock.
+//        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
+//            if (newStatus == RequestStatus.ACCEPTED) {
+//                // ensure no other accepted request exists
+//                boolean exists = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
+//                if (exists) throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
+//                req.setStatus(RequestStatus.IN_NEGOTIATION); // move to negotiation first
+//                // optionally set mobile status to reserved/active
+//                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
+//                mobileRepo.save(req.getMobile());
+//            } else if (newStatus == RequestStatus.REJECTED) {
+//                req.setStatus(RequestStatus.REJECTED);
+//                // if no accepted requests exist, you can revert mobile to AVAILABLE (if not sold)
+//                boolean anyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
+//                if (!anyAccepted && req.getMobile().getStatus() != com.spring.jwt.Mobile.entity.Mobile.Status.SOLD) {
+//                    req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE); // or AVAILABLE depending on your Mobile.Status enum
+//                    mobileRepo.save(req.getMobile());
+//                }
+//            } else if (newStatus == RequestStatus.IN_NEGOTIATION) {
+//                req.setStatus(RequestStatus.IN_NEGOTIATION);
+//                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
+//                mobileRepo.save(req.getMobile());
+//            } else if (newStatus == RequestStatus.COMPLETED) {
+//                // completed -> final sold
+//                req.setStatus(RequestStatus.COMPLETED);
+//                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.SOLD);
+//                mobileRepo.save(req.getMobile());
+//
+//                // reject other pending requests
+//                var others = requestRepo.findByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.PENDING);
+//                for (var o : others) {
+//                    o.setStatus(RequestStatus.REJECTED);
+//                    requestRepo.save(o);
+//                }
+//            } else if (newStatus == RequestStatus.PENDING) {
+//                req.setStatus(RequestStatus.PENDING);
+//            } else if (newStatus == RequestStatus.ACCEPTED) {
+//                // if you allow direct ACCEPTED (skipping negotiation)
+//                boolean alreadyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
+//                if (alreadyAccepted)
+//                    throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
+//                req.setStatus(RequestStatus.ACCEPTED);
+//                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
+//                mobileRepo.save(req.getMobile());
+//            }
+//            requestRepo.save(req);
+//        }
+//
+//        return toResponse(req);
+//    }
+
     @Override
     @Transactional
-    public MobileRequestResponseDTO updateRequestStatus(Long requestId, String statusStr) {
+    public MobileRequestResponseDTO acceptRequest(Long requestId) {
+
         MobileRequest req = requestRepo.findById(requestId)
                 .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
 
-        RequestStatus newStatus;
-        try {
-            newStatus = RequestStatus.valueOf(statusStr.toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            throw new MobileRequestException("Invalid status: " + statusStr);
+        if (req.getMobile().getStatus() == Mobile.Status.SOLD) {
+            throw new MobileRequestException(
+                    "Cannot accept request. Mobile already SOLD."
+            );
         }
 
-        //  In production multi-instance use DB constraint or distributed lock.
-        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
-            if (newStatus == RequestStatus.ACCEPTED) {
-                // ensure no other accepted request exists
-                boolean exists = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
-                if (exists) throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
-                req.setStatus(RequestStatus.IN_NEGOTIATION); // move to negotiation first
-                // optionally set mobile status to reserved/active
-                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
-                mobileRepo.save(req.getMobile());
-            } else if (newStatus == RequestStatus.REJECTED) {
-                req.setStatus(RequestStatus.REJECTED);
-                // if no accepted requests exist, you can revert mobile to AVAILABLE (if not sold)
-                boolean anyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
-                if (!anyAccepted && req.getMobile().getStatus() != com.spring.jwt.Mobile.entity.Mobile.Status.SOLD) {
-                    req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE); // or AVAILABLE depending on your Mobile.Status enum
-                    mobileRepo.save(req.getMobile());
-                }
-            } else if (newStatus == RequestStatus.IN_NEGOTIATION) {
-                req.setStatus(RequestStatus.IN_NEGOTIATION);
-                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
-                mobileRepo.save(req.getMobile());
-            } else if (newStatus == RequestStatus.COMPLETED) {
-                // completed -> final sold
-                req.setStatus(RequestStatus.COMPLETED);
-                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.SOLD);
-                mobileRepo.save(req.getMobile());
 
-                // reject other pending requests
-                var others = requestRepo.findByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.PENDING);
-                for (var o : others) {
-                    o.setStatus(RequestStatus.REJECTED);
-                    requestRepo.save(o);
+        if (req.getStatus() != RequestStatus.PENDING) {
+            throw new MobileRequestException(
+                    "Only PENDING requests can be accepted"
+            );
+        }
+
+        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
+
+            // Reject other pending requests
+            List<MobileRequest> others =
+                    requestRepo.findByMobile_MobileIdAndStatus(
+                            req.getMobile().getMobileId(),
+                            RequestStatus.PENDING
+                    );
+
+            for (MobileRequest r : others) {
+                if (!r.getRequestId().equals(req.getRequestId())) {
+                    r.setStatus(RequestStatus.REJECTED);
+                    requestRepo.save(r);
                 }
-            } else if (newStatus == RequestStatus.PENDING) {
-                req.setStatus(RequestStatus.PENDING);
-            } else if (newStatus == RequestStatus.ACCEPTED) {
-                // if you allow direct ACCEPTED (skipping negotiation)
-                boolean alreadyAccepted = requestRepo.existsByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.ACCEPTED);
-                if (alreadyAccepted)
-                    throw new MobileRequestException("Another request already ACCEPTED for this mobile.");
-                req.setStatus(RequestStatus.ACCEPTED);
-                req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.ACTIVE);
-                mobileRepo.save(req.getMobile());
             }
+
+            //  THIS LINE GUARANTEES SOCKET.IO WORKS
+            req.setStatus(RequestStatus.IN_NEGOTIATION);
+
+            req.getMobile().setStatus(Mobile.Status.ACTIVE);
+            mobileRepo.save(req.getMobile());
+
             requestRepo.save(req);
         }
 
         return toResponse(req);
     }
+
+    @Override
+    @Transactional
+    public MobileRequestResponseDTO rejectRequest(Long requestId) {
+
+        MobileRequest req = requestRepo.findById(requestId)
+                .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
+
+        //  Cannot reject completed deal
+        if (req.getStatus() == RequestStatus.COMPLETED) {
+            throw new MobileRequestException(
+                    "Cannot reject a COMPLETED request"
+            );
+        }
+
+        //  Already rejected
+        if (req.getStatus() == RequestStatus.REJECTED) {
+            throw new MobileRequestException(
+                    "Request is already REJECTED"
+            );
+        }
+
+        //  Allow reject only from PENDING or IN_NEGOTIATION
+        if (req.getStatus() != RequestStatus.PENDING &&
+                req.getStatus() != RequestStatus.IN_NEGOTIATION) {
+
+            throw new MobileRequestException(
+                    "Only PENDING or IN_NEGOTIATION requests can be rejected"
+            );
+        }
+
+        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
+
+            req.setStatus(RequestStatus.REJECTED);
+
+            // If negotiation was active, free the mobile
+            boolean anyOtherNegotiation =
+                    requestRepo.existsByMobile_MobileIdAndStatus(
+                            req.getMobile().getMobileId(),
+                            RequestStatus.IN_NEGOTIATION
+                    );
+
+            if (!anyOtherNegotiation &&
+                    req.getMobile().getStatus() != Mobile.Status.SOLD) {
+
+                req.getMobile().setStatus(Mobile.Status.ACTIVE);
+                mobileRepo.save(req.getMobile());
+            }
+
+            requestRepo.save(req);
+        }
+
+        return toResponse(req);
+    }
+
+
+
+
+    @Override
+    @Transactional
+    public void completeRequest(Long requestId) {
+
+        MobileRequest req = requestRepo.findById(requestId)
+                .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
+
+        if (req.getMobile().getStatus() == Mobile.Status.SOLD) {
+            throw new MobileRequestException(
+                    "Mobile already SOLD. Completion not allowed."
+            );
+        }
+
+
+        if (req.getStatus() != RequestStatus.IN_NEGOTIATION) {
+            throw new MobileRequestException(
+                    "Request must be IN_NEGOTIATION to complete"
+            );
+        }
+
+        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
+
+            boolean alreadyCompleted =
+                    requestRepo.existsByMobile_MobileIdAndStatus(
+                            req.getMobile().getMobileId(),
+                            RequestStatus.COMPLETED
+                    );
+
+            if (alreadyCompleted) {
+                throw new MobileRequestException(
+                        "Another request already completed for this mobile"
+                );
+            }
+
+
+            req.setStatus(RequestStatus.COMPLETED);
+            req.getMobile().setStatus(Mobile.Status.SOLD);
+
+            mobileRepo.save(req.getMobile());
+            requestRepo.save(req);
+        }
+    }
+
+
+
+
 
     @Override
     @Transactional
@@ -209,29 +363,29 @@ public class MobileRequestServiceImpl implements MobileRequestService {
     }
 
     // Mark accepted or in negotiation request completed & mark mobile sold
-    @Override
-    @Transactional
-    public void markRequestCompletedAndMarkSold(Long requestId) {
-        MobileRequest req = requestRepo.findById(requestId)
-                .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
-
-        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
-            if (req.getStatus() != RequestStatus.ACCEPTED && req.getStatus() != RequestStatus.IN_NEGOTIATION) {
-                throw new MobileRequestException("Request must be ACCEPTED or IN_NEGOTIATION to mark completed.");
-            }
-            req.setStatus(RequestStatus.COMPLETED);
-            req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.SOLD);
-            mobileRepo.save(req.getMobile());
-
-            // reject other requests
-            var others = requestRepo.findByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.PENDING);
-            for (var o : others) {
-                o.setStatus(RequestStatus.REJECTED);
-                requestRepo.save(o);
-            }
-            requestRepo.save(req);
-        }
-    }
+//    @Override
+//    @Transactional
+//    public void markRequestCompletedAndMarkSold(Long requestId) {
+//        MobileRequest req = requestRepo.findById(requestId)
+//                .orElseThrow(() -> new MobileRequestNotFoundException(requestId));
+//
+//        synchronized (("mobile-lock-" + req.getMobile().getMobileId()).intern()) {
+//            if (req.getStatus() != RequestStatus.ACCEPTED && req.getStatus() != RequestStatus.IN_NEGOTIATION) {
+//                throw new MobileRequestException("Request must be ACCEPTED or IN_NEGOTIATION to mark completed.");
+//            }
+//            req.setStatus(RequestStatus.COMPLETED);
+//            req.getMobile().setStatus(com.spring.jwt.Mobile.entity.Mobile.Status.SOLD);
+//            mobileRepo.save(req.getMobile());
+//
+//            // reject other requests
+//            var others = requestRepo.findByMobile_MobileIdAndStatus(req.getMobile().getMobileId(), RequestStatus.PENDING);
+//            for (var o : others) {
+//                o.setStatus(RequestStatus.REJECTED);
+//                requestRepo.save(o);
+//            }
+//            requestRepo.save(req);
+//        }
+//    }
 
     // ---------------- helpers ----------------
     private void appendMessageInternal(MobileRequest req, Long senderId, String senderType, String text) {
@@ -327,7 +481,7 @@ public class MobileRequestServiceImpl implements MobileRequestService {
 
         // Raw JSON (optional, for debugging)
 //        dto.setConversationJson(req.getConversation());
-
+//
         // Convert JSON string → List<ConversationMessage>
         try {
             if (req.getConversation() != null && !req.getConversation().isEmpty()) {

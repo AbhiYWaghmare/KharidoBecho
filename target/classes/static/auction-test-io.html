@@ -2,154 +2,148 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Laptop Auction - Socket.IO</title>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <title>Laptop Auction Socket Test</title>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <style>
-        body { font-family: Arial; margin: 30px; }
-        h2 { margin-top: 30px; }
-        input { padding: 6px; margin: 5px; width: 200px; }
-        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
-        .box { border: 1px solid #ccc; padding: 15px; margin-top: 20px; }
-        #status { font-weight: bold; margin-top: 10px; }
-        ul { padding-left: 20px; }
-        .log { font-size: 12px; color: #444; max-height: 120px; overflow-y: auto; }
+        body { font-family: Arial; background:#f5f5f5; }
+        .box {
+            background:#fff; padding:15px; width:420px; margin:20px auto;
+            border-radius:6px; box-shadow:0 0 5px rgba(0,0,0,.2);
+        }
+        input, button { width:100%; padding:8px; margin-top:6px; }
+        #log { height:180px; overflow-y:auto; border:1px solid #ccc;
+               margin-top:10px; padding:5px; background:#fafafa; }
+        .msg { margin:4px 0; }
+        .system { color:#555; }
+        .error { color:red; }
     </style>
 </head>
 
 <body>
-<h1>💻 Laptop Auction (Socket.IO)</h1>
-
 <div class="box">
-    <h2>1️⃣ Connection</h2>
-    <button onclick="connectSocket()">Connect</button>
-    <div id="status">Status: Disconnected</div>
-    <div class="log" id="debugLog"></div>
-</div>
+    <h3>💻 Laptop Auction Socket Test</h3>
 
-<div class="box">
-    <h2>2️⃣ Join Auction</h2>
-    <input type="number" id="auctionId" placeholder="Auction ID">
+    <label>Auction ID</label>
+    <input id="auctionId" placeholder="1">
+
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+
+    <hr>
+
+    <label>Bidder User ID</label>
+    <input id="bidderId" placeholder="10001">
+
+    <label>Bid Amount</label>
+    <input id="amount" placeholder="50000">
+
     <button onclick="joinAuction()">Join Auction</button>
-</div>
+    <button onclick="sendBid()">Place Bid</button>
 
-<div class="box">
-    <h2>🔥 Live Auctions</h2>
-    <ul id="liveAuctions"></ul>
-</div>
-
-<div class="box">
-    <h2>3️⃣ Place Bid</h2>
-    <input type="number" id="bidderId" placeholder="Your User ID">
-    <input type="number" id="bidAmount" placeholder="Bid Amount">
-    <button onclick="placeBid()">Place Bid</button>
-    <div id="bidResponse"></div>
-</div>
-
-<div class="box">
-    <h2>🏆 Top Bid</h2>
-    <div id="topBid">No bids yet</div>
-</div>
-
-<div class="box">
-    <h2>🔥 Top 3 Bids</h2>
-    <ul id="topThreeBids"></ul>
+    <div id="log"></div>
 </div>
 
 <script>
     let socket = null;
-    let currentAuctionId = null;
+    let joinedAuction = null;
 
-    function log(m) {
-        const d = document.getElementById("debugLog");
-        d.innerHTML += m + "<br/>";
-        d.scrollTop = d.scrollHeight;
+    function log(msg, cls="system") {
+        const d = document.createElement("div");
+        d.className = "msg " + cls;
+        d.innerText = msg;
+        document.getElementById("log").appendChild(d);
+        document.getElementById("log").scrollTop = 9999;
     }
 
-    function status(t, c) {
-        const el = document.getElementById("status");
-        el.innerText = "Status: " + t;
-        el.style.color = c;
+function connect() {
+    const userId = document.getElementById("bidderId").value.trim();
+
+    if (!userId || isNaN(userId)) {
+        alert("Enter a valid User ID before connecting");
+        return;
     }
 
-    function connectSocket() {
-        if (socket && socket.connected) return;
+    socket = io("http://localhost:3000", {
+        reconnection: false,
+        query: {
+            userId: userId   // 🔥 REQUIRED BY BACKEND GATE
+        }
+    });
 
-        socket = io("http://localhost:3000", { transports: ["websocket"] });
+    socket.on("connect", () => log("✅ Connected as user " + userId));
+    socket.on("disconnect", () => log("❌ Disconnected"));
 
-        socket.on("connect", () => {
-            log("CONNECTED " + socket.id);
-            status("Connected", "green");
-            socket.emit("getLiveAuctions");
-        });
+    socket.on("socket_error", msg => {
+        log("❌ " + msg, "error");
+        socket.disconnect();
+    });
 
-        socket.on("disconnect", () => {
-            status("Disconnected", "red");
-        });
+    socket.on("joinAuctionResponse", msg => log("✔ " + msg));
+    socket.on("placeLaptopBidResponse", msg => log("✔ " + msg));
 
-        socket.on("liveAuctions", list => {
-            const ul = document.getElementById("liveAuctions");
-            ul.innerHTML = "";
+    socket.on("laptopTopBid", bid => {
+        if (bid)
+            log(`🏆 Top Bid: ₹${bid.bidAmount} by ${bid.bidderId}`);
+    });
 
-            if (!list || list.length === 0) {
-                ul.innerHTML = "<li>No live auctions</li>";
-                return;
-            }
+    socket.on("laptopTopThreeBids", list => {
+        log("🔥 Top 3 Bids:");
+        list.forEach(b =>
+            log(`→ User ${b.bidderId} ₹${b.bidAmount}`)
+        );
+    });
+}
 
-            list.forEach(item => {
-                const li = document.createElement("li");
-                li.id = "auction_" + item.auctionId;
-                li.innerText =
-                    "Auction #" + item.auctionId +
-                    " | ₹" + item.currentPrice +
-                    " | Bidder: " + (item.highestBidder ?? "None");
-                ul.appendChild(li);
-            });
-        });
-
-        socket.on("joinAuctionResponse", msg => log("✔ " + msg));
-        socket.on("placeLaptopBidResponse", msg => log("✔ " + msg));
-
-        socket.on("laptopTopBid", bid => {
-            if (!bid) return;
-            document.getElementById("topBid").innerText =
-                "₹" + bid.bidAmount + " by User " + bid.bidderId;
-        });
-
-        socket.on("laptopTopThreeBids", list => {
-            const ul = document.getElementById("topThreeBids");
-            ul.innerHTML = "";
-            list.forEach(b =>
-                ul.innerHTML += `<li>User ${b.bidderId} → ₹${b.bidAmount}</li>`
-            );
-        });
-    }
 
     function joinAuction() {
-        const id = document.getElementById("auctionId").value;
-        if (!id) return alert("Enter Auction ID");
-
-        currentAuctionId = Number(id);
-        socket.emit("joinAuction", currentAuctionId);
-        log("Joining auction " + currentAuctionId);
+    if (!socket || !socket.connected) {
+        log("❌ Not connected to socket", "error");
+        return;
     }
 
-    function placeBid() {
-        const bidder = document.getElementById("bidderId").value;
-        const amount = document.getElementById("bidAmount").value;
+    const id = document.getElementById("auctionId").value;
 
-        if (!currentAuctionId) return alert("Join auction first!");
-        if (!bidder || !amount) return alert("Bidder & Amount required");
-
-        socket.emit("placeLaptopBid", {
-            auctionId: currentAuctionId,
-            bidderUserId: Number(bidder),
-            amount: Number(amount)
-        });
-
-        log("Bid sent ₹" + amount);
+    if (!id) {
+        log("❌ Auction ID required", "error");
+        return;
     }
+
+    joinedAuction = Number(id);
+
+    log("📤 Sending joinAuction " + joinedAuction);
+    socket.emit("joinAuction", joinedAuction);
+}
+
+    function sendBid() {
+    if (!socket || !socket.connected) {
+        log("❌ Not connected to socket", "error");
+        return;
+    }
+
+    if (!joinedAuction) {
+        log("❌ Join an auction first", "error");
+        return;
+    }
+
+    const bidder = document.getElementById("bidderId").value;
+    const amount = document.getElementById("amount").value;
+
+    if (!bidder || !amount) {
+        log("❌ Bidder & amount required", "error");
+        return;
+    }
+
+    log(`📤 Sending bid ₹${amount}`);
+
+    socket.emit("placeLaptopBid", {
+        auctionId: Number(joinedAuction),
+        bidderUserId: Number(bidder),
+        amount: Number(amount)
+    });
+}
+
 </script>
-
 </body>
 </html>
