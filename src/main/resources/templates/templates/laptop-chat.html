@@ -1,0 +1,118 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Live Laptop Buyer–Seller Chat</title>-->
+<!--    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>-->
+
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            display: flex;-->
+<!--            gap: 20px;-->
+<!--        }-->
+<!--        .chat-box {-->
+<!--            width: 45%;-->
+<!--            border: 1px solid #ccc;-->
+<!--            padding: 10px;-->
+<!--        }-->
+<!--        .messages {-->
+<!--            height: 300px;-->
+<!--            overflow-y: auto;-->
+<!--            border: 1px solid #ddd;-->
+<!--            margin-bottom: 10px;-->
+<!--            padding: 5px;-->
+<!--        }-->
+<!--        .connected { color: green; }-->
+<!--        .disconnected { color: red; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--&lt;!&ndash; BUYER &ndash;&gt;-->
+<!--<div class="chat-box">-->
+<!--    <h3>Buyer (UserId: 10003)</h3>-->
+<!--    <div id="buyer-status" class="disconnected">Disconnected</div>-->
+<!--    <div id="buyer-messages" class="messages"></div>-->
+<!--    <input id="buyer-input" placeholder="Buyer message"/>-->
+<!--    <button onclick="sendBuyer()">Send</button>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; SELLER &ndash;&gt;-->
+<!--<div class="chat-box">-->
+<!--    <h3>Seller (UserId: 10001)</h3>-->
+<!--    <div id="seller-status" class="disconnected">Disconnected</div>-->
+<!--    <div id="seller-messages" class="messages"></div>-->
+<!--    <input id="seller-input" placeholder="Seller message"/>-->
+<!--    <button onclick="sendSeller()">Send</button>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--    const REQUEST_ID = 12; // 🔁 change to valid laptop_request_id-->
+
+<!--    /* &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; BUYER SOCKET &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; */-->
+<!--    const buyerSocket = io("http://localhost:9092", {-->
+<!--        query: { userId: 10003 }-->
+<!--    });-->
+
+<!--    buyerSocket.on("connect", () => {-->
+<!--        document.getElementById("buyer-status").innerText = "Connected";-->
+<!--        document.getElementById("buyer-status").className = "connected";-->
+<!--    });-->
+
+<!--    buyerSocket.on("disconnect", () => {-->
+<!--        document.getElementById("buyer-status").innerText = "Disconnected";-->
+<!--        document.getElementById("buyer-status").className = "disconnected";-->
+<!--    });-->
+
+<!--    buyerSocket.on("receive_laptop_chat_message", msg => {-->
+<!--        document.getElementById("buyer-messages")-->
+<!--            .innerHTML += `<div><b>${msg.senderRole}:</b> ${msg.message}</div>`;-->
+<!--    });-->
+
+<!--    function sendBuyer() {-->
+<!--        const text = document.getElementById("buyer-input").value;-->
+
+<!--        buyerSocket.emit("send_laptop_chat_message", {-->
+<!--            requestId: REQUEST_ID,-->
+<!--            senderUserId: 10003,-->
+<!--            message: text-->
+<!--        });-->
+
+<!--        document.getElementById("buyer-input").value = "";-->
+<!--    }-->
+
+<!--    /* &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; SELLER SOCKET &#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; */-->
+<!--    const sellerSocket = io("http://localhost:9092", {-->
+<!--        query: { userId: 10001 }-->
+<!--    });-->
+
+<!--    sellerSocket.on("connect", () => {-->
+<!--        document.getElementById("seller-status").innerText = "Connected";-->
+<!--        document.getElementById("seller-status").className = "connected";-->
+<!--    });-->
+
+<!--    sellerSocket.on("disconnect", () => {-->
+<!--        document.getElementById("seller-status").innerText = "Disconnected";-->
+<!--        document.getElementById("seller-status").className = "disconnected";-->
+<!--    });-->
+
+<!--    sellerSocket.on("receive_laptop_chat_message", msg => {-->
+<!--        document.getElementById("seller-messages")-->
+<!--            .innerHTML += `<div><b>${msg.senderRole}:</b> ${msg.message}</div>`;-->
+<!--    });-->
+
+<!--    function sendSeller() {-->
+<!--        const text = document.getElementById("seller-input").value;-->
+
+<!--        sellerSocket.emit("send_laptop_chat_message", {-->
+<!--            requestId: REQUEST_ID,-->
+<!--            senderUserId: 10001,-->
+<!--            message: text-->
+<!--        });-->
+
+<!--        document.getElementById("seller-input").value = "";-->
+<!--    }-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->

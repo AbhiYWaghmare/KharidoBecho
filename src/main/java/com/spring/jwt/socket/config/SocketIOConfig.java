@@ -1,31 +1,31 @@
-//************ WithOut Annotation Use this **************//
-
-
-package com.spring.jwt.socket.config;
-
-import com.corundumstudio.socketio.SocketIOServer;
-import jakarta.annotation.PreDestroy;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class SocketIOConfig {
-
-    @Bean
-    public SocketIOServer socketIOServer() {
-
-        com.corundumstudio.socketio.Configuration socketConfig =
-                new com.corundumstudio.socketio.Configuration();
-
-        socketConfig.setHostname("0.0.0.0");
-        socketConfig.setPort(9092);
-
-        // Allow frontend & APK
-        socketConfig.setOrigin("*");
-
-        return new SocketIOServer(socketConfig);
-    }
-}
+////************ WithOut Annotation Use this **************//
+//
+//
+//package com.spring.jwt.socket.config;
+//
+//import com.corundumstudio.socketio.SocketIOServer;
+//import jakarta.annotation.PreDestroy;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//
+//@Configuration
+//public class SocketIOConfig {
+//
+//    @Bean
+//    public SocketIOServer socketIOServer() {
+//
+//        com.corundumstudio.socketio.Configuration socketConfig =
+//                new com.corundumstudio.socketio.Configuration();
+//
+//        socketConfig.setHostname("0.0.0.0");
+//        socketConfig.setPort(9092);
+//
+//        // Allow frontend & APK
+//        socketConfig.setOrigin("*");
+//
+//        return new SocketIOServer(socketConfig);
+//    }
+//}
 
 
 //******************** With Annotation*********************************//

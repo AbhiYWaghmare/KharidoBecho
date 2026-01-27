@@ -288,10 +288,31 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        // Completely exclude WebSocket endpoints from this filter
-        return path.startsWith("/Auction")
-                || path.startsWith("/ws")
-                || path.startsWith("/websocket")
-                || path.startsWith("/sockjs");
+        return
+                // ================= STATIC FILES =================
+                path.endsWith(".html")
+                        || path.endsWith(".js")
+                        || path.endsWith(".css")
+                        || path.endsWith(".png")
+                        || path.endsWith(".jpg")
+                        || path.endsWith(".svg")
+
+                        // ================= TEMPLATES / STATIC =================
+                        || path.startsWith("/templates")
+                        || path.startsWith("/static")
+                        || path.startsWith("/public")
+
+                        // ================= SOCKET.IO =================
+                        || path.startsWith("/socket.io")
+                        || path.startsWith("/ws")
+                        || path.startsWith("/websocket")
+                        || path.startsWith("/sockjs")
+
+                        // ================= ERROR HANDLING =================
+                        || path.equals("/error")
+
+                        // ================= YOUR EXISTING RULE =================
+                        || path.startsWith("/Auction");
     }
+
 }

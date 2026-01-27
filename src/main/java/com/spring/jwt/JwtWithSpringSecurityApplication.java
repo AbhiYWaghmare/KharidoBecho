@@ -61,9 +61,11 @@ public class JwtWithSpringSecurityApplication {
 
 	}
 
+
 	@PostConstruct
 	public void init() {
 		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
-		System.out.println("Timezone set to IST");
 	}
+
+
 }

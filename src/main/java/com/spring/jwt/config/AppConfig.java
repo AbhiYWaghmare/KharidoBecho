@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -120,14 +121,14 @@ public class AppConfig {
                 "/api/**",
                     "/cars/**",
                     "/api/v1/cars/**",
-
-
+                    "/api/laptop/chat/**",
+                    "/laptop-auction/**",
                     "/api/v1/user/**",
                     "/api/laptops/**",
                     "/api/laptopBookings/**",
                     "/api/laptops/**",
                     "/api/laptop-photo/**",
-                    "/api/v1/laptop-auctions/**",
+//                    "/api/v1/laptop-auctions/**",
                     "/api/colours/**",
                     "/api/v1/user/**",
                     "/api/v1/cars/**",
@@ -215,6 +216,13 @@ public class AppConfig {
 
                 //For testing All API are permitted
                 .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+//                .requestMatchers(
+//                        "/",
+//                        "/*.html",
+//                        "/**/*.html"
+//                ).permitAll()
+
+                .requestMatchers("/socket.io/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/v1/users/**").permitAll()
                 .requestMatchers("/api/v1/auth/**").permitAll()
@@ -236,9 +244,11 @@ public class AppConfig {
                 .requestMatchers("/api/v1/exam/**").permitAll()
                 .requestMatchers("/api/v1/**").permitAll()
 
+                .requestMatchers("/api/laptop/chat/**").permitAll()
                 .requestMatchers("/api/laptops/**").permitAll()
                 .requestMatchers("/api/laptop-photo/**").permitAll()
                 .requestMatchers( "/api/dropDown/**").permitAll()
+                .requestMatchers("/laptop-auction/**").permitAll()
 
                 .requestMatchers("/bikes/**").permitAll()  // <-- ADD THIS LINE
 
@@ -308,6 +318,7 @@ public class AppConfig {
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auth/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/auctions/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/laptop-auction/**"),
                     new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/chat/**"),
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/buyers/**"),
@@ -328,6 +339,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop-photo/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/v1/laptop-auctions/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher( "/api/dropDown/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptop/chat/**"),
 
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/bikes/**"),
@@ -336,9 +348,7 @@ public class AppConfig {
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptops/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/photo/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/laptopBookings/**"),
-
-
-                    new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/carBookings/**"),
+                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/carBookings/**"),
 
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v2/api-docs/**"),
                 new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/v3/api-docs/**"),
@@ -419,10 +429,14 @@ public class AppConfig {
     public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
         return builder -> builder.featuresToDisable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
     }
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/ws-auction/**");
+        return (web) -> web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
+
+
 
 
 

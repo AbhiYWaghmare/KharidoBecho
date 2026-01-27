@@ -1,12 +1,12 @@
-//package com.spring.jwt.auction.exception;
-//
-//public class AuctionNotFoundException extends RuntimeException {
-//
-//    public AuctionNotFoundException(Long id) {
-//        super("Auction not found with id: " + id);
-//    }
-//
-//    public AuctionNotFoundException(String message) {
-//        super(message);
-//    }
-//}
+package com.spring.jwt.auction.exception;
+
+public class AuctionNotFoundException extends RuntimeException {
+
+    public AuctionNotFoundException(Long id) {
+        super("Auction not found with id: " + id);
+    }
+
+    public AuctionNotFoundException(String message) {
+        super(message);
+    }
+}

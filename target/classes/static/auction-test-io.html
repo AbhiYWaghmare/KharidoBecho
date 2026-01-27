@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Laptop Auction Socket Test</title>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+        body { font-family: Arial; background:#f5f5f5; }
+        .box {
+            background:#fff; padding:15px; width:420px; margin:20px auto;
+            border-radius:6px; box-shadow:0 0 5px rgba(0,0,0,.2);
+        }
+        input, button { width:100%; padding:8px; margin-top:6px; }
+        #log { height:180px; overflow-y:auto; border:1px solid #ccc;
+               margin-top:10px; padding:5px; background:#fafafa; }
+        .msg { margin:4px 0; }
+        .system { color:#555; }
+        .error { color:red; }
+    </style>
+</head>
+
+<body>
+<div class="box">
+    <h3>💻 Laptop Auction Socket Test</h3>
+
+    <label>Auction ID</label>
+    <input id="auctionId" placeholder="1">
+
+    <button onclick="connect()">Connect</button>
+    <button onclick="disconnect()">Disconnect</button>
+
+    <hr>
+
+    <label>Bidder User ID</label>
+    <input id="bidderId" placeholder="10001">
+
+    <label>Bid Amount</label>
+    <input id="amount" placeholder="50000">
+
+    <button onclick="joinAuction()">Join Auction</button>
+    <button onclick="sendBid()">Place Bid</button>
+
+    <div id="log"></div>
+</div>
+
+<script>
+    let socket = null;
+    let joinedAuction = null;
+
+    function log(msg, cls="system") {
+        const d = document.createElement("div");
+        d.className = "msg " + cls;
+        d.innerText = msg;
+        document.getElementById("log").appendChild(d);
+        document.getElementById("log").scrollTop = 9999;
+    }
+
+function connect() {
+    const userId = document.getElementById("bidderId").value.trim();
+
+    if (!userId || isNaN(userId)) {
+        alert("Enter a valid User ID before connecting");
+        return;
+    }
+
+    socket = io("http://localhost:3000", {
+        reconnection: false,
+        query: {
+            userId: userId   // 🔥 REQUIRED BY BACKEND GATE
+        }
+    });
+
+    socket.on("connect", () => log("✅ Connected as user " + userId));
+    socket.on("disconnect", () => log("❌ Disconnected"));
+
+    socket.on("socket_error", msg => {
+        log("❌ " + msg, "error");
+        socket.disconnect();
+    });
+
+    socket.on("joinAuctionResponse", msg => log("✔ " + msg));
+    socket.on("placeLaptopBidResponse", msg => log("✔ " + msg));
+
+    socket.on("laptopTopBid", bid => {
+        if (bid)
+            log(`🏆 Top Bid: ₹${bid.bidAmount} by ${bid.bidderId}`);
+    });
+
+    socket.on("laptopTopThreeBids", list => {
+        log("🔥 Top 3 Bids:");
+        list.forEach(b =>
+            log(`→ User ${b.bidderId} ₹${b.bidAmount}`)
+        );
+    });
+}
+
+
+    function joinAuction() {
+    if (!socket || !socket.connected) {
+        log("❌ Not connected to socket", "error");
+        return;
+    }
+
+    const id = document.getElementById("auctionId").value;
+
+    if (!id) {
+        log("❌ Auction ID required", "error");
+        return;
+    }
+
+    joinedAuction = Number(id);
+
+    log("📤 Sending joinAuction " + joinedAuction);
+    socket.emit("joinAuction", joinedAuction);
+}
+
+    function sendBid() {
+    if (!socket || !socket.connected) {
+        log("❌ Not connected to socket", "error");
+        return;
+    }
+
+    if (!joinedAuction) {
+        log("❌ Join an auction first", "error");
+        return;
+    }
+
+    const bidder = document.getElementById("bidderId").value;
+    const amount = document.getElementById("amount").value;
+
+    if (!bidder || !amount) {
+        log("❌ Bidder & amount required", "error");
+        return;
+    }
+
+    log(`📤 Sending bid ₹${amount}`);
+
+    socket.emit("placeLaptopBid", {
+        auctionId: Number(joinedAuction),
+        bidderUserId: Number(bidder),
+        amount: Number(amount)
+    });
+}
+
+</script>
+</body>
+</html>
